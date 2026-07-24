@@ -28,3 +28,18 @@ export async function onRequest({ request, env }) {
     return Response.json({ ok: false, msg: "服务异常：" + err.message }, { status: 500, headers: corsHeaders });
   }
 }
+
+const sqlRes = await env.DB.prepare(`SELECT id,role FROM admin WHERE username = ? AND password = ?`)
+.bind(username, password)
+.all();
+if (sqlRes.results.length > 0) {
+  // 返回角色给前端
+  return Response.json({ ok: true, msg: "登录成功", role: sqlRes.results[0].role }, { headers: corsHeaders });
+}
+if(res.ok){
+  if(res.role === "admin"){
+    window.location.href = "dashboard.html"
+  }else{
+    window.location.href = "member.html"
+  }
+}

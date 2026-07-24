@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>战队队员中心</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        header{background:#223355;color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center}
+        .container{max-width:1200px;margin:30px auto;padding:0 20px}
+        .card{background:#fff;border:1px solid #eee;border-radius:8px;padding:24px;margin-bottom:20px}
+        h2{margin-bottom:16px;color:#223355}
+        .logout{color:#fff;cursor:pointer}
+    </style>
+</head>
+<body>
+<header>
+    <h1>D.M.N 战队队员个人中心</h1>
+    <div class="logout" onclick="logout()">退出登录</div>
+</header>
+<div class="container">
+    <div class="card">
+        <h2>个人数据</h2>
+        <p>账号：<span id="user"></span></p>
+        <p>KD：<span id="kd"></span></p>
+        <p>总击杀：<span id="kill"></span></p>
+        <p>参赛场次：<span id="game"></span></p>
+    </div>
+    <div class="card">
+        <h2>全队KD排行榜</h2>
+        <div id="rankList"></div>
+    </div>
+    <div class="card">
+        <h2>近期赛事战绩</h2>
+        <div id="gameLog"></div>
+    </div>
+    <div class="card">
+        <h2>战队赞助公示</h2>
+        <div id="sponsor"></div>
+    </div>
+</div>
+<script>
+// 退出登录
+function logout(){
+    window.location.href="index.html"
+}
+// 后续可在这里调用/api/member接口读取队员数据、榜单
+</script>
+</body>
+</html>
