@@ -2,48 +2,54 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>战队队员中心</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D.M.N 队员个人中心</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        header{background:#223355;color:#fff;padding:16px;display:flex;justify-content:space-between;align-items:center}
-        .container{max-width:1200px;margin:30px auto;padding:0 20px}
-        .card{background:#fff;border:1px solid #eee;border-radius:8px;padding:24px;margin-bottom:20px}
-        h2{margin-bottom:16px;color:#223355}
-        .logout{color:#fff;cursor:pointer}
+        *{margin:0;padding:0;box-sizing:border-box;font-family: system-ui}
+        header{background:#2c4266;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
+        .logout{color:#d0e1ff;cursor:pointer}
+        .container{max-width:1100px;margin:30px auto;padding:0 16px}
+        .card{background:#fff;border:1px solid #e5e8f0;border-radius:8px;padding:24px;margin-bottom:20px}
+        h2{color:#203459;margin-bottom:14px}
+        p{margin:8px 0;color:#333;line-height:1.7}
     </style>
 </head>
 <body>
 <header>
-    <h1>D.M.N 战队队员个人中心</h1>
+    <h1>D.M.N 战队队员中心</h1>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
 <div class="container">
     <div class="card">
-        <h2>个人数据</h2>
-        <p>账号：<span id="user"></span></p>
-        <p>KD：<span id="kd"></span></p>
-        <p>总击杀：<span id="kill"></span></p>
-        <p>参赛场次：<span id="game"></span></p>
+        <h2>个人生涯数据</h2>
+        <p>总场次：待同步PUBG赛事数据</p>
+        <p>生涯KD：待同步PUBG赛事数据</p>
+        <p>总击杀/总伤害：待同步PUBG赛事数据</p>
+        <p>前十率、吃鸡数：待同步PUBG赛事数据</p>
     </div>
     <div class="card">
-        <h2>全队KD排行榜</h2>
-        <div id="rankList"></div>
+        <h2>公开榜单查询</h2>
+        <p>• 战神榜（总击杀排名）</p>
+        <p>• 伤害榜（场均伤害排名）</p>
+        <p>• 生存榜（场均生存时间）</p>
+        <p>• 吃鸡榜（吃鸡数量排行）</p>
+        <p>• 战队总KD排行榜</p>
     </div>
     <div class="card">
-        <h2>近期赛事战绩</h2>
-        <div id="gameLog"></div>
+        <h2>战队相关功能</h2>
+        <p>• 查看本队阵容、换人历史记录</p>
+        <p>• 查看全队奢侈税缴纳记录</p>
+        <p>• 查看全部赛事回放与选手高光片段</p>
     </div>
     <div class="card">
-        <h2>战队赞助公示</h2>
-        <div id="sponsor"></div>
+        <h2>赛事赞助公示</h2>
+        <p>展示老板赞助、全队奢侈税流水（全员可见）</p>
     </div>
 </div>
 <script>
-// 退出登录
 function logout(){
     window.location.href="index.html"
 }
-// 后续可在这里调用/api/member接口读取队员数据、榜单
 </script>
 </body>
 </html>

@@ -65,12 +65,12 @@
 </head>
 <body>
 <div class="login-box">
-    <h2 class="login-title">后台管理系统登录</h2>
+    <h2 class="login-title">D.M.N 战队管理系统登录</h2>
     <div class="item">
-        <input type="text" id="username" placeholder="请输入账号" value="test">
+        <input type="text" id="username" placeholder="请输入账号">
     </div>
     <div class="item">
-        <input type="password" id="pwd" placeholder="请输入密码" value="123456">
+        <input type="password" id="pwd" placeholder="请输入密码">
     </div>
     <button class="login-btn" id="submitBtn">立即登录</button>
     <div class="err-text" id="errorMsg"></div>
@@ -82,9 +82,7 @@
     const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
 
-    // 登录点击事件
     submitBtn.addEventListener('click', loginSubmit);
-    // 回车快捷登录
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') loginSubmit();
     })
@@ -113,7 +111,7 @@
             })
             const data = await res.json();
             if (data.ok) {
-                // 根据角色跳转页面
+                // 按角色跳转页面
                 if (data.role === 'admin') {
                     window.location.href = 'dashboard.html';
                 } else {
@@ -127,7 +125,6 @@
         }
     }
 
-    // 展示错误提示
     function showErr(text) {
         errorMsg.innerText = '服务异常：' + text;
         errorMsg.style.display = 'block';

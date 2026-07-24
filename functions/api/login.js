@@ -18,6 +18,7 @@ export async function onRequest({ request, env }) {
     const { action, username, password } = reqBody;
 
     if (action === "login") {
+      // 查询账号+角色
       const sqlRes = await env.DB.prepare(`SELECT id, role FROM admin WHERE username = ? AND password = ?`)
         .bind(username, password)
         .all();
