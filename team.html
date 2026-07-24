@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的战队 | D.M.N</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+        body {
+            background: #0f1419;
+            color: #f0f2f5;
+        }
+        header {
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a3342;
+        }
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffd700;
+        }
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        .nav-links a {
+            color: #b8c2cc;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .nav-links a:hover,.nav-links a.active {
+            color: #ffd700;
+        }
+        .logout {
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+        .panel {
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .panel h3 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        .btn {
+            display: inline-block;
+            background: #ffd700;
+            color: #0f1419;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 12px;
+            margin-bottom: 12px;
+            border:0;
+            cursor:pointer;
+        }
+        .btn:hover {
+            background: #ffed4e;
+        }
+        .btn-secondary {
+            background: #2a3342;
+            color: #f0f2f5;
+        }
+        .btn-secondary:hover {
+            background: #353f52;
+        }
+        .empty {
+            color: #7d8898;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        .input-box{
+            width:100%;
+            max-width:320px;
+            height:46px;
+            padding:0 14px;
+            background:#222d3b;
+            border:1px solid #353f52;
+            border-radius:8px;
+            color:#fff;
+            font-size:16px;
+            margin:12px 0;
+        }
+        .team-slot-wrap{
+            display:grid;
+            grid-template-columns: repeat(4,1fr);
+            gap:12px;
+            margin:20px 0;
+        }
+        .slot{
+            background:#222d3b;
+            border:1px dashed #6e7888;
+            border-radius:8px;
+            padding:20px 10px;
+            text-align:center;
+            color:#8b95a5;
+        }
+        .slot.starter{
+            border-color:#ffd700;
+        }
+        @media (max-width:600px){
+            header{flex-direction:column;gap:12px}
+            .nav-links{gap:10px;flex-wrap:wrap;justify-content:center}
+            .team-slot-wrap{grid-template-columns: repeat(2,1fr)}
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">D.M.N</div>
+    <nav class="nav-links">
+        <a href="member.html">队员中心</a>
+        <a href="ranks.html">排行榜</a>
+        <a href="team.html" class="active">我的战队</a>
+        <a href="replays.html">比赛回放</a>
+        <a href="sponsorship.html">赞助公示</a>
+    </nav>
+    <div class="logout" onclick="logout()">退出登录</div>
+</header>
+<div class="container">
+    <div class="panel">
+        <h3>暂无战队</h3>
+        <p style="color:#b8c2cc;margin-bottom:16px;">你当前未加入任何DMN赛事战队，可创建新战队或输入邀请码加入已有战队</p>
+        <input class="input-box" placeholder="输入战队6位邀请码">
+        <button class="btn">加入战队</button>
+        <button class="btn btn-secondary">创建新战队</button>
+    </div>
+    <div class="panel">
+        <h3>战队编制说明</h3>
+        <p style="color:#b8c2cc;line-height:1.7;">单战队最多9人：1队长 + 4首发（计算奢侈税）+ 4替补</p>
+        <p style="color:#b8c2cc;line-height:1.7;margin-top:8px;">首发四人KD总和超过4.5，自动计算奢侈税，提交报名后方可参赛</p>
+        <div class="team-slot-wrap">
+            <div class="slot starter">首发位1</div>
+            <div class="slot starter">首发位2</div>
+            <div class="slot starter">首发位3</div>
+            <div class="slot starter">首发位4</div>
+        </div>
+        <div class="team-slot-wrap">
+            <div class="slot">替补1</div>
+            <div class="slot">替补2</div>
+            <div class="slot">替补3</div>
+            <div class="slot">替补4</div>
+        </div>
+    </div>
+    <div class="panel">
+        <h3>赛季报名进度</h3>
+        <div class="empty">当前赛季报名通道未开启/你未提交战队报名</div>
+    </div>
+</div>
+<script>
+function logout(){
+    window.location.href="index.html"
+}
+</script>
+</body>
+</html>
