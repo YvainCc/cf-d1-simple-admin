@@ -139,8 +139,8 @@
         <a href="member.html">队员中心</a>
         <a href="ranks.html">排行榜</a>
         <a href="team.html" class="active">我的战队</a>
-        <a href="replays.html">比赛回放</a>
-        <a href="sponsorship.html">赞助公示</a>
+        <a href="#">比赛回放</a>
+        <a href="#">赞助公示</a>
     </nav>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
@@ -148,9 +148,9 @@
     <div class="panel">
         <h3>暂无战队</h3>
         <p style="color:#b8c2cc;margin-bottom:16px;">你当前未加入任何DMN赛事战队，可创建新战队或输入邀请码加入已有战队</p>
-        <input class="input-box" placeholder="输入战队6位邀请码">
-        <button class="btn">加入战队</button>
-        <button class="btn btn-secondary">创建新战队</button>
+        <input class="input-box" id="inviteCode" placeholder="输入战队6位邀请码">
+        <button class="btn" id="joinBtn">加入战队</button>
+        <button class="btn btn-secondary" id="createTeamBtn">创建新战队</button>
     </div>
     <div class="panel">
         <h3>战队编制说明</h3>
@@ -177,6 +177,14 @@
 <script>
 function logout(){
     window.location.href="index.html"
+}
+// 战队创建、加入接口后续开发完成后绑定点击事件
+document.getElementById("joinBtn").onclick = function(){
+    const code = document.getElementById("inviteCode").value.trim()
+    if(!code) alert("请输入6位邀请码")
+}
+document.getElementById("createTeamBtn").onclick = function(){
+    alert("创建战队接口开发中...")
 }
 </script>
 </body>
