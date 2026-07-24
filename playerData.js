@@ -13,12 +13,10 @@ export async function onRequest({ request, env }) {
   }
 
   try {
-    // 读取url参数 username，后续登录后前端携带当前账号
     const url = new URL(request.url);
     const username = url.searchParams.get("username");
     if (!username) return Response.json({ok:false,msg:"缺少账号参数"},{headers:corsHeaders});
 
-    // 查询选手基础信息+生涯数据
     const res = await env.DB.prepare(`
       SELECT a.username, s.total_kill, s.total_match, s.historical_total_kd, s.total_win, s.total_damage
       FROM admin a
