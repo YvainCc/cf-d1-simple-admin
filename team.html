@@ -205,37 +205,42 @@
     </div>
 </div>
 <script>
-// 全局登录账号，后续登录页改造存入localStorage
+// 全局变量定义
 const loginUserName = "player01";
 let currentTeamId = "";
 let isCaptain = false;
 
+// 退出登录
 function logout(){
     window.location.href="index.html"
 }
 
-// 页面加载拉取战队基础信息
+// 页面加载初始化数据
 window.onload = async function(){
+  try{
     const res = await fetch(`/api/team?username=${loginUserName}`);
     const data = await res.json();
     if(data.ok && data.hasTeam){
-        // 隐藏加入面板，展示战队详情
         document.getElementById("joinPanel").style.display = "none";
         document.getElementById("teamMainPanel").style.display = "block";
+        // 赋值战队ID，后续接口调用依赖
         currentTeamId = data.teamInfo.id;
         isCaptain = data.selfRole === "captain";
-        document.getElementById("teamTitle").innerText = `战队：${data.teamInfo.name} | 邀请码：${data.teamInfo.inviteCode}`;
+        document.querySelector("#teamMainPanel h3").innerText = `战队：${data.teamInfo.name} | 邀请码：${data.teamInfo.inviteCode}`;
         loadTeamLineup();
+        loadRegisterInfo();
     }
+  }catch(e){
+    console.log("战队数据加载失败",e);
+  }
 }
 
-// 加载阵容、计算总KD奢侈税
+// 加载首发、替补阵容，计算奢侈税提示
 async function loadTeamLineup(){
     const res = await fetch(`/api/teamManage?teamId=${currentTeamId}`);
     const json = await res.json();
     if(!json.ok) return;
     const tData = json.teamData;
-    // 奢侈税提示
     const tipBox = document.getElementById("taxTipBox");
     if(tData.needLuxuryTax){
         tipBox.className = "tax-tip tax-yes";
@@ -244,7 +249,7 @@ async function loadTeamLineup(){
         tipBox.className = "tax-tip tax-no";
         tipBox.innerText = `当前首发总KD ${tData.sumStarterKD}，低于4.5阈值，无需缴纳奢侈税`;
     }
-    // 渲染首发
+    // 渲染首发区域
     const starterWrap = document.getElementById("starterWrap");
     starterWrap.innerHTML = "";
     tData.starters.forEach(item=>{
@@ -260,7 +265,7 @@ async function loadTeamLineup(){
             </div>
         `
     })
-    // 渲染替补
+    // 渲染替补区域
     const subWrap = document.getElementById("subWrap");
     subWrap.innerHTML = "";
     tData.substitute.forEach(item=>{
@@ -278,7 +283,30 @@ async function loadTeamLineup(){
     })
 }
 
-// 队长切换队员首发/替补
+// 加载赛季报名状态、奢侈税金额
+async function loadRegisterInfo(){
+    const res = await fetch(`/api/register?teamId=${currentTeamId}&seasonId=1`);
+    const json = await res.json();
+    if(!json.ok) return;
+    const regBox = document.querySelector(".panel:last-child .empty");
+    const regBtnBox = document.querySelector(".panel:last-child");
+    const regData = json.data;
+    let statusText = "";
+    if(regData.hasRegister){
+        if(regData.registerStatus === "pending") statusText = "已提交报名，等待管理员审核";
+        if(regData.registerStatus === "pass") statusText = "报名审核通过，可正常参赛";
+        if(regData.registerStatus === "reject") statusText = "报名被驳回，请调整阵容重新提交";
+    }else{
+        statusText = "未提交本赛季战队报名";
+    }
+    regBox.innerText = `首发总KD：${regData.sumStarterKD}，奢侈税扣除：${regData.luxuryTaxCost} | 当前状态：${statusText}`;
+    // 仅队长显示报名按钮
+    if(isCaptain && !regData.hasRegister){
+        regBtnBox.innerHTML += `<button class="btn" style="margin-top:16px" onclick="submitRegister()">提交本赛季报名</button>`;
+    }
+}
+
+// 队长切换队员首发/替补身份
 async function switchRole(playerId, newRole){
     const res = await fetch("/api/teamManage",{
         method:"POST",
@@ -295,32 +323,62 @@ async function switchRole(playerId, newRole){
     if(ret.ok) loadTeamLineup();
 }
 
-// 加入战队按钮
-document.getElementById("joinBtn").onclick = async function(){
-    const code = document.getElementById("inviteCode").value.trim()
-    if(!code) alert("请输入6位邀请码")
-    const res = await fetch("/api/team",{
+// 队长提交赛季报名申请
+async function submitRegister(){
+    const confirm = confirm("确认提交本赛季战队报名？提交后不可重复提交");
+    if(!confirm) return;
+    const res = await fetch("/api/register",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({type:"join",username:loginUserName,inviteCode:code})
+        body:JSON.stringify({
+            teamId: currentTeamId,
+            seasonId: 1,
+            captainUsername: loginUserName
+        })
     })
     const ret = await res.json();
     alert(ret.msg);
     if(ret.ok) location.reload();
 }
-// 创建战队按钮
-document.getElementById("createTeamBtn").onclick = async function(){
-    const name = prompt("请输入战队名称：");
-    if(!name) return;
+
+// 加入战队按钮点击事件
+document.getElementById("joinBtn").addEventListener("click", async function(){
+    const code = document.getElementById("inviteCode").value.trim();
+    if(!code){
+        alert("请填写6位战队邀请码");
+        return;
+    }
     const res = await fetch("/api/team",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({type:"create",username:loginUserName,teamName:name})
+        body:JSON.stringify({
+            type:"join",
+            username: loginUserName,
+            inviteCode: code
+        })
     })
     const ret = await res.json();
-    alert(ret.msg + (ret.ok ? " 战队邀请码："+ret.inviteCode : ""));
+    alert(ret.msg);
     if(ret.ok) location.reload();
-}
+})
+
+// 创建战队按钮点击事件
+document.getElementById("createTeamBtn").addEventListener("click", async function(){
+    const teamName = prompt("请输入你的战队名称：");
+    if(!teamName || teamName.trim() === "") return;
+    const res = await fetch("/api/team",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            type:"create",
+            username: loginUserName,
+            teamName: teamName.trim()
+        })
+    })
+    const ret = await res.json();
+    alert(ret.msg + (ret.ok ? " 你的战队邀请码："+ret.inviteCode : ""));
+    if(ret.ok) location.reload();
+})
 </script>
 </body>
 </html>
