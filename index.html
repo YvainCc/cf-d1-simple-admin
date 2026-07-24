@@ -3,124 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>系统登录</title>
+    <title>D.M.N 战队管理系统-登录</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Microsoft Yahei", sans-serif;
+            font-family: system-ui, sans-serif;
         }
         body {
             background-color: #f5f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
         }
         .login-box {
-            width: 380px;
             background: #fff;
-            padding: 36px 30px;
+            width: 420px;
+            padding: 40px 30px;
             border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 12px #e0e4ec;
         }
-        h2 {
+        .login-title {
             text-align: center;
+            font-size: 24px;
             color: #222;
             margin-bottom: 30px;
         }
         .item {
             margin-bottom: 20px;
         }
-        input {
-            width: 100%;
-            height: 44px;
-            padding: 0 14px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 16px;
-            outline: none;
-        }
-        input:focus {
-            border-color: #409eff;
-        }
-        #loginBtn {
+        .item input {
             width: 100%;
             height: 46px;
-            background: #409eff;
-            color: white;
+            padding: 0 14px;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background: #3b88f7;
             border: none;
             border-radius: 6px;
+            color: white;
             font-size: 17px;
             cursor: pointer;
         }
-        #loginBtn:hover {
-            background: #337ecc;
+        .login-btn:active {
+            background: #2e77dd;
         }
-        #tip {
+        .err-text {
+            color: #f53f3f;
             text-align: center;
-            margin-top: 16px;
-            font-size: 15px;
+            margin-top: 12px;
+            display: none;
         }
-        .red { color: #f56c6c; }
-        .green { color: #67c23a; }
     </style>
 </head>
 <body>
-    <div class="login-box">
-        <h2>后台管理系统登录</h2>
-        <div class="item">
-            <input id="username" placeholder="请输入用户名" value="test">
-        </div>
-        <div class="item">
-            <input id="password" type="password" placeholder="请输入密码" value="123456">
-        </div>
-        <button id="loginBtn" onclick="login()">立即登录</button>
-        <div id="tip"></div>
+<div class="login-box">
+    <h2 class="login-title">后台管理系统登录</h2>
+    <div class="item">
+        <input type="text" id="username" placeholder="请输入账号" value="test">
     </div>
+    <div class="item">
+        <input type="password" id="pwd" placeholder="请输入密码" value="123456">
+    </div>
+    <button class="login-btn" id="submitBtn">立即登录</button>
+    <div class="err-text" id="errorMsg"></div>
+</div>
 
-    <script>
-        // 同域名接口，无需填写workers.dev
-        const API_URL = "/api/login";
+<script>
+    const usernameInput = document.getElementById('username');
+    const pwdInput = document.getElementById('pwd');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
 
-        async function login() {
-            const username = document.getElementById("username").value.trim();
-            const password = document.getElementById("password").value.trim();
-            const tipDom = document.getElementById("tip");
-            tipDom.className = "";
-            tipDom.innerText = "正在校验账号...";
+    // 登录点击事件
+    submitBtn.addEventListener('click', loginSubmit);
+    // 回车快捷登录
+    document.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') loginSubmit();
+    })
 
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        action: "login",
-                        username: username,
-                        password: password
-                    })
-                })
-                const data = await res.json();
-                if (data.ok) {
-                    tipDom.className = "green";
-                    tipDom.innerText = data.msg;
-                    // 登录成功跳转后台
-                    setTimeout(() => {
-                        location.href = "dashboard.html";
-                    }, 1200)
-                } else {
-                    tipDom.className = "red";
-                    tipDom.innerText = data.msg;
-                }
-            } catch (err) {
-                tipDom.className = "red";
-                tipDom.innerText = "接口连接失败，切换手机热点重试";
-                console.error(err);
-            }
+    async function loginSubmit() {
+        const username = usernameInput.value.trim();
+        const password = pwdInput.value.trim();
+        errorMsg.style.display = 'none';
+
+        if (!username || !password) {
+            showErr('账号密码不能为空');
+            return;
         }
-    </script>
+
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'login',
+                    username: username,
+                    password: password
+                })
+            })
+            const data = await res.json();
+            if (data.ok) {
+                // 根据角色跳转页面
+                if (data.role === 'admin') {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    window.location.href = 'member.html';
+                }
+            } else {
+                showErr(data.msg);
+            }
+        } catch (err) {
+            showErr('网络请求失败，请稍后重试');
+        }
+    }
+
+    // 展示错误提示
+    function showErr(text) {
+        errorMsg.innerText = '服务异常：' + text;
+        errorMsg.style.display = 'block';
+    }
+</script>
 </body>
 </html>
