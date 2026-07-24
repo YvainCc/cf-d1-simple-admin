@@ -3,53 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D.M.N 队员个人中心</title>
+    <title>D.M.N 战队队员中心</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family: system-ui}
-        header{background:#2c4266;color:#fff;padding:16px 22px;display:flex;justify-content:space-between;align-items:center}
-        .logout{color:#d0e1ff;cursor:pointer}
-        .container{max-width:1100px;margin:30px auto;padding:0 16px}
-        .card{background:#fff;border:1px solid #e5e8f0;border-radius:8px;padding:24px;margin-bottom:20px}
-        h2{color:#203459;margin-bottom:14px}
-        p{margin:8px 0;color:#333;line-height:1.7}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0f1419;
+            color: #f0f2f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a3342;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #b8c2cc;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ffd700;
+        }
+
+        .logout {
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            margin: 24px 0 16px;
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+        }
+
+        .card-title {
+            font-size: 13px;
+            color: #8b95a5;
+            margin-bottom: 8px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffd700;
+        }
+
+        .card-sub {
+            font-size: 12px;
+            color: #6e7888;
+            margin-top: 6px;
+        }
+
+        .panel {
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .panel h3 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .rank-table th {
+            color: #7d8898;
+            text-align: left;
+            font-size: 12px;
+            padding: 0 12px 4px;
+        }
+
+        .rank-table td {
+            background: #222d3b;
+            padding: 14px 12px;
+            font-size: 14px;
+            color: #cfd6de;
+        }
+
+        .rank-table td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .rank-table td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .rank-number {
+            width: 46px;
+            text-align: center;
+            font-weight: 800;
+            color: #ffd700;
+        }
+
+        .you-row td {
+            background: #253b5a;
+            border-left: 3px solid #ffd700;
+        }
+
+        .badge {
+            background: #ffd700;
+            color: #0f1419;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #ffd700;
+            color: #0f1419;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 12px;
+            margin-bottom: 12px;
+        }
+
+        .btn:hover {
+            background: #ffed4e;
+        }
+
+        .btn-secondary {
+            background: #2a3342;
+            color: #f0f2f5;
+        }
+
+        .btn-secondary:hover {
+            background: #353f52;
+        }
+
+        .empty {
+            color: #7d8898;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                gap: 12px;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
+
 <header>
-    <h1>D.M.N 战队队员中心</h1>
+    <div class="logo">D.M.N</div>
+    <nav class="nav-links">
+        <a href="member.html" class="active">队员中心</a>
+        <a href="ranks.html">排行榜</a>
+        <a href="team.html">我的战队</a>
+        <a href="replays.html">比赛回放</a>
+        <a href="sponsorship.html">赞助公示</a>
+    </nav>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
+
 <div class="container">
-    <div class="card">
-        <h2>个人生涯数据</h2>
-        <p>总场次：待同步PUBG赛事数据</p>
-        <p>生涯KD：待同步PUBG赛事数据</p>
-        <p>总击杀/总伤害：待同步PUBG赛事数据</p>
-        <p>前十率、吃鸡数：待同步PUBG赛事数据</p>
+
+    <div class="section-title">个人生涯数据</div>
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">生涯 KD</div>
+            <div class="card-value">--</div>
+            <div class="card-sub">PUBG 赛事数据同步后显示</div>
+        </div>
+        <div class="card">
+            <div class="card-title">总击杀</div>
+            <div class="card-value">--</div>
+            <div class="card-sub">累计击杀数</div>
+        </div>
+        <div class="card">
+            <div class="card-title">总场次</div>
+            <div class="card-value">--</div>
+            <div class="card-sub">参赛对局数</div>
+        </div>
+        <div class="card">
+            <div class="card-title">吃鸡数</div>
+            <div class="card-value">--</div>
+            <div class="card-sub">获得第一名次数</div>
+        </div>
     </div>
-    <div class="card">
-        <h2>公开榜单查询</h2>
-        <p>• 战神榜（总击杀排名）</p>
-        <p>• 伤害榜（场均伤害排名）</p>
-        <p>• 生存榜（场均生存时间）</p>
-        <p>• 吃鸡榜（吃鸡数量排行）</p>
-        <p>• 战队总KD排行榜</p>
+
+    <div class="panel">
+        <h3>本赛季表现</h3>
+        <div class="grid">
+            <div class="card" style="background: #222d3b;">
+                <div class="card-title">场均伤害</div>
+                <div class="card-value" style="font-size: 24px;">--</div>
+            </div>
+            <div class="card" style="background: #222d3b;">
+                <div class="card-title">前十率</div>
+                <div class="card-value" style="font-size: 24px;">--%</div>
+            </div>
+            <div class="card" style="background: #222d3b;">
+                <div class="card-title">场均生存</div>
+                <div class="card-value" style="font-size: 24px;">--:--</div>
+            </div>
+            <div class="card" style="background: #222d3b;">
+                <div class="card-title">最高击杀</div>
+                <div class="card-value" style="font-size: 24px;">--</div>
+            </div>
+        </div>
     </div>
-    <div class="card">
-        <h2>战队相关功能</h2>
-        <p>• 查看本队阵容、换人历史记录</p>
-        <p>• 查看全队奢侈税缴纳记录</p>
-        <p>• 查看全部赛事回放与选手高光片段</p>
+
+    <div class="section-title">排行榜快速入口</div>
+    <div class="panel">
+        <h3>DMN 赛事榜单</h3>
+        <a href="ranks.html" class="btn">战神榜</a>
+        <a href="ranks.html" class="btn btn-secondary">伤害榜</a>
+        <a href="ranks.html" class="btn btn-secondary">生存榜</a>
+        <a href="ranks.html" class="btn btn-secondary">吃鸡榜</a>
+        <a href="ranks.html" class="btn btn-secondary">战队榜</a>
     </div>
-    <div class="card">
-        <h2>赛事赞助公示</h2>
-        <p>展示老板赞助、全队奢侈税流水（全员可见）</p>
+
+    <div class="section-title">我的战队</div>
+    <div class="panel">
+        <h3>当前战队信息</h3>
+        <div class="empty">
+            暂未加入战队，或本赛季战队数据未同步。
+        </div>
+        <a href="team.html" class="btn">查看战队</a>
+        <a href="join-team.html" class="btn btn-secondary">加入战队</a>
     </div>
+
+    <div class="section-title">赛事赞助公示</div>
+    <div class="panel">
+        <h3>赞助与奢侈税记录</h3>
+        <div class="empty">
+            本赛季赞助流水、老板赞助、奢侈税记录将在此展示。
+        </div>
+        <a href="sponsorship.html" class="btn">查看公示</a>
+    </div>
+
 </div>
+
 <script>
-function logout(){
-    window.location.href="index.html"
+function logout() {
+    window.location.href = "index.html";
 }
 </script>
+
 </body>
 </html>

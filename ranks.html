@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMN 排行榜</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background: #0f1419;
+            color: #f0f2f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            padding: 18px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a3342;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffd700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-links a {
+            color: #b8c2cc;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ffd700;
+        }
+
+        .logout {
+            color: #ff5555;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 16px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: #2a3342;
+            color: #b8c2cc;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: #ffd700;
+            color: #0f1419;
+        }
+
+        .panel {
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .panel h3 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+
+        .rank-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .rank-table th {
+            color: #7d8898;
+            text-align: left;
+            font-size: 12px;
+            padding: 0 12px 4px;
+        }
+
+        .rank-table td {
+            background: #222d3b;
+            padding: 14px 12px;
+            font-size: 14px;
+            color: #cfd6de;
+        }
+
+        .rank-table td:first-child {
+            border-radius: 8px 0 0 8px;
+        }
+
+        .rank-table td:last-child {
+            border-radius: 0 8px 8px 0;
+        }
+
+        .rank-number {
+            width: 46px;
+            text-align: center;
+            font-weight: 800;
+            color: #ffd700;
+        }
+
+        .you-row td {
+            background: #253b5a;
+            border-left: 3px solid #ffd700;
+        }
+
+        .badge {
+            background: #ffd700;
+            color: #0f1419;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+        }
+
+        .empty {
+            color: #7d8898;
+            padding: 40px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .nav-links {
+                gap: 12px;
+            }
+
+            .rank-table th:nth-child(4),
+            .rank-table td:nth-child(4) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">D.M.N</div>
+    <nav class="nav-links">
+        <a href="member.html">队员中心</a>
+        <a href="ranks.html" class="active">排行榜</a>
+        <a href="team.html">我的战队</a>
+        <a href="replays.html">比赛回放</a>
+        <a href="sponsorship.html">赞助公示</a>
+    </nav>
+    <div class="logout" onclick="logout()">退出登录</div>
+</header>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active">战神榜</button>
+        <button class="tab">伤害榜</button>
+        <button class="tab">生存榜</button>
+        <button class="tab">吃鸡榜</button>
+        <button class="tab">战队榜</button>
+    </div>
+
+    <div class="panel">
+        <h3>2026 S1 赛季 - 战神榜</h3>
+
+        <table class="rank-table">
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>选手</th>
+                    <th>战队</th>
+                    <th>总击杀</th>
+                    <th>KD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="rank-number">1</td>
+                    <td>Player_A</td>
+                    <td>DMN Alpha</td>
+                    <td>128</td>
+                    <td>4.80</td>
+                </tr>
+                <tr>
+                    <td class="rank-number">2</td>
+                    <td>Player_B</td>
+                    <td>DMN Bravo</td>
+                    <td>115</td>
+                    <td>4.30</td>
+                </tr>
+                <tr>
+                    <td class="rank-number">3</td>
+                    <td>Player_C</td>
+                    <td>DMN Charlie</td>
+                    <td>109</td>
+                    <td>4.10</td>
+                </tr>
+                <tr class="you-row">
+                    <td class="rank-number">--</td>
+                    <td>你</td>
+                    <td>未加入战队</td>
+                    <td>--</td>
+                    <td>--</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="empty">
+            真实数据将从 PUBG API / 管理员录入数据后自动生成。
+        </div>
+    </div>
+</div>
+
+<script>
+function logout() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>
