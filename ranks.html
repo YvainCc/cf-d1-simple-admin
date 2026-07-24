@@ -11,12 +11,10 @@
             box-sizing: border-box;
             font-family: system-ui, -apple-system, sans-serif;
         }
-
         body {
             background: #0f1419;
             color: #f0f2f5;
         }
-
         header {
             background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
             padding: 18px 24px;
@@ -25,19 +23,16 @@
             align-items: center;
             border-bottom: 1px solid #2a3342;
         }
-
         .logo {
             font-size: 22px;
             font-weight: 800;
             letter-spacing: 1px;
             color: #ffd700;
         }
-
         .nav-links {
             display: flex;
             gap: 24px;
         }
-
         .nav-links a {
             color: #b8c2cc;
             text-decoration: none;
@@ -45,32 +40,26 @@
             font-weight: 500;
             transition: 0.2s;
         }
-
-        .nav-links a:hover,
-        .nav-links a.active {
+        .nav-links a:hover,.nav-links a.active {
             color: #ffd700;
         }
-
         .logout {
             color: #ff5555;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
         }
-
         .container {
             max-width: 1200px;
             margin: 30px auto;
             padding: 0 16px;
         }
-
         .tabs {
             display: flex;
             gap: 12px;
             margin-bottom: 24px;
             flex-wrap: wrap;
         }
-
         .tab {
             background: #2a3342;
             color: #b8c2cc;
@@ -81,82 +70,64 @@
             font-size: 14px;
             font-weight: 600;
         }
-
         .tab.active {
             background: #ffd700;
             color: #0f1419;
         }
-
         .panel {
             background: #1a2430;
             border: 1px solid #2a3342;
             border-radius: 12px;
             padding: 24px;
         }
-
         .panel h3 {
             font-size: 20px;
             margin-bottom: 18px;
             color: #fff;
         }
-
         .rank-table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0 10px;
         }
-
         .rank-table th {
             color: #7d8898;
             text-align: left;
             font-size: 12px;
             padding: 0 12px 4px;
         }
-
         .rank-table td {
             background: #222d3b;
             padding: 14px 12px;
             font-size: 14px;
             color: #cfd6de;
         }
-
-        .rank-table td:first-child {
+        .rank-table tr td:first-child {
             border-radius: 8px 0 0 8px;
         }
-
-        .rank-table td:last-child {
+        .rank-table tr td:last-child {
             border-radius: 0 8px 8px 0;
         }
-
         .rank-number {
             width: 46px;
             text-align: center;
             font-weight: 800;
             color: #ffd700;
         }
-
-        .you-row td {
-            background: #253b5a;
-            border-left: 3px solid #ffd700;
-        }
-
         .empty {
             color: #7d8898;
             padding: 40px 0;
             text-align: center;
             font-size: 14px;
         }
-
         @media (max-width: 600px) {
             header {
                 flex-direction: column;
                 gap: 12px;
             }
-
             .nav-links {
                 gap: 12px;
             }
-
             .rank-table th:nth-child(4),
             .rank-table td:nth-child(4) {
                 display: none;
@@ -165,7 +136,6 @@
     </style>
 </head>
 <body>
-
 <header>
     <div class="logo">D.M.N</div>
     <nav class="nav-links">
@@ -177,46 +147,89 @@
     </nav>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
-
 <div class="container">
     <div class="tabs">
-        <button class="tab active" data-type="kill">战神榜</button>
+        <button class="tab active" data-type="kill">战神榜（总击杀）</button>
         <button class="tab" data-type="dmg">伤害榜</button>
-        <button class="tab" data-type="survive">生存榜</button>
         <button class="tab" data-type="win">吃鸡榜</button>
-        <button class="tab" data-type="team">战队榜</button>
+        <button class="tab" data-type="kd">KD榜</button>
+        <button class="tab" data-type="team">战队总击杀榜</button>
     </div>
-
     <div class="panel">
-        <h3>2026 S1 赛季 - 战神榜</h3>
-        <table class="rank-table" id="rankTable">
-            <thead>
-                <tr>
-                    <th>排名</th>
-                    <th>选手</th>
-                    <th>战队</th>
-                    <th>总击杀</th>
-                    <th>KD</th>
-                </tr>
-            </thead>
+        <h3 id="rankTitle">2026 S1 赛季 - 战神榜</h3>
+        <table class="rank-table">
+            <thead id="tableHead"></thead>
             <tbody id="rankBody">
-                <tr>
-                    <td colspan="5" class="empty">管理员录入选手数据后自动展示榜单</td>
-                </tr>
+                <tr><td colspan="5" class="empty">加载中...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
-
 <script>
-function logout() {
-    window.location.href = "index.html";
+function logout(){
+    window.location.href="index.html";
 }
-
-// 预留榜单接口请求逻辑，后续写rank.js接口后启用
-window.onload = function(){
-    // fetch("/api/rank?type=kill") 接口写完后开启
+let currentType = "kill";
+// 榜单标题映射
+const titleMap = {
+    kill:"战神榜（总击杀）",
+    dmg:"伤害榜",
+    win:"吃鸡榜",
+    kd:"KD榜",
+    team:"战队总击杀榜"
+};
+// 表头映射
+const headMap = {
+    kill:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总击杀</th><th>KD</th></tr>`,
+    dmg:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总伤害</th><th>KD</th></tr>`,
+    win:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>吃鸡场次</th><th>KD</th></tr>`,
+    kd:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>KD值</th><th>总击杀</th></tr>`,
+    team:`<tr><th class="rank-number">排名</th><th>战队名称</th><th>全队总击杀</th><th></th><th></th></tr>`
+};
+// 加载榜单数据
+async function loadRank(type){
+    currentType = type;
+    // 切换激活tab
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.querySelector(`.tab[data-type="${type}"]`).classList.add("active");
+    // 更新标题、表头
+    document.getElementById("rankTitle").innerText = `2026 S1 赛季 - ${titleMap[type]}`;
+    document.getElementById("tableHead").innerHTML = headMap[type];
+    document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">加载中...</td></tr>`;
+    // 请求接口
+    const res = await fetch(`/api/rank?type=${type}`);
+    const json = await res.json();
+    if(!json.ok || json.list.length === 0){
+        document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">暂无数据</td></tr>`;
+        return;
+    }
+    // 渲染列表
+    let html = "";
+    json.list.forEach((item,idx)=>{
+        const rank = idx+1;
+        const teamName = item.team_name || "无战队";
+        if(type === "kill"){
+            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_kill}</td><td>${item.historical_total_kd}</td></tr>`;
+        }else if(type === "dmg"){
+            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_damage}</td><td>${item.historical_total_kd}</td></tr>`;
+        }else if(type === "win"){
+            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_win}</td><td>${item.historical_total_kd}</td></tr>`;
+        }else if(type === "kd"){
+            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.historical_total_kd}</td><td>${item.total_kill}</td></tr>`;
+        }else if(type === "team"){
+            html += `<tr><td class="rank-number">${rank}</td><td>${item.team_name}</td><td>${item.totalTeamKill}</td><td></td><td></td></tr>`;
+        }
+    })
+    document.getElementById("rankBody").innerHTML = html;
 }
+// tab点击切换
+document.querySelectorAll(".tab").forEach(tab=>{
+    tab.addEventListener("click",()=>{
+        loadRank(tab.dataset.type);
+    })
+})
+// 页面初始化加载默认战神榜
+window.onload = ()=> loadRank("kill");
 </script>
 </body>
 </html>
