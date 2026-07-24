@@ -64,6 +64,19 @@
             padding: 0 16px;
         }
 
+        .season-select-wrap {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        #seasonSelect {
+            padding: 6px 12px;
+            background: #1a2430;
+            color: #fff;
+            border: 1px solid #2a3342;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
         .section-title {
             font-size: 18px;
             margin: 24px 0 16px;
@@ -242,6 +255,14 @@
 </header>
 
 <div class="container">
+    <!-- 赛季下拉选择框 -->
+    <div class="season-select-wrap">
+        <select id="seasonSelect">
+            <option value="all">全部比赛（生涯汇总）</option>
+            <option value="S5">S5赛季</option>
+            <option value="S6">S6赛季</option>
+        </select>
+    </div>
 
     <div class="section-title">个人生涯数据</div>
     <div class="grid">
@@ -267,7 +288,7 @@
         </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="seasonPanel">
         <h3>本赛季表现</h3>
         <div class="grid">
             <div class="card" style="background: #222d3b;">
@@ -325,30 +346,69 @@ function logout() {
     window.location.href = "index.html";
 }
 
-// 页面加载自动拉取选手数据（增加异常捕获、分字段赋值）
-window.onload = async function(){
-  // 后续登录完成后替换为localStorage存储的真实账号，临时测试固定player01
-  const userName = "player01";
-  try{
-    const res = await fetch(`/api/playerData?username=${userName}`);
-    const data = await res.json();
-    if(data.ok && data.data){
-      const info = data.data;
-      // 分别给对应ID赋值，不再全部覆盖KD
-      document.getElementById("kdVal").innerText = info.historical_total_kd || "--";
-      document.getElementById("killVal").innerText = info.total_kill || "0";
-      document.getElementById("matchVal").innerText = info.total_match || "0";
-      document.getElementById("winVal").innerText = info.total_win || "0";
-      document.getElementById("dmgVal").innerText = info.total_damage || "0";
-      // 简单计算前十率（后续完善赛季分表再细化）
-      if(info.total_match > 0){
-        const rate = ((info.total_win / info.total_match) * 100).toFixed(1);
-        document.getElementById("top10Val").innerText = rate + "%";
-      }
+// 当前选中赛季，默认全部比赛
+let currentSeason = "all";
+// 登录账号，后续替换为 localStorage 读取登录用户名
+const userName = "player01";
+const seasonPanel = document.getElementById("seasonPanel");
+const seasonSelect = document.getElementById("seasonSelect");
+
+// 页面初始化加载数据
+window.onload = function() {
+    loadPlayerStats();
+    // 下拉切换监听
+    seasonSelect.addEventListener("change", function() {
+        currentSeason = this.value;
+        loadPlayerStats();
+    })
+}
+
+// 拉取数据并渲染
+async function loadPlayerStats() {
+    // 重置所有显示为--
+    document.getElementById("kdVal").innerText = "--";
+    document.getElementById("killVal").innerText = "--";
+    document.getElementById("matchVal").innerText = "--";
+    document.getElementById("winVal").innerText = "--";
+    document.getElementById("dmgVal").innerText = "--";
+    document.getElementById("top10Val").innerText = "--%";
+
+    try {
+        // 携带赛季参数请求接口
+        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
+        const json = await res.json();
+        if (!json.ok || !json.data) return;
+        const info = json.data;
+
+        // 渲染顶部生涯四块数据（汇总/单赛季通用）
+        if (info.historical_total_kd && info.historical_total_kd > 0) {
+            document.getElementById("kdVal").innerText = info.historical_total_kd;
+        } else {
+            document.getElementById("kdVal").innerText = "--";
+        }
+        document.getElementById("killVal").innerText = info.total_kill ?? 0;
+        document.getElementById("matchVal").innerText = info.total_match ?? 0;
+        document.getElementById("winVal").innerText = info.total_win ?? 0;
+
+        // 控制本赛季面板显示隐藏
+        if (currentSeason === "all") {
+            seasonPanel.style.display = "none";
+        } else {
+            seasonPanel.style.display = "block";
+            // 单赛季计算场均伤害、前十率
+            const match = Number(info.total_match) || 0;
+            if (match > 0) {
+                // 场均伤害取整
+                const avgDmg = Math.round(Number(info.total_damage) / match);
+                document.getElementById("dmgVal").innerText = avgDmg;
+                // 前十率（吃鸡/总场次）
+                const winRate = ((Number(info.total_win) / match) * 100).toFixed(1);
+                document.getElementById("top10Val").innerText = winRate + "%";
+            }
+        }
+    } catch (err) {
+        console.error("数据加载失败：", err);
     }
-  }catch(err){
-    console.log("数据加载失败：", err);
-  }
 }
 </script>
 
