@@ -15,12 +15,12 @@ export async function onRequest({ request, env }) {
   try {
     const url = new URL(request.url);
     const username = url.searchParams.get("username");
-    // 新增赛季参数：all / S5 / S6
     const season = url.searchParams.get("season") || "all";
 
     if (!username) return Response.json({ok:false,msg:"缺少账号参数"},{headers:corsHeaders});
 
     let sql;
+    let bindParams = [];
     if(season === "all"){
       // 全部比赛：汇总所有赛季生涯数据
       sql = `
@@ -34,11 +34,12 @@ export async function onRequest({ request, env }) {
           CASE WHEN SUM(s.total_death) > 0 THEN ROUND(SUM(s.total_kill)*1.0 / SUM(s.total_death),2) ELSE 0 END AS historical_total_kd
         FROM admin a
         LEFT JOIN player_stats s ON a.id = s.player_id
-        WHERE a.username = ?
+        WHERE a.username = ? AND a.active = 1
         GROUP BY a.id,a.username
       `;
+      bindParams = [username];
     }else{
-      // 指定赛季：S5 / S6 单赛季数据
+      // 指定赛季：严格筛选赛季，改用INNER JOIN，避免匹配多条失效
       sql = `
         SELECT 
           a.username,
@@ -49,18 +50,14 @@ export async function onRequest({ request, env }) {
           s.total_death,
           s.historical_total_kd
         FROM admin a
-        LEFT JOIN player_stats s ON a.id = s.player_id
-        WHERE a.username = ? AND s.season = ?
+        INNER JOIN player_stats s ON a.id = s.player_id
+        WHERE a.username = ? AND a.active = 1 AND s.season = ?
       `;
+      bindParams = [username, season];
     }
 
-    let stmt = env.DB.prepare(sql);
-    let res;
-    if(season === "all"){
-      res = await stmt.bind(username).first();
-    }else{
-      res = await stmt.bind(username, season).first();
-    }
+    const stmt = env.DB.prepare(sql);
+    const res = await stmt.bind(...bindParams).first();
 
     return Response.json({
       ok:true,
