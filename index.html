@@ -111,6 +111,8 @@
             })
             const data = await res.json();
             if (data.ok) {
+                // 登录成功，存储当前登录用户名到本地存储
+                localStorage.setItem("loginUser", username);
                 // 按角色跳转页面
                 if (data.role === 'admin') {
                     window.location.href = 'dashboard.html';
