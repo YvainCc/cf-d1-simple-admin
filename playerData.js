@@ -22,7 +22,6 @@ export async function onRequest({ request, env }) {
     let sql;
     let bindParams = [];
     if(season === "all"){
-      // 全部比赛：汇总所有赛季
       sql = `
         SELECT 
           a.username,
@@ -39,7 +38,6 @@ export async function onRequest({ request, env }) {
       `;
       bindParams = [username];
     }else{
-      // 指定赛季：精准过滤赛季
       sql = `
         SELECT 
           a.username,
