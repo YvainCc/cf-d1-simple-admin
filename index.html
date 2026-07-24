@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft Yahei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .login-box {
+            width: 380px;
+            background: #fff;
+            padding: 36px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        h2 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 30px;
+        }
+        .item {
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #409eff;
+        }
+        #loginBtn {
+            width: 100%;
+            height: 46px;
+            background: #409eff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 17px;
+            cursor: pointer;
+        }
+        #loginBtn:hover {
+            background: #337ecc;
+        }
+        #tip {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 15px;
+        }
+        .red { color: #f56c6c; }
+        .green { color: #67c23a; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>后台管理系统登录</h2>
+        <div class="item">
+            <input id="username" placeholder="请输入用户名" value="test">
+        </div>
+        <div class="item">
+            <input id="password" type="password" placeholder="请输入密码" value="123456">
+        </div>
+        <button id="loginBtn" onclick="login()">立即登录</button>
+        <div id="tip"></div>
+    </div>
+
+    <script>
+        // 同域名接口，无需填写workers.dev
+        const API_URL = "/api/login";
+
+        async function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const tipDom = document.getElementById("tip");
+            tipDom.className = "";
+            tipDom.innerText = "正在校验账号...";
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        action: "login",
+                        username: username,
+                        password: password
+                    })
+                })
+                const data = await res.json();
+                if (data.ok) {
+                    tipDom.className = "green";
+                    tipDom.innerText = data.msg;
+                    // 登录成功跳转后台
+                    setTimeout(() => {
+                        location.href = "dashboard.html";
+                    }, 1200)
+                } else {
+                    tipDom.className = "red";
+                    tipDom.innerText = data.msg;
+                }
+            } catch (err) {
+                tipDom.className = "red";
+                tipDom.innerText = "接口连接失败，切换手机热点重试";
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+</html>

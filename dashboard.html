@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "Microsoft Yahei";
+        }
+        header {
+            height: 60px;
+            background: #304156;
+            color: #fff;
+            line-height: 60px;
+            padding: 0 30px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .logout {
+            cursor: pointer;
+            color: #99ccff;
+        }
+        .container {
+            width: 1200px;
+            margin: 50px auto;
+        }
+        .card {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 1px 10px rgba(0,0,0,0.06);
+        }
+        h3 {
+            font-size: 22px;
+            margin-bottom: 20px;
+            color: #222;
+        }
+        p {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span>D.M.N 战队管理后台</span>
+        <span class="logout" onclick="logout()">退出登录</span>
+    </header>
+    <div class="container">
+        <div class="card">
+            <h3>欢迎登录管理系统</h3>
+            <p>当前采用 Cloudflare Pages + D1 架构，前后端同一域名部署，无跨域问题。</p>
+            <p>后续可在此页面开发：战绩查询、KD计算、赞助管理、选手榜单等功能。</p>
+        </div>
+    </div>
+
+    <script>
+        // 返回登录页
+        function logout() {
+            location.href = "index.html";
+        }
+    </script>
+</body>
+</html>
