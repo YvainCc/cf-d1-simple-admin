@@ -59,6 +59,19 @@
             font-size: 14px;
             color: #333a4f;
         }
+        .jump-btn{
+            margin-top:16px;
+            padding:10px 20px;
+            background:#1a2a48;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:14px;
+        }
+        .jump-btn:hover{
+            background:#283b66;
+        }
     </style>
 </head>
 <body>
@@ -84,7 +97,8 @@
         <div class="list-item">• 赛季配置: 新建赛季、调整奢侈税起征点</div>
         <div class="list-item">• 回放上传: mp4赛事视频、高光片段打点</div>
         <div class="list-item">• 审计日志: 超级管理员专属操作记录查询</div>
-        <p style="margin-top:12px;color:#2563eb;">点击导航栏【管理后台】进入操作页面 admin.html</p>
+        <!-- 新增跳转按钮 -->
+        <button class="jump-btn" onclick="window.location.href='admin.html'">进入选手/报名操作管理后台</button>
     </div>
 </div>
 <script>
