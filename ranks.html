@@ -197,7 +197,7 @@ async function loadRank(type){
     document.getElementById("tableHead").innerHTML = headMap[type];
     document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">加载中...</td></tr>`;
     // 请求接口
-    const res = await fetch(`/api/rank?type=${type}`);
+    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/rank?type=${type}`);
     const json = await res.json();
     if(!json.ok || json.list.length === 0){
         document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">暂无数据</td></tr>`;

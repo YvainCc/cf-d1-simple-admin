@@ -75,30 +75,25 @@
     <button class="login-btn" id="submitBtn">立即登录</button>
     <div class="err-text" id="errorMsg"></div>
 </div>
-
 <script>
     const usernameInput = document.getElementById('username');
     const pwdInput = document.getElementById('pwd');
     const submitBtn = document.getElementById('submitBtn');
     const errorMsg = document.getElementById('errorMsg');
-
-    submitBtn.addEventListener('click', loginSubmit);
+    submit.addEventListener('click', loginSubmit);
     document.addEventListener('keydown', (e) => {
         if(e.key === 'Enter') loginSubmit();
     })
-
     async function loginSubmit() {
         const username = usernameInput.value.trim();
         const password = pwdInput.value.trim();
         errorMsg.style.display = 'none';
-
         if (!username || !password) {
             showErr('账号密码不能为空');
             return;
         }
-
         try {
-            const res = await fetch('/api/login', {
+            const res = await fetch('https://dmn-api.yvainchuang.workers.dev/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -126,7 +121,6 @@
             showErr('网络请求失败，请稍后重试');
         }
     }
-
     function showErr(text) {
         errorMsg.innerText = '服务异常：' + text;
         errorMsg.style.display = 'block';

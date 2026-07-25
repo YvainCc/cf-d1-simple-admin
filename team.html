@@ -172,7 +172,6 @@
         <button class="btn" id="joinBtn">加入战队</button>
         <button class="btn btn-secondary" id="createTeamBtn">创建新战队</button>
     </div>
-
     <div class="panel" id="teamMainPanel" style="display:none;">
         <h3 id="teamTitle"></h3>
         <div id="taxTipBox" class="tax-tip"></div>
@@ -181,7 +180,6 @@
         <h4 style="margin:24px 0 8px;color:#ffd700;">替补阵容</h4>
         <div class="team-slot-wrap" id="subWrap"></div>
     </div>
-
     <div class="panel">
         <h3>战队编制说明</h3>
         <p style="color:#b8c2cc;line-height:1.7;">单战队最多9人：1队长 + 4首发（计算奢侈税）+ 4替补</p>
@@ -209,16 +207,14 @@
 const loginUserName = "player01";
 let currentTeamId = "";
 let isCaptain = false;
-
 // 退出登录
 function logout(){
     window.location.href="index.html"
 }
-
 // 页面加载初始化数据
 window.onload = async function(){
   try{
-    const res = await fetch(`/api/team?username=${loginUserName}`);
+    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/team?username=${loginUserName}`);
     const data = await res.json();
     if(data.ok && data.hasTeam){
         document.getElementById("joinPanel").style.display = "none";
@@ -234,10 +230,9 @@ window.onload = async function(){
     console.log("战队数据加载失败",e);
   }
 }
-
 // 加载首发、替补阵容，计算奢侈税提示
 async function loadTeamLineup(){
-    const res = await fetch(`/api/teamManage?teamId=${currentTeamId}`);
+    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/teamManage?teamId=${currentTeamId}`);
     const json = await res.json();
     if(!json.ok) return;
     const tData = json.teamData;
@@ -282,10 +277,9 @@ async function loadTeamLineup(){
         `
     })
 }
-
 // 加载赛季报名状态、奢侈税金额
 async function loadRegisterInfo(){
-    const res = await fetch(`/api/register?teamId=${currentTeamId}&seasonId=1`);
+    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/register?teamId=${currentTeamId}&seasonId=1`);
     const json = await res.json();
     if(!json.ok) return;
     const regBox = document.querySelector(".panel:last-child .empty");
@@ -305,10 +299,9 @@ async function loadRegisterInfo(){
         regBtnBox.innerHTML += `<button class="btn" style="margin-top:16px" onclick="submitRegister()">提交本赛季报名</button>`;
     }
 }
-
 // 队长切换队员首发/替补身份
 async function switchRole(playerId, newRole){
-    const res = await fetch("/api/teamManage",{
+    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/teamManage",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -322,12 +315,11 @@ async function switchRole(playerId, newRole){
     alert(ret.msg);
     if(ret.ok) loadTeamLineup();
 }
-
 // 队长提交赛季报名申请
 async function submitRegister(){
     const confirm = confirm("确认提交本赛季战队报名？提交后不可重复提交");
     if(!confirm) return;
-    const res = await fetch("/api/register",{
+    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/register",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -340,7 +332,6 @@ async function submitRegister(){
     alert(ret.msg);
     if(ret.ok) location.reload();
 }
-
 // 加入战队按钮点击事件
 document.getElementById("joinBtn").addEventListener("click", async function(){
     const code = document.getElementById("inviteCode").value.trim();
@@ -348,7 +339,7 @@ document.getElementById("joinBtn").addEventListener("click", async function(){
         alert("请填写6位战队邀请码");
         return;
     }
-    const res = await fetch("/api/team",{
+    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/team",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -361,12 +352,11 @@ document.getElementById("joinBtn").addEventListener("click", async function(){
     alert(ret.msg);
     if(ret.ok) location.reload();
 })
-
 // 创建战队按钮点击事件
 document.getElementById("createTeamBtn").addEventListener("click", async function(){
     const teamName = prompt("请输入你的战队名称：");
     if(!teamName || teamName.trim() === "") return;
-    const res = await fetch("/api/team",{
+    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/team",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
