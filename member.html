@@ -323,7 +323,7 @@ async function loadPlayerStats() {
     document.getElementById("dmgVal").innerText = "--";
     document.getElementById("top10Val").innerText = "--%";
     try {
-        const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/playerData?username=${userName}&season=${currentSeason}`);
+        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
         const json = await res.json();
         if (!json.ok || !json.data) return;
         const info = json.data;

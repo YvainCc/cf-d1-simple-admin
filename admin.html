@@ -162,7 +162,6 @@
         <button class="tab-btn active" data-tab="playerEdit">选手KD录入</button>
         <button class="tab-btn" data-tab="auditRegister">战队报名审核</button>
     </div>
-    <!-- 选手数据录入面板 -->
     <div class="panel" id="playerEditPanel">
         <h3>选手KD数据手动录入/修改</h3>
         <table>
@@ -182,7 +181,6 @@
                 <tr><td colspan="8" class="empty">加载中...</td></tr>
             </tbody>
         </table>
-        <!-- 编辑弹窗行 -->
         <div id="editForm" style="display:none;margin-top:20px;border-top:1px solid #333;padding-top:20px;">
             <h4>修改选手数据 <span id="editUserName"></span></h4>
             <input type="hidden" id="editPlayerId">
@@ -196,7 +194,6 @@
             <button class="save-btn" onclick="savePlayerEdit()">保存修改</button>
         </div>
     </div>
-    <!-- 报名审核面板 -->
     <div class="panel" id="auditPanel" style="display:none;">
         <h3>赛季战队报名审核</h3>
         <table>
@@ -223,7 +220,6 @@ let currentEditPlayerId = null;
 function logout(){
     window.location.href="index.html"
 }
-// 切换tab
 document.querySelectorAll(".tab-btn").forEach(btn=>{
     btn.onclick = ()=>{
         document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
@@ -235,9 +231,8 @@ document.querySelectorAll(".tab-btn").forEach(btn=>{
         if(tab === "auditRegister") loadRegList();
     }
 })
-// 加载全部选手
 async function loadPlayerList(){
-    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/adminManage?opt=playerList`);
+    const res = await fetch(`/api/adminManage?opt=playerList`);
     const json = await res.json();
     const body = document.getElementById("playerTableBody");
     if(!json.ok || json.list.length ===0){
@@ -260,7 +255,6 @@ async function loadPlayerList(){
     })
     body.innerHTML = html;
 }
-// 打开选手编辑表单
 function openEdit(pid, uname, kill, match, win, dmg, kd){
     currentEditPlayerId = pid;
     document.getElementById("editForm").style.display = "block";
@@ -272,7 +266,6 @@ function openEdit(pid, uname, kill, match, win, dmg, kd){
     document.getElementById("editDmg").value = dmg;
     document.getElementById("editKd").value = kd;
 }
-// 保存选手修改
 async function savePlayerEdit(){
     const pid = document.getElementById("editPlayerId").value;
     const kill = document.getElementById("editKill").value;
@@ -280,7 +273,7 @@ async function savePlayerEdit(){
     const win = document.getElementById("editWin").value;
     const dmg = document.getElementById("editDmg").value;
     const kd = document.getElementById("editKd").value;
-    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/adminManage",{
+    const res = await fetch("/api/adminManage",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -301,9 +294,8 @@ async function savePlayerEdit(){
         loadPlayerList();
     }
 }
-// 加载报名审核列表
 async function loadRegList(){
-    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/adminManage?opt=regList`);
+    const res = await fetch(`/api/adminManage?opt=regList`);
     const json = await res.json();
     const body = document.getElementById("regTableBody");
     if(!json.ok || json.list.length ===0){
@@ -332,11 +324,10 @@ async function loadRegList(){
     })
     body.innerHTML = html;
 }
-// 执行报名审核
 async function auditReg(regId, status){
     const confirmTip = status === "pass" ? "确认通过该战队报名？" : "确认驳回该战队报名？";
     if(!confirm(confirmTip)) return;
-    const res = await fetch("https://dmn-api.yvainchuang.workers.dev/api/adminManage",{
+    const res = await fetch("/api/adminManage",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -350,7 +341,6 @@ async function auditReg(regId, status){
     alert(ret.msg);
     if(ret.ok) loadRegList();
 }
-// 页面初始化加载选手列表
 window.onload = ()=> loadPlayerList();
 </script>
 </body>

@@ -170,7 +170,6 @@ function logout(){
     window.location.href="index.html";
 }
 let currentType = "kill";
-// 榜单标题映射
 const titleMap = {
     kill:"战神榜（总击杀）",
     dmg:"伤害榜",
@@ -178,7 +177,6 @@ const titleMap = {
     kd:"KD榜",
     team:"战队总击杀榜"
 };
-// 表头映射
 const headMap = {
     kill:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总击杀</th><th>KD</th></tr>`,
     dmg:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总伤害</th><th>KD</th></tr>`,
@@ -186,24 +184,19 @@ const headMap = {
     kd:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>KD值</th><th>总击杀</th></tr>`,
     team:`<tr><th class="rank-number">排名</th><th>战队名称</th><th>全队总击杀</th><th></th><th></th></tr>`
 };
-// 加载榜单数据
 async function loadRank(type){
     currentType = type;
-    // 切换激活tab
     document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
     document.querySelector(`.tab[data-type="${type}"]`).classList.add("active");
-    // 更新标题、表头
     document.getElementById("rankTitle").innerText = `2026 S1 赛季 - ${titleMap[type]}`;
     document.getElementById("tableHead").innerHTML = headMap[type];
     document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">加载中...</td></tr>`;
-    // 请求接口
-    const res = await fetch(`https://dmn-api.yvainchuang.workers.dev/api/rank?type=${type}`);
+    const res = await fetch(`/api/rank?type=${type}`);
     const json = await res.json();
     if(!json.ok || json.list.length === 0){
         document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">暂无数据</td></tr>`;
         return;
     }
-    // 渲染列表
     let html = "";
     json.list.forEach((item,idx)=>{
         const rank = idx+1;
@@ -222,13 +215,11 @@ async function loadRank(type){
     })
     document.getElementById("rankBody").innerHTML = html;
 }
-// tab点击切换
 document.querySelectorAll(".tab").forEach(tab=>{
     tab.addEventListener("click",()=>{
         loadRank(tab.dataset.type);
     })
 })
-// 页面初始化加载默认战神榜
 window.onload = ()=> loadRank("kill");
 </script>
 </body>
