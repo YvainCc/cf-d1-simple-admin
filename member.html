@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D.M.N 战队队员中心</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -109,13 +110,10 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        .panel h3 {
-            font-size: 20px;
-            margin-bottom: 18px;
-            color: #fff;
-        }
+        /* 重点：增加居中 */
         .radar-wrap {
             max-width:660px;
+            margin: 0 auto;
         }
         table{
             width:100%;
@@ -130,19 +128,6 @@
         table th{
             background:#222d3b;
             color:#ffd700;
-        }
-        .btn {
-            display: inline-block;
-            background: #ffd700;
-            color: #0f1419;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 14px;
-        }
-        .btn:hover {
-            background: #ffed4e;
         }
         .empty {
             color: #7d8898;
@@ -159,6 +144,9 @@
             }
             .nav-links a {
                 font-size: 12px;
+            }
+            .radar-wrap {
+                max-width:100%;
             }
         }
         @media (max-width: 600px) {
@@ -243,23 +231,6 @@
         </table>
     </div>
 
-    <div class="section-title">我的战队</div>
-    <div class="panel">
-        <h3>当前战队信息</h3>
-        <div class="empty">
-            暂未加入战队，或本赛季战队数据未同步。
-        </div>
-        <a href="team.html" class="btn">查看战队</a>
-    </div>
-
-    <div class="section-title">赛事赞助公示</div>
-    <div class="panel">
-        <h3>赞助与奢侈税记录</h3>
-        <div class="empty">
-            本赛季赞助流水、老板赞助、奢侈税记录将在此展示。
-        </div>
-        <a href="#" class="btn">查看公示</a>
-    </div>
 </div>
 
 <script>
@@ -295,9 +266,15 @@ function initRadarChart(dataArr) {
                 }
             },
             plugins:{
-                legend:{labels:{color:"#ddd"}}
+                legend:{labels:{color:"#ddd"}},
+                // 开启顶点分数显示
+                datalabels:{
+                    color:"#fff",
+                    font:{size:12,weight:"bold"}
+                }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     })
 }
 
