@@ -389,7 +389,7 @@
         </select>
     </div>
 
-    <!-- 小黑盒风格玩家信息头部 -->
+    <!-- 小黑盒风格玩家信息头部【名称动态读取】 -->
     <div class="profile-header">
         <div class="profile-avatar">
             <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
@@ -599,6 +599,9 @@ document.addEventListener('DOMContentLoaded', function(){
         window.location.href = "index.html";
         return;
     }
+    // 【重点】动态渲染登录用户名，修复固定YvainCC
+    document.getElementById("profileUserName").innerText = userName;
+
     loadPlayerStats();
     document.getElementById('seasonSelect').addEventListener("change", function () {
         currentSeason = this.value;
@@ -643,8 +646,7 @@ async function loadPlayerStats() {
         const totalDeath = Number(d.total_death || 0);
         const totalDamage = Number(d.total_damage || 0);
         const kdVal = Number(d.historical_total_kd || 0);
-        const userName = localStorage.getItem("loginUser");
-        document.getElementById("profileUserName").innerText = userName;
+
         document.getElementById("rankVal").innerText = "-";
         document.getElementById("matchVal").innerText = totalMatch;
         document.getElementById("winVal").innerText = totalWin;
