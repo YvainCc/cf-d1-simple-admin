@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>D.M.N 战队队员中心</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
@@ -182,12 +182,69 @@
             color:#ffd700;
             text-decoration:none;
         }
+        /* 小黑盒顶部玩家信息卡片 */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+        }
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #ffd700;
+            flex-shrink: 0;
+        }
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .profile-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .profile-tag {
+            font-size: 13px;
+            color: #8b95a5;
+        }
+        .profile-rating {
+            text-align: center;
+            min-width: 70px;
+        }
+        .rating-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .rating-label {
+            font-size: 12px;
+            color: #8b95a5;
+        }
+
+        /* ===== 移动端小黑盒适配核心样式 ===== */
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
             }
             .stat-grid {
-                grid-template-columns: repeat(2,1fr);
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             .nav-links {
                 gap: 12px;
@@ -200,12 +257,113 @@
             }
         }
         @media (max-width: 600px) {
+            body {
+                background: #111723;
+            }
             header {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 12px 16px;
+            }
+            .logo {
+                font-size: 18px;
+            }
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: space-around;
+            }
+            .nav-links a {
+                font-size: 13px;
+            }
+            .container {
+                margin: 20px auto;
+                padding: 0 12px;
+            }
+            .season-select-wrap {
+                text-align: left;
+                margin-bottom: 16px;
+            }
+            .section-title {
+                font-size: 16px;
+                margin: 20px 0 12px;
+            }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .card {
+                padding: 16px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #1e2a3a 0%, #161d29 100%);
+            }
+            .card-value {
+                font-size: 22px;
+            }
+            .card-title {
+                font-size: 12px;
+            }
+            .stat-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .stat-grid .card {
+                padding: 12px;
+                text-align: center;
+            }
+            .stat-grid .card-title {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            .stat-grid .card-value {
+                font-size: 16px;
+            }
+            .panel {
+                padding: 16px;
+                border-radius: 10px;
+            }
+            table th, table td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+            #toggleMore, .full-match-btn {
+                padding: 14px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+            /* 头部信息卡片移动端 */
+            .profile-header {
+                padding: 14px;
                 gap: 12px;
             }
-            .grid, .stat-grid {
-                grid-template-columns: 1fr;
+            .profile-avatar {
+                width: 56px;
+                height: 56px;
+            }
+            .profile-name {
+                font-size: 18px;
+            }
+            .profile-rating {
+                min-width: 60px;
+            }
+            .rating-num {
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            table th, table td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            .card-value {
+                font-size: 20px;
             }
         }
     </style>
@@ -229,6 +387,21 @@
             <option value="S5">S5赛季</option>
             <option value="S6">S6赛季</option>
         </select>
+    </div>
+
+    <!-- 小黑盒风格玩家信息头部 -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
+        </div>
+        <div class="profile-info">
+            <div class="profile-name">YvainCC</div>
+            <div class="profile-tag">D.M.N 战队队员</div>
+        </div>
+        <div class="profile-rating">
+            <div class="rating-num" id="headerKD">--</div>
+            <div class="rating-label">KD</div>
+        </div>
     </div>
 
     <div class="section-title">个人生涯概况</div>
@@ -441,6 +614,7 @@ async function loadPlayerStats() {
     document.getElementById("matchVal").innerText = "--";
     document.getElementById("winVal").innerText = "--";
     document.getElementById("kdVal").innerText = "--";
+    document.getElementById("headerKD").innerText = "--";
     document.getElementById("deathVal").innerText = "--";
     document.getElementById("assistVal").innerText = "--";
     document.getElementById("dmgTotalVal").innerText = "--";
@@ -448,7 +622,7 @@ async function loadPlayerStats() {
     document.getElementById("winRateVal").innerText = "--%";
     document.getElementById("top10Val").innerText = "--";
     document.getElementById("top10RateVal").innerText = "--%";
-    document.getElementById("headRateVal").innerText = "--%";
+    document.getElementById("headRateVal").innerText = "0.0";
     document.getElementById("bestRankVal").innerText = "--";
     document.getElementById("avgDmgVal").innerText = "--";
     document.getElementById("maxSurviveVal").innerText = "--";
@@ -463,7 +637,6 @@ async function loadPlayerStats() {
             return;
         }
         const d = json.data;
-        // 适配你当前后端返回字段
         const totalMatch = Number(d.total_match || 0);
         const totalWin = Number(d.total_win || 0);
         const totalKill = Number(d.total_kill || 0);
@@ -475,18 +648,17 @@ async function loadPlayerStats() {
         document.getElementById("matchVal").innerText = totalMatch;
         document.getElementById("winVal").innerText = totalWin;
         document.getElementById("kdVal").innerText = kdVal.toFixed(2);
+        document.getElementById("headerKD").innerText = kdVal.toFixed(2);
         document.getElementById("deathVal").innerText = totalDeath;
         document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
 
         const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
         document.getElementById("winRateVal").innerText = winRate;
 
-        // 后端暂时没有这些字段，填充默认
         document.getElementById("assistVal").innerText = 0;
         document.getElementById("avgSurviveVal").innerText = "0.0";
         document.getElementById("top10Val").innerText = 0;
         document.getElementById("top10RateVal").innerText = "0.0";
-        document.getElementById("headRateVal").innerText = "0.0";
         document.getElementById("bestRankVal").innerText = "-";
         document.getElementById("avgDmgVal").innerText = totalMatch > 0 ? Math.round(totalDamage / totalMatch) : 0;
         document.getElementById("maxSurviveVal").innerText = "0.0";
@@ -501,7 +673,6 @@ async function loadPlayerStats() {
             winRate: Number(winRate)
         };
 
-        // 对局与武器，当前接口无数据，保持空白
         const matchTbody = document.getElementById("matchTableBody");
         matchTbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局记录</td>`;
         const weaponTbody = document.getElementById("weaponTableBody");
