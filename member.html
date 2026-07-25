@@ -395,7 +395,7 @@
             <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
         </div>
         <div class="profile-info">
-            <div class="profile-name">YvainCC</div>
+            <div class="profile-name" id="profileUserName">--</div>
             <div class="profile-tag">D.M.N 战队队员</div>
         </div>
         <div class="profile-rating">
@@ -643,7 +643,8 @@ async function loadPlayerStats() {
         const totalDeath = Number(d.total_death || 0);
         const totalDamage = Number(d.total_damage || 0);
         const kdVal = Number(d.historical_total_kd || 0);
-
+        const userName = localStorage.getItem("loginUser");
+        document.getElementById("profileUserName").innerText = userName;
         document.getElementById("rankVal").innerText = "-";
         document.getElementById("matchVal").innerText = totalMatch;
         document.getElementById("winVal").innerText = totalWin;
