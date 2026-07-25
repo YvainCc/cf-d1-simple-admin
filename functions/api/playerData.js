@@ -1,3 +1,4 @@
+// 20260725 修复数据库查询
 export async function onRequest({ request, env }) {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
