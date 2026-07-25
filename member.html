@@ -110,9 +110,9 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        /* 重点：增加居中 */
+        /* 缩小雷达最大宽度，居中，和卡片尺寸协调统一 */
         .radar-wrap {
-            max-width:660px;
+            max-width: 480px;
             margin: 0 auto;
         }
         table{
@@ -146,7 +146,7 @@
                 font-size: 12px;
             }
             .radar-wrap {
-                max-width:100%;
+                max-width: 100%;
             }
         }
         @media (max-width: 600px) {
@@ -267,7 +267,6 @@ function initRadarChart(dataArr) {
             },
             plugins:{
                 legend:{labels:{color:"#ddd"}},
-                // 开启顶点分数显示
                 datalabels:{
                     color:"#fff",
                     font:{size:12,weight:"bold"}
