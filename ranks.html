@@ -293,8 +293,8 @@ function fillEmptyCard(el){
 async function loadRankData(){
     const res = await fetch(`/api/rank?season=${currentSeason}&type=${currentType}`);
     const json = await res.json();
-    // 核心修复：后端直接返回数组，无外层包装
-    const list = Array.isArray(json) ? json : (json.data || []);
+    // 修复：后端数组键名为 list，不是 data
+    const list = Array.isArray(json) ? json : (json.list || []);
     
     const tbody = document.getElementById("rankTbody");
     const card1 = document.getElementById("card1");
