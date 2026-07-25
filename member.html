@@ -75,6 +75,7 @@
             color: #ffd700;
             font-weight: 700;
         }
+        /* 基础4卡片网格 */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -103,7 +104,7 @@
             color: #6e7888;
             margin-top: 6px;
         }
-        /* 更多摘要按钮 */
+        /* 展开收起按钮 */
         .toggle-wrap {
             text-align: center;
             margin: 12px 0;
@@ -117,22 +118,43 @@
             padding: 12px;
             font-size: 15px;
             cursor: pointer;
+            transition: .2s;
         }
         #toggleMore:hover {
             color: #ffd700;
+            border-color: #ffd700;
         }
-        /* 雷达区域 默认隐藏 */
-        .radar-box {
-            max-width: 480px;
-            margin: 0 auto 24px;
+        /* 折叠面板容器 */
+        .collapse-box {
+            display: none;
+            margin-bottom: 24px;
+        }
+        .collapse-box.show {
+            display: block;
+        }
+        .panel {
             background: #1a2430;
             border: 1px solid #2a3342;
             border-radius: 12px;
             padding: 24px;
-            display: none;
+            margin-bottom: 24px;
         }
-        .radar-box.show {
-            display: block;
+        .panel h3 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        /* 雷达容器 居中缩小 */
+        .radar-wrap {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        /* 详细摘要两行网格 */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap:12px;
+            margin-bottom:20px;
         }
         table{
             width:100%;
@@ -154,9 +176,28 @@
             text-align: center;
             font-size: 14px;
         }
+        .full-match-btn {
+            display:block;
+            width:100%;
+            text-align:center;
+            margin-top:16px;
+            padding:12px;
+            background:#ffd700;
+            color:#0f1419;
+            text-decoration:none;
+            border-radius:8px;
+            font-weight:bold;
+        }
+        .weapon-row a {
+            color:#ffd700;
+            text-decoration:none;
+        }
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-grid {
+                grid-template-columns: repeat(2,1fr);
             }
             .nav-links {
                 gap: 12px;
@@ -164,7 +205,7 @@
             .nav-links a {
                 font-size: 12px;
             }
-            .radar-box {
+            .radar-wrap {
                 max-width: 100%;
             }
         }
@@ -173,7 +214,7 @@
                 flex-direction: column;
                 gap: 12px;
             }
-            .grid {
+            .grid, .stat-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -200,51 +241,71 @@
         </select>
     </div>
 
-    <div class="section-title">个人生涯数据</div>
+    <div class="section-title">个人生涯概况</div>
+    <!-- 基础4卡片 默认展示 -->
     <div class="grid">
         <div class="card">
-            <div class="card-title">生涯 KD</div>
-            <div class="card-value" id="kdVal">--</div>
-            <div class="card-sub">PUBG 赛事数据同步后显示</div>
-        </div>
-        <div class="card">
-            <div class="card-title">总击杀</div>
-            <div class="card-value" id="killVal">--</div>
-            <div class="card-sub">累计击杀数</div>
+            <div class="card-title">当前赛季排名</div>
+            <div class="card-value" id="rankVal">--</div>
+            <div class="card-sub">赛季分段总排名</div>
         </div>
         <div class="card">
             <div class="card-title">总场次</div>
             <div class="card-value" id="matchVal">--</div>
-            <div class="card-sub">参赛对局数</div>
+            <div class="card-sub">本赛季参赛局数</div>
         </div>
         <div class="card">
             <div class="card-title">吃鸡数</div>
             <div class="card-value" id="winVal">--</div>
-            <div class="card-sub">获得第一名次数</div>
+            <div class="card-sub">第一名次数</div>
+        </div>
+        <div class="card">
+            <div class="card-title">段位KD</div>
+            <div class="card-value" id="kdVal">--</div>
+            <div class="card-sub">击杀/死亡比值</div>
         </div>
     </div>
 
-    <!-- 更多摘要按钮 -->
+    <!-- 展开收起按钮 -->
     <div class="toggle-wrap">
         <button id="toggleMore">更多摘要 ▼</button>
     </div>
 
-    <!-- 雷达区域 默认隐藏 -->
-    <div class="radar-box" id="radarWrap">
-        <canvas id="abilityRadar"></canvas>
+    <!-- 折叠区域：详细数据+雷达 -->
+    <div class="collapse-box" id="collapseWrap">
+        <div class="section-title">详细赛季数据</div>
+        <div class="stat-grid">
+            <div class="card"><div class="card-title">总死亡</div><div class="card-value" id="deathVal">--</div></div>
+            <div class="card"><div class="card-title">总助攻</div><div class="card-value" id="assistVal">--</div></div>
+            <div class="card"><div class="card-title">总伤害</div><div class="card-value" id="dmgTotalVal">--</div></div>
+            <div class="card"><div class="card-title">场均存活(min)</div><div class="card-value" id="avgSurviveVal">--</div></div>
+            <div class="card"><div class="card-title">吃鸡率</div><div class="card-value" id="winRateVal">--%</div></div>
+            <div class="card"><div class="card-title">前十场次</div><div class="card-value" id="top10Val">--</div></div>
+            <div class="card"><div class="card-title">前十率</div><div class="card-value" id="top10RateVal">--%</div></div>
+            <div class="card"><div class="card-title">包头率</div><div class="card-value" id="headRateVal">--%</div></div>
+            <div class="card"><div class="card-title">赛季最高排名</div><div class="card-value" id="bestRankVal">--</div></div>
+            <div class="card"><div class="card-title">场均伤害</div><div class="card-value" id="avgDmgVal">--</div></div>
+            <div class="card"><div class="card-title">最长存活</div><div class="card-value" id="maxSurviveVal">--</div></div>
+        </div>
+
+        <div class="section-title">个人综合能力雷达图</div>
+        <div class="panel radar-wrap">
+            <canvas id="abilityRadar"></canvas>
+        </div>
     </div>
 
-    <div class="section-title">近期比赛战绩</div>
+    <!-- 近期战绩 -->
+    <div class="section-title">近期比赛战绩（近10场）</div>
     <div class="panel">
         <table>
             <thead>
                 <tr>
-                    <th>对局日期</th>
-                    <th>赛事名称</th>
-                    <th>名次</th>
+                    <th>排名</th>
+                    <th>模式</th>
+                    <th>段位</th>
                     <th>击杀</th>
                     <th>伤害</th>
-                    <th>存活时长</th>
+                    <th>单局评分</th>
                 </tr>
             </thead>
             <tbody id="matchTableBody">
@@ -252,15 +313,74 @@
                     <td colspan="6" class="empty">加载对局数据...</td>
                 </tr>
             </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6">
+                        <a href="matchAll.html" class="full-match-btn">查看全部比赛</a>
+                    </td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
+    <!-- 武器熟练度模块 -->
+    <div class="section-title">武器熟练度</div>
+    <div class="panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>武器</th>
+                    <th>熟练度等级</th>
+                    <th>总击杀 / 单场最高</th>
+                    <th>最远击杀(m)</th>
+                    <th>详情</th>
+                </tr>
+            </thead>
+            <tbody id="weaponTableBody">
+                <tr>
+                    <td colspan="5" class="empty">暂无武器数据</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
 let radarChartInstance = null;
 let radarRendered = false;
 const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
+
+// 小黑盒单局评分算法
+function calcSingleScore(kill, dmg, rank, win, top10Rate) {
+    let rankScore = rank === 1 ? 100 : rank <= 10 ? 70 : Math.max(0, 100 - rank * 4);
+    let killScore = Math.min(kill * 12, 100);
+    let dmgScore = Math.min(dmg / 12, 100);
+    let winBonus = win ? 12 : 0;
+    return Math.round((rankScore * 0.35 + killScore * 0.35 + dmgScore * 0.2 + winBonus * 0.1) * 10) / 10;
+}
+
+// 赛季五大维度雷达分计算（复刻小黑盒权重）
+function calcRadarData(data) {
+    const {
+        avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate
+    } = data;
+    // 1.生存评分 25% 场均存活+前十率
+    let survive = Math.min(avgSurvive / 22 * 100, top10Rate);
+    survive = Math.round(survive);
+    // 2.Rating评分25% 最高段位分
+    let rating = Math.min(maxRating / 2400 * 100, 100);
+    rating = Math.round(rating);
+    //3.战斗30% KD+场均伤害
+    let fight = Math.min(avgKD * 28 + avgDmg / 15, 100);
+    fight = Math.round(fight);
+    //4.支援10% 总助攻换算
+    let assist = Math.min(totalAssist / (avgSurvive * 0.8) * 100, 100);
+    assist = Math.round(assist);
+    //5.吃鸡率10%
+    let win = Math.min(winRate * 2.2, 100);
+    win = Math.round(win);
+    return [survive, rating, fight, assist, win];
+}
 
 function initRadarChart(dataArr) {
     const canvas = document.getElementById("abilityRadar");
@@ -272,7 +392,7 @@ function initRadarChart(dataArr) {
         data: {
             labels: radarLabels,
             datasets: [{
-                label: "综合能力评分",
+                label: "本赛季综合能力",
                 data: dataArr,
                 backgroundColor: "rgba(255, 215, 0, 0.12)",
                 borderColor: "#ffd700",
@@ -290,7 +410,7 @@ function initRadarChart(dataArr) {
                     ticks:{display:false},
                     grid:{color:"#2a3342"},
                     angleLines:{color:"#2a3342"}
-                }
+            }
             },
             plugins:{
                 legend:{labels:{color:"#ddd"}},
@@ -304,20 +424,16 @@ function initRadarChart(dataArr) {
     })
 }
 
-// 展开/收起雷达
+// 展开/收起逻辑
 const toggleBtn = document.getElementById('toggleMore');
-const radarWrap = document.getElementById('radarWrap');
+const collapseWrap = document.getElementById('collapseWrap');
 toggleBtn.addEventListener('click', ()=>{
-    radarWrap.classList.toggle('show');
-    const isShow = radarWrap.classList.contains('show');
-    toggleBtn.innerText = isShow ? '收起摘要 ▲' : '更多摘要 ▼';
-    // 首次展开再渲染图表
-    if(isShow && !radarRendered){
-        if(window.playerRadarData){
-            initRadarChart(window.playerRadarData);
-        }else{
-            initRadarChart([100,92.4,84.8,83.7,95.8]);
-        }
+    collapseWrap.classList.toggle('show');
+    const show = collapseWrap.classList.contains('show');
+    toggleBtn.innerText = show ? '收起摘要 ▲' : '更多摘要 ▼';
+    if(show && !radarRendered && window.seasonStat){
+        const radarScore = calcRadarData(window.seasonStat);
+        initRadarChart(radarScore);
         radarRendered = true;
     }
 })
@@ -336,60 +452,111 @@ window.onload = function () {
     loadPlayerStats();
     seasonSelect.addEventListener("change", function () {
         currentSeason = this.value;
-        loadPlayerStats();
-        // 切换赛季后重置渲染标记
         radarRendered = false;
-        radarWrap.classList.remove('show');
+        collapseWrap.classList.remove('show');
         toggleBtn.innerText = '更多摘要 ▼';
+        loadPlayerStats();
     })
 }
+
 async function loadPlayerStats() {
     const userName = localStorage.getItem("loginUser");
-    document.getElementById("kdVal").innerText = "--";
-    document.getElementById("killVal").innerText = "--";
+    // 清空所有数值
+    document.getElementById("rankVal").innerText = "--";
     document.getElementById("matchVal").innerText = "--";
     document.getElementById("winVal").innerText = "--";
+    document.getElementById("kdVal").innerText = "--";
+    document.getElementById("deathVal").innerText = "--";
+    document.getElementById("assistVal").innerText = "--";
+    document.getElementById("dmgTotalVal").innerText = "--";
+    document.getElementById("avgSurviveVal").innerText = "--";
+    document.getElementById("winRateVal").innerText = "--%";
+    document.getElementById("top10Val").innerText = "--";
+    document.getElementById("top10RateVal").innerText = "--%";
+    document.getElementById("headRateVal").innerText = "--%";
+    document.getElementById("bestRankVal").innerText = "--";
+    document.getElementById("avgDmgVal").innerText = "--";
+    document.getElementById("maxSurviveVal").innerText = "--";
+    document.getElementById("matchTableBody").innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
+    document.getElementById("weaponTableBody").innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
     try {
         const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
         const json = await res.json();
         if (!json.ok || !json.data) {
-            window.playerRadarData = [100,92.4,84.8,83.7,95.8];
+            window.seasonStat = {
+                avgSurvive:16,top10Rate:62,maxRating:1820,avgKD:2.1,avgDmg:720,totalAssist:32,winRate:12
+            };
             return;
         }
-        const info = json.data;
-        if (info.historical_total_kd && info.historical_total_kd > 0) {
-            document.getElementById("kdVal").innerText = info.historical_total_kd;
+        const d = json.data;
+        // 基础卡片
+        document.getElementById("rankVal").innerText = d.seasonRank ?? "-";
+        document.getElementById("matchVal").innerText = d.totalMatch ?? 0;
+        document.getElementById("winVal").innerText = d.totalWin ?? 0;
+        document.getElementById("kdVal").innerText = d.kd?.toFixed(2) ?? 0;
+        // 详细摘要数据
+        const totalDeath = d.totalMatch - d.totalWin;
+        const winRate = d.totalMatch > 0 ? ((d.totalWin / d.totalMatch)*100).toFixed(1) : 0;
+        const top10Rate = d.totalMatch >0 ? ((d.top10 / d.totalMatch)*100).toFixed(1) :0;
+        window.seasonStat = {
+            avgSurvive: d.avgSurvive ?? 0,
+            top10Rate: Number(top10Rate),
+            maxRating: d.maxRating ?? 1200,
+            avgKD: Number(d.kd ?? 0),
+            avgDmg: d.avgDamage ?? 0,
+            totalAssist: d.totalAssist ?? 0,
+            winRate: Number(winRate)
         }
-        document.getElementById("killVal").innerText = info.total_kill ?? 0;
-        document.getElementById("matchVal").innerText = info.total_match ?? 0;
-        document.getElementById("winVal").innerText = info.total_win ?? 0;
+        document.getElementById("deathVal").innerText = totalDeath;
+        document.getElementById("assistVal").innerText = d.totalAssist ??0;
+        document.getElementById("dmgTotalVal").innerText = d.totalDamage ??0;
+        document.getElementById("avgSurviveVal").innerText = d.avgSurvive?.toFixed(1) ??0;
+        document.getElementById("winRateVal").innerText = winRate;
+        document.getElementById("top10Val").innerText = d.top10 ??0;
+        document.getElementById("top10RateVal").innerText = top10Rate;
+        document.getElementById("headRateVal").innerText = d.headshotRate?.toFixed(1) ??0;
+        document.getElementById("bestRankVal").innerText = d.bestRank ?? "-";
+        document.getElementById("avgDmgVal").innerText = d.avgDamage ??0;
+        document.getElementById("maxSurviveVal").innerText = d.maxSurvive ??0;
 
-        // 后端返回雷达数组 [生存,Rating,战斗,支援,吃鸡率]
-        if(Array.isArray(json.radar)){
-            window.playerRadarData = json.radar;
-        }else{
-            window.playerRadarData = [100,92.4,84.8,83.7,95.8];
-        }
-
-        const tbody = document.getElementById("matchTableBody");
-        if(Array.isArray(json.matches) && json.matches.length>0){
-            tbody.innerHTML = "";
-            json.matches.forEach(item=>{
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                <td>${item.time}</td>
-                <td>${item.event}</td>
-                <td>第${item.rank}名</td>
+        // 近10场战绩渲染
+        const matchTbody = document.getElementById("matchTableBody");
+        matchTbody.innerHTML = "";
+        const matchList = Array.isArray(json.matches) ? json.matches.slice(0,10) : [];
+        matchList.forEach(item=>{
+            const tr = document.createElement("tr");
+            let rankText = item.rank == 1 ? "吃鸡" : item.rank <=10 ? `第${item}名` : "-";
+            const score = calcSingleScore(item.kills ??0, item.damage ??0, item.rank, item.rank==1, Number(top10Rate));
+            tr.innerHTML = `
+                <td>${rankText}</td>
+                <td>${item.mode}</td>
+                <td>${item.tier ?? "-"}</td>
                 <td>${item.kills}</td>
                 <td>${item.damage}</td>
-                <td>${item.survive}</td>
+                <td>${score}</td>
+            `;
+            matchTbody.appendChild(tr);
+        })
+        // 武器熟练度
+        const weaponTbody = document.getElementById("weaponTableBody");
+        weaponTbody.innerHTML = "";
+        if(Array.isArray(json.weapons) && json.weapons.length>0){
+            json.weapons.forEach(w=>{
+                const tr = document.createElement("tr");
+                tr.className = "weapon-row";
+                tr.innerHTML = `
+                    <td>${w.name}</td>
+                    <td>Lv.${w.level}</td>
+                    <td>${w.totalKill} / ${w.maxSingleKill}</td>
+                    <td>${w.maxDistance}m</td>
+                    <td><a href="weapon.html?wid=${w.id}">></a></td>
                 `;
-                tbody.appendChild(tr);
+                weaponTbody.appendChild(tr);
             })
         }
     } catch (err) {
         console.error(err);
-        window.playerRadarData = [100,92.4,84.8,83.7,95.8];
+        window.seasonStat = {avgSurvive:16,top10Rate:62,maxRating:1820,avgKD:2.1,avgDmg:720,totalAssist:32,winRate:12};
     }
 }
 </script>
