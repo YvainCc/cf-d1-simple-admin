@@ -1,4 +1,4 @@
-// 替换原playerData接口，修复运算符兼容问题
+// 全新重建
 export async function onRequest({ request, env }) {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
