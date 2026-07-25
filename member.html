@@ -349,6 +349,7 @@
 let radarChartInstance = null;
 let radarRendered = false;
 const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
+let window.seasonStat = {};
 
 // 小黑盒单局评分算法
 function calcSingleScore(kill, dmg, rank, win, top10Rate) {
@@ -364,16 +365,16 @@ function calcRadarData(data) {
     const {
         avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate
     } = data;
-    // 1.生存评分 25% 场均存活+前十率
+    // 1.生存评分 25%
     let survive = Math.min(avgSurvive / 22 * 100, top10Rate);
     survive = Math.round(survive);
-    // 2.Rating评分25% 最高段位分
+    // 2.Rating评分25%
     let rating = Math.min(maxRating / 2400 * 100, 100);
     rating = Math.round(rating);
-    //3.战斗30% KD+场均伤害
+    //3.战斗30%
     let fight = Math.min(avgKD * 28 + avgDmg / 15, 100);
     fight = Math.round(fight);
-    //4.支援10% 总助攻换算
+    //4.支援10%
     let assist = Math.min(totalAssist / (avgSurvive * 0.8) * 100, 100);
     assist = Math.round(assist);
     //5.吃鸡率10%
@@ -431,7 +432,7 @@ toggleBtn.addEventListener('click', ()=>{
     collapseWrap.classList.toggle('show');
     const show = collapseWrap.classList.contains('show');
     toggleBtn.innerText = show ? '收起摘要 ▲' : '更多摘要 ▼';
-    if(show && !radarRendered && window.seasonStat){
+    if(show && !radarRendered){
         const radarScore = calcRadarData(window.seasonStat);
         initRadarChart(radarScore);
         radarRendered = true;
@@ -460,7 +461,6 @@ window.onload = function () {
 }
 
 async function loadPlayerStats() {
-    const userName = localStorage.getItem("loginUser");
     // 清空所有数值
     document.getElementById("rankVal").innerText = "--";
     document.getElementById("matchVal").innerText = "--";
@@ -479,13 +479,12 @@ async function loadPlayerStats() {
     document.getElementById("maxSurviveVal").innerText = "--";
     document.getElementById("matchTableBody").innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
     document.getElementById("weaponTableBody").innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+    window.seasonStat = {};
     try {
+        const userName = localStorage.getItem("loginUser");
         const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
         const json = await res.json();
         if (!json.ok || !json.data) {
-            window.seasonStat = {
-                avgSurvive:16,top10Rate:62,maxRating:1820,avgKD:2.1,avgDmg:720,totalAssist:32,winRate:12
-            };
             return;
         }
         const d = json.data;
@@ -493,31 +492,36 @@ async function loadPlayerStats() {
         document.getElementById("rankVal").innerText = d.seasonRank ?? "-";
         document.getElementById("matchVal").innerText = d.totalMatch ?? 0;
         document.getElementById("winVal").innerText = d.totalWin ?? 0;
-        document.getElementById("kdVal").innerText = d.kd?.toFixed(2) ?? 0;
-        // 详细摘要数据
-        const totalDeath = d.totalMatch - d.totalWin;
-        const winRate = d.totalMatch > 0 ? ((d.totalWin / d.totalMatch)*100).toFixed(1) : 0;
-        const top10Rate = d.totalMatch >0 ? ((d.top10 / d.totalMatch)*100).toFixed(1) :0;
+        document.getElementById("kdVal").innerText = Number(d.kd ?? 0).toFixed(2);
+        // 计算衍生值
+        const totalMatch = Number(d.totalMatch || 0);
+        const totalWin = Number(d.totalWin || 0);
+        const totalDeath = totalMatch - totalWin;
+        const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
+        const top10 = Number(d.top10_count || 0);
+        const top10Rate = totalMatch >0 ? ((top10 / totalMatch)*100).toFixed(1) :0;
+        // 存储雷达计算数据源
         window.seasonStat = {
-            avgSurvive: d.avgSurvive ?? 0,
+            avgSurvive: Number(d.avg_survive ?? 0),
             top10Rate: Number(top10Rate),
-            maxRating: d.maxRating ?? 1200,
+            maxRating: Number(d.max_rating ?? 1000),
             avgKD: Number(d.kd ?? 0),
-            avgDmg: d.avgDamage ?? 0,
-            totalAssist: d.totalAssist ?? 0,
+            avgDmg: Number(d.avg_damage ?? 0),
+            totalAssist: Number(d.total_assist ?? 0),
             winRate: Number(winRate)
-        }
+        };
+        // 填充扩展卡片
         document.getElementById("deathVal").innerText = totalDeath;
-        document.getElementById("assistVal").innerText = d.totalAssist ??0;
-        document.getElementById("dmgTotalVal").innerText = d.totalDamage ??0;
-        document.getElementById("avgSurviveVal").innerText = d.avgSurvive?.toFixed(1) ??0;
+        document.getElementById("assistVal").innerText = d.total_assist ??0;
+        document.getElementById("dmgTotalVal").innerText = d.total_damage ??0;
+        document.getElementById("avgSurviveVal").innerText = Number(d.avg_survive??0).toFixed(1);
         document.getElementById("winRateVal").innerText = winRate;
-        document.getElementById("top10Val").innerText = d.top10 ??0;
+        document.getElementById("top10Val").innerText = top10;
         document.getElementById("top10RateVal").innerText = top10Rate;
-        document.getElementById("headRateVal").innerText = d.headshotRate?.toFixed(1) ??0;
-        document.getElementById("bestRankVal").innerText = d.bestRank ?? "-";
-        document.getElementById("avgDmgVal").innerText = d.avgDamage ??0;
-        document.getElementById("maxSurviveVal").innerText = d.maxSurvive ??0;
+        document.getElementById("headRateVal").innerText = Number(d.headshot_rate??0).toFixed(1);
+        document.getElementById("bestRankVal").innerText = d.best_rank ?? "-";
+        document.getElementById("avgDmgVal").innerText = d.avg_damage ??0;
+        document.getElementById("maxSurviveVal").innerText = d.max_survive ??0;
 
         // 近10场战绩渲染
         const matchTbody = document.getElementById("matchTableBody");
@@ -555,8 +559,7 @@ async function loadPlayerStats() {
             })
         }
     } catch (err) {
-        console.error(err);
-        window.seasonStat = {avgSurvive:16,top10Rate:62,maxRating:1820,avgKD:2.1,avgDmg:720,totalAssist:32,winRate:12};
+        console.error("加载数据失败", err);
     }
 }
 </script>
