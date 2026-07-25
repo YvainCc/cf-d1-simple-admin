@@ -128,6 +128,20 @@
             text-align:center;
             padding:24px 0;
         }
+        table{
+            width:100%;
+            border-collapse: collapse;
+        }
+        table th,table td{
+            border:1px solid #28303c;
+            padding:12px;
+            text-align:center;
+            font-size:14px;
+        }
+        table th{
+            background:#202935;
+            color:#fcd322;
+        }
     </style>
 </head>
 <body>
@@ -179,15 +193,38 @@
         <canvas id="abilityRadar"></canvas>
     </div>
 
-    <h2 class="module-title">排行榜快速入口</h2>
+    <h2 class="module-title">近期比赛战绩</h2>
     <div class="block-panel">
-        <h3>DMN 赛事榜单</h3>
-        <div>
-            <button class="btn-yellow">战神榜</button>
-            <button class="btn-dark">伤害榜</button>
-            <button class="btn-dark">吃鸡榜</button>
-            <button class="btn-dark">战队榜</button>
-        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>对局日期</th>
+                    <th>赛事名称</th>
+                    <th>名次</th>
+                    <th>击杀</th>
+                    <th>伤害</th>
+                    <th>存活时长</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026-07-24</td>
+                    <td>DMN友谊赛</td>
+                    <td>第5名</td>
+                    <td>2</td>
+                    <td>345</td>
+                    <td>18分22秒</td>
+                </tr>
+                <tr>
+                    <td>2026-07-23</td>
+                    <td>DMN友谊赛</td>
+                    <td>第8名</td>
+                    <td>1</td>
+                    <td>211</td>
+                    <td>12分05秒</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <h2 class="module-title">我的战队</h2>
@@ -239,9 +276,7 @@ function initRadarChart(dataArr) {
                 }
             },
             plugins: {
-                legend: {
-                    labels: { color: "#dddddd" }
-                }
+                legend: { labels: { color: "#dddddd" } }
             }
         }
     });
