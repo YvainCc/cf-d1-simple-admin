@@ -2,9 +2,11 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>D.M.N 战队队员中心</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 雷达顶点数字标签 -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -109,10 +111,15 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        /* 雷达面板宽度和上方4卡片总宽度对齐 */
-        .radar-panel {
-            max-width: 760px;
-            margin: 0 auto;
+        .panel h3 {
+            font-size: 20px;
+            margin-bottom: 18px;
+            color: #fff;
+        }
+        /* 重点修改：增加margin:0 auto 实现居中 */
+        .radar-wrap {
+            max-width:660px;
+            margin:0 auto;
         }
         table{
             width:100%;
@@ -157,8 +164,8 @@
             .nav-links a {
                 font-size: 12px;
             }
-            .radar-panel {
-                max-width: 100%;
+            .radar-wrap {
+                max-width:100%;
             }
         }
         @media (max-width: 600px) {
@@ -218,7 +225,7 @@
     </div>
 
     <div class="section-title">个人综合能力雷达图</div>
-    <div class="panel radar-panel">
+    <div class="panel radar-wrap">
         <canvas id="abilityRadar"></canvas>
     </div>
 
@@ -264,18 +271,15 @@
 
 <script>
 let radarChartInstance = null;
-const radarLabels = ["场均击杀", "场均伤害", "生存能力", "命中率", "投掷物使用率"];
-
 function initRadarChart(dataArr) {
     const canvas = document.getElementById("abilityRadar");
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (radarChartInstance) radarChartInstance.destroy();
-
     radarChartInstance = new Chart(ctx, {
         type: "radar",
         data: {
-            labels: radarLabels,
+            labels: ["场均击杀", "场均伤害", "生存能力", "命中率", "投掷物使用率"],
             datasets: [{
                 label: "本赛季综合能力",
                 data: dataArr,
@@ -283,7 +287,7 @@ function initRadarChart(dataArr) {
                 borderColor: "#ffd700",
                 pointBackgroundColor: "#ffd700",
                 pointBorderColor: "#000",
-                pointRadius: 5
+                pointRadius: 4
             }]
         },
         options: {
@@ -291,30 +295,17 @@ function initRadarChart(dataArr) {
             maintainAspectRatio: true,
             scales: {
                 r: {
-                    min:0,
-                    max:100,
-                    ticks:{
-                        display: false
-                    },
-                    grid:{color:"#242c38"},
-                    angleLines:{color:"#242c38"}
+                    min:0,max:100,
+                    ticks:{display:false},
+                    grid:{color:"#2a3342"},
+                    angleLines:{color:"#2a3342"}
                 }
             },
             plugins:{
-                legend:{
-                    labels:{color:"#ddd"}
-                },
-                tooltip:{
-                    callbacks:{
-                        label:function(context){
-                            return context.label + "：" + context.raw + " 分";
-                        }
-                    }
-                },
-                datalabels: {
-                    display: true,
-                    color: "#fff",
-                    font: { size:12, weight:"bold" }
+                legend:{labels:{color:"#ddd"}},
+                datalabels:{
+                    color:"#fff",
+                    font:{size:12,weight:"bold"}
                 }
             }
         },
@@ -388,6 +379,5 @@ async function loadPlayerStats() {
     }
 }
 </script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </body>
 </html>
