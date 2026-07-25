@@ -5,18 +5,22 @@ export async function onRequest({ request, env }) {
     "Access-Control-Allow-Methods": "GET,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
   };
+
   if (request.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
   if (request.method !== "GET") {
     return Response.json({ ok: false, msg: "仅支持GET请求" }, { status: 405, headers: corsHeaders });
   }
+
   const url = new URL(request.url);
   const username = url.searchParams.get("username");
-  const season = url.searchParams.get("season") || "all";
+  const season = url.searchParams.get("season") ?? "all";
+
   if (!username) {
     return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
   }
+
   let sql, params;
   if (season === "all") {
     sql = `
@@ -46,15 +50,23 @@ export async function onRequest({ request, env }) {
     `;
     params = [username, season];
   }
+
   const row = await env.DB.prepare(sql).bind(...params).first();
   const data = row || {
-    total_kill:0,total_match:0,total_win:0,total_damage:0,total_death:0,historical_total_kd:0
+    total_kill:0,
+    total_match:0,
+    total_win:0,
+    total_damage:0,
+    total_death:0,
+    historical_total_kd:0
   };
   data.username = username;
+
   if (season === "all") {
     const death = Number(data.total_death) || 0;
     const kill = Number(data.total_kill) || 0;
     data.historical_total_kd = death > 0 ? parseFloat((kill/death).toFixed(2)) : 0;
   }
+
   return Response.json({ ok:true, data }, { headers:corsHeaders });
 }
