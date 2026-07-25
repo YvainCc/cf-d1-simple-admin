@@ -79,7 +79,7 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 24px;
+            margin-bottom: 12px;
         }
         .card {
             background: #1a2430;
@@ -103,17 +103,36 @@
             color: #6e7888;
             margin-top: 6px;
         }
-        .panel {
+        /* 更多摘要按钮 */
+        .toggle-wrap {
+            text-align: center;
+            margin: 12px 0;
+        }
+        #toggleMore {
+            width: 100%;
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            color: #cccccc;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 15px;
+            cursor: pointer;
+        }
+        #toggleMore:hover {
+            color: #ffd700;
+        }
+        /* 雷达区域 默认隐藏 */
+        .radar-box {
+            max-width: 480px;
+            margin: 0 auto 24px;
             background: #1a2430;
             border: 1px solid #2a3342;
             border-radius: 12px;
             padding: 24px;
-            margin-bottom: 24px;
+            display: none;
         }
-        /* 缩小雷达最大宽度，居中，和卡片尺寸协调统一 */
-        .radar-wrap {
-            max-width: 480px;
-            margin: 0 auto;
+        .radar-box.show {
+            display: block;
         }
         table{
             width:100%;
@@ -145,7 +164,7 @@
             .nav-links a {
                 font-size: 12px;
             }
-            .radar-wrap {
+            .radar-box {
                 max-width: 100%;
             }
         }
@@ -205,8 +224,13 @@
         </div>
     </div>
 
-    <div class="section-title">个人综合能力雷达图</div>
-    <div class="panel radar-wrap">
+    <!-- 更多摘要按钮 -->
+    <div class="toggle-wrap">
+        <button id="toggleMore">更多摘要 ▼</button>
+    </div>
+
+    <!-- 雷达区域 默认隐藏 -->
+    <div class="radar-box" id="radarWrap">
         <canvas id="abilityRadar"></canvas>
     </div>
 
@@ -235,6 +259,9 @@
 
 <script>
 let radarChartInstance = null;
+let radarRendered = false;
+const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
+
 function initRadarChart(dataArr) {
     const canvas = document.getElementById("abilityRadar");
     if (!canvas) return;
@@ -243,9 +270,9 @@ function initRadarChart(dataArr) {
     radarChartInstance = new Chart(ctx, {
         type: "radar",
         data: {
-            labels: ["场均击杀", "场均伤害", "生存能力", "命中率", "投掷物使用率"],
+            labels: radarLabels,
             datasets: [{
-                label: "本赛季综合能力",
+                label: "综合能力评分",
                 data: dataArr,
                 backgroundColor: "rgba(255, 215, 0, 0.12)",
                 borderColor: "#ffd700",
@@ -277,6 +304,24 @@ function initRadarChart(dataArr) {
     })
 }
 
+// 展开/收起雷达
+const toggleBtn = document.getElementById('toggleMore');
+const radarWrap = document.getElementById('radarWrap');
+toggleBtn.addEventListener('click', ()=>{
+    radarWrap.classList.toggle('show');
+    const isShow = radarWrap.classList.contains('show');
+    toggleBtn.innerText = isShow ? '收起摘要 ▲' : '更多摘要 ▼';
+    // 首次展开再渲染图表
+    if(isShow && !radarRendered){
+        if(window.playerRadarData){
+            initRadarChart(window.playerRadarData);
+        }else{
+            initRadarChart([100,92.4,84.8,83.7,95.8]);
+        }
+        radarRendered = true;
+    }
+})
+
 function logout() {
     localStorage.removeItem("loginUser");
     window.location.href = "index.html";
@@ -292,6 +337,10 @@ window.onload = function () {
     seasonSelect.addEventListener("change", function () {
         currentSeason = this.value;
         loadPlayerStats();
+        // 切换赛季后重置渲染标记
+        radarRendered = false;
+        radarWrap.classList.remove('show');
+        toggleBtn.innerText = '更多摘要 ▼';
     })
 }
 async function loadPlayerStats() {
@@ -304,7 +353,7 @@ async function loadPlayerStats() {
         const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
         const json = await res.json();
         if (!json.ok || !json.data) {
-            initRadarChart([62,70,66,55,60]);
+            window.playerRadarData = [100,92.4,84.8,83.7,95.8];
             return;
         }
         const info = json.data;
@@ -315,10 +364,11 @@ async function loadPlayerStats() {
         document.getElementById("matchVal").innerText = info.total_match ?? 0;
         document.getElementById("winVal").innerText = info.total_win ?? 0;
 
+        // 后端返回雷达数组 [生存,Rating,战斗,支援,吃鸡率]
         if(Array.isArray(json.radar)){
-            initRadarChart(json.radar);
+            window.playerRadarData = json.radar;
         }else{
-            initRadarChart([62,70,66,55,60]);
+            window.playerRadarData = [100,92.4,84.8,83.7,95.8];
         }
 
         const tbody = document.getElementById("matchTableBody");
@@ -339,7 +389,7 @@ async function loadPlayerStats() {
         }
     } catch (err) {
         console.error(err);
-        initRadarChart([62,70,66,55,60]);
+        window.playerRadarData = [100,92.4,84.8,83.7,95.8];
     }
 }
 </script>
