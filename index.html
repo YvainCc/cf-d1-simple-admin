@@ -1,3 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D.M.N 战队管理系统-登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .login-box {
+            background: #fff;
+            width: 420px;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 12px #e0e4ec;
+        }
+        .login-title {
+            text-align: center;
+            font-size: 24px;
+            color: #222;
+            margin-bottom: 30px;
+        }
+        .item {
+            margin-bottom: 20px;
+        }
+        .item input {
+            width: 100%;
+            height: 46px;
+            padding: 0 14px;
+            border: 1px solid #dcdfe6;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+        .login-btn {
+            width: 100%;
+            height: 48px;
+            background: #3b88f7;
+            border: none;
+            border-radius: 6px;
+            color: white;
+            font-size: 17px;
+            cursor: pointer;
+        }
+        .login-btn:active {
+            background: #2e77dd;
+        }
+        .err-text {
+            color: #f53f3f;
+            text-align: center;
+            margin-top: 12px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <h2 class="login-title">D.M.N 战队管理系统登录</h2>
+    <div class="item">
+        <input type="text" id="username" placeholder="请输入账号">
+    </div>
+    <div class="item">
+        <input type="password" id="pwd" placeholder="请输入密码">
+    </div>
+    <button class="login-btn" id="submitBtn">立即登录</button>
+    <div class="err-text" id="errorMsg"></div>
+</div>
+<script>
 const usernameInput = document.getElementById('username');
 const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
@@ -30,7 +108,6 @@ async function loginSubmit() {
         const data = await res.json();
         if (data.ok) {
             localStorage.setItem("loginUser", username);
-            // 区分跳转，后端返回没有role，统一先跳队员中心
             window.location.href = 'member.html';
         } else {
             showErr(data.msg);
@@ -44,3 +121,6 @@ function showErr(text) {
     errorMsg.innerText = '服务异常：' + text;
     errorMsg.style.display = 'block';
 }
+</script>
+</body>
+</html>
