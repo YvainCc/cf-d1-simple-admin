@@ -109,14 +109,9 @@
             padding: 24px;
             margin-bottom: 24px;
         }
-        .panel h3 {
-            font-size: 20px;
-            margin-bottom: 18px;
-            color: #fff;
-        }
-        /* 雷达图容器 缩小+居中 模仿小黑盒 */
-        .radar-wrap {
-            max-width: 520px;
+        /* 雷达面板宽度和上方4卡片总宽度对齐 */
+        .radar-panel {
+            max-width: 760px;
             margin: 0 auto;
         }
         table{
@@ -152,7 +147,6 @@
             text-align: center;
             font-size: 14px;
         }
-        /* 移动端适配 */
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -163,7 +157,7 @@
             .nav-links a {
                 font-size: 12px;
             }
-            .radar-wrap {
+            .radar-panel {
                 max-width: 100%;
             }
         }
@@ -224,7 +218,7 @@
     </div>
 
     <div class="section-title">个人综合能力雷达图</div>
-    <div class="panel radar-wrap">
+    <div class="panel radar-panel">
         <canvas id="abilityRadar"></canvas>
     </div>
 
@@ -302,8 +296,8 @@ function initRadarChart(dataArr) {
                     ticks:{
                         display: false
                     },
-                    grid:{color:"#2a3342"},
-                    angleLines:{color:"#2a3342"}
+                    grid:{color:"#242c38"},
+                    angleLines:{color:"#242c38"}
                 }
             },
             plugins:{
@@ -316,9 +310,15 @@ function initRadarChart(dataArr) {
                             return context.label + "：" + context.raw + " 分";
                         }
                     }
+                },
+                datalabels: {
+                    display: true,
+                    color: "#fff",
+                    font: { size:12, weight:"bold" }
                 }
             }
-        }
+        },
+        plugins: [ChartDataLabels]
     })
 }
 
@@ -388,5 +388,6 @@ async function loadPlayerStats() {
     }
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </body>
 </html>
