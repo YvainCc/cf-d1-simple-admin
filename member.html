@@ -269,7 +269,7 @@
             <div class="card"><div class="card-title">吃鸡率</div><div class="card-value" id="winRateVal">--%</div></div>
             <div class="card"><div class="card-title">前十场次</div><div class="card-value" id="top10Val">--</div></div>
             <div class="card"><div class="card-title">前十率</div><div class="card-value" id="top10RateVal">--%</div></div>
-            <div class="card"><div class="card-title">包头率</div><div class="card-value" id="headRateVal">--%</div></div>
+            <div class="card"><div class="card-title">爆头率</div><div class="card-value" id="headRateVal">--%</div></div>
             <div class="card"><div class="card-title">赛季最高排名</div><div class="card-value" id="bestRankVal">--</div></div>
             <div class="card"><div class="card-title">场均伤害</div><div class="card-value" id="avgDmgVal">--</div></div>
             <div class="card"><div class="card-title">最长存活</div><div class="card-value" id="maxSurviveVal">--</div></div>
@@ -346,15 +346,15 @@ function calcSingleScore(kill, dmg, rank, win, top10Rate) {
 
 function calcRadarData(data) {
     const {avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate} = data;
-    let survive = Math.min(avgSurvive / 22 * 100, top10Rate);
+    let survive = Math.min(avgSurvive / 22 * 100, top10Rate || 0);
     survive = Math.round(survive);
-    let rating = Math.min(maxRating / 2400 * 100, 100);
+    let rating = Math.min(maxRating / 2400 * 100 || 0, 100);
     rating = Math.round(rating);
-    let fight = Math.min(avgKD * 28 + avgDmg / 15, 100);
+    let fight = Math.min(avgKD * 28 + avgDmg / 15 || 0, 100);
     fight = Math.round(fight);
-    let assist = Math.min(totalAssist / (avgSurvive * 0.8) * 100, 100);
+    let assist = Math.min(totalAssist / ((avgSurvive||0.1) * 0.8) * 100 || 0, 100);
     assist = Math.round(assist);
-    let win = Math.min(winRate * 2.2, 100);
+    let win = Math.min(winRate * 2.2 || 0, 100);
     win = Math.round(win);
     return [survive, rating, fight, assist, win];
 }
@@ -463,74 +463,49 @@ async function loadPlayerStats() {
             return;
         }
         const d = json.data;
-        document.getElementById("rankVal").innerText = d.seasonRank ?? "-";
-        document.getElementById("matchVal").innerText = d.totalMatch ?? 0;
-        document.getElementById("winVal").innerText = d.totalWin ?? 0;
-        document.getElementById("kdVal").innerText = Number(d.kd ?? 0).toFixed(2);
+        // 适配你当前后端返回字段
+        const totalMatch = Number(d.total_match || 0);
+        const totalWin = Number(d.total_win || 0);
+        const totalKill = Number(d.total_kill || 0);
+        const totalDeath = Number(d.total_death || 0);
+        const totalDamage = Number(d.total_damage || 0);
+        const kdVal = Number(d.historical_total_kd || 0);
 
-        const totalMatch = Number(d.totalMatch || 0);
-        const totalWin = Number(d.totalWin || 0);
-        const totalDeath = totalMatch - totalWin;
+        document.getElementById("rankVal").innerText = "-";
+        document.getElementById("matchVal").innerText = totalMatch;
+        document.getElementById("winVal").innerText = totalWin;
+        document.getElementById("kdVal").innerText = kdVal.toFixed(2);
+        document.getElementById("deathVal").innerText = totalDeath;
+        document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
+
         const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
-        const top10 = Number(d.top10_count || 0);
-        const top10Rate = totalMatch >0 ? ((top10 / totalMatch)*100).toFixed(1) :0;
+        document.getElementById("winRateVal").innerText = winRate;
+
+        // 后端暂时没有这些字段，填充默认
+        document.getElementById("assistVal").innerText = 0;
+        document.getElementById("avgSurviveVal").innerText = "0.0";
+        document.getElementById("top10Val").innerText = 0;
+        document.getElementById("top10RateVal").innerText = "0.0";
+        document.getElementById("headRateVal").innerText = "0.0";
+        document.getElementById("bestRankVal").innerText = "-";
+        document.getElementById("avgDmgVal").innerText = totalMatch > 0 ? Math.round(totalDamage / totalMatch) : 0;
+        document.getElementById("maxSurviveVal").innerText = "0.0";
 
         seasonStat = {
-            avgSurvive: Number(d.avg_survive ?? 0),
-            top10Rate: Number(top10Rate),
-            maxRating: Number(d.max_rating ?? 1000),
-            avgKD: Number(d.kd ?? 0),
-            avgDmg: Number(d.avg_damage ?? 0),
-            totalAssist: Number(d.total_assist ?? 0),
+            avgSurvive: 0,
+            top10Rate: Number(winRate),
+            maxRating: 1000,
+            avgKD: kdVal,
+            avgDmg: totalMatch > 0 ? totalDamage / totalMatch : 0,
+            totalAssist: 0,
             winRate: Number(winRate)
         };
 
-        document.getElementById("deathVal").innerText = totalDeath;
-        document.getElementById("assistVal").innerText = d.total_assist ??0;
-        document.getElementById("dmgTotalVal").innerText = d.total_damage ??0;
-        document.getElementById("avgSurviveVal").innerText = Number(d.avg_survive??0).toFixed(1);
-        document.getElementById("winRateVal").innerText = winRate;
-        document.getElementById("top10Val").innerText = top10;
-        document.getElementById("top10RateVal").innerText = top10Rate;
-        document.getElementById("headRateVal").innerText = Number(d.headshot_rate??0).toFixed(1);
-        document.getElementById("bestRankVal").innerText = d.best_rank ?? "-";
-        document.getElementById("avgDmgVal").innerText = d.avg_damage ??0;
-        document.getElementById("maxSurviveVal").innerText = d.max_survive ??0;
-
+        // 对局与武器，当前接口无数据，保持空白
         const matchTbody = document.getElementById("matchTableBody");
-        matchTbody.innerHTML = "";
-        const matchList = Array.isArray(json.matches) ? json.matches.slice(0,10) : [];
-        matchList.forEach(item=>{
-            const tr = document.createElement("tr");
-            let rankText = item.rank == 1 ? "吃鸡" : item.rank <=10 ? `第${item.rank}名` : "-";
-            const score = calcSingleScore(item.kills ??0, item.damage ??0, item.rank, item.rank===1, Number(top10Rate));
-            tr.innerHTML = `
-                <td>${rankText}</td>
-                <td>${item.mode}</td>
-                <td>${item.tier ?? "-"}</td>
-                <td>${item.kills}</td>
-                <td>${item.damage}</td>
-                <td>${score}</td>
-            `;
-            matchTbody.appendChild(tr);
-        })
-
+        matchTbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局记录</td>`;
         const weaponTbody = document.getElementById("weaponTableBody");
-        weaponTbody.innerHTML = "";
-        if(Array.isArray(json.weapons) && json.weapons.length>0){
-            json.weapons.forEach(w=>{
-                const tr = document.createElement("tr");
-                tr.className = "weapon-row";
-                tr.innerHTML = `
-                    <td>${w.name}</td>
-                    <td>Lv.${w.level}</td>
-                    <td>${w.totalKill} / ${w.maxSingleKill}</td>
-                    <td>${w.maxDistance}m</td>
-                    <td><a href="weapon.html?wid=${w.id}">></a></td>
-                `;
-                weaponTbody.appendChild(tr);
-            })
-        }
+        weaponTbody.innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
     } catch (err) {
         console.error("加载数据异常", err);
     }
