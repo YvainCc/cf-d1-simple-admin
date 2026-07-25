@@ -91,7 +91,7 @@
             color:#0c1117;
             font-weight:bold;
         }
-        /* 前三名金银铜卡片 完全匹配截图布局 */
+        /* 前三名金银铜卡片 顺序：亚军 - 冠军 - 季军 */
         .top3-wrap {
             display: grid;
             grid-template-columns: repeat(3,1fr);
@@ -215,7 +215,7 @@
         </select>
     </div>
 
-    <!-- 金银铜前三名 顺序：亚军 - 冠军 - 季军 和截图一致 -->
+    <!-- 金银铜前三名 顺序：亚军 - 冠军 - 季军 -->
     <div class="top3-wrap" id="top3Box">
         <div class="rank-card rank-2" id="card2">
             <div class="rank-medal">🥈</div>
@@ -284,6 +284,12 @@ function logout() {
     window.location.href = "index.html";
 }
 
+function fillEmptyCard(el){
+    el.querySelector(".rank-name").innerText = "--";
+    el.querySelector(".rank-value-line").innerText = "--";
+    el.querySelector(".rank-desc").innerText = "总击杀 -- | KD --";
+}
+
 async function loadRankData(){
     const res = await fetch(`/api/rank?season=${currentSeason}&type=${currentType}`);
     const json = await res.json();
@@ -295,7 +301,6 @@ async function loadRankData(){
 
     if(list.length === 0){
         tbody.innerHTML = `<tr><td colspan="8" class="empty-tip">暂无榜单数据</td>`;
-        // 清空前三名
         fillEmptyCard(card1);
         fillEmptyCard(card2);
         fillEmptyCard(card3);
@@ -312,17 +317,12 @@ async function loadRankData(){
             case "kill": showVal = item.total_kill ?? 0; break;
             case "damage": showVal = Math.round(item.total_damage ?? 0); break;
             case "win": showVal = item.total_win ??0; break;
-            case "kd": showVal = Number(item.kd_value ??0).toFixed(2); break;
+            case "kd": showVal = Number(item.historical_total_kd ??0).toFixed(2); break;
             default: showVal = item.total_kill ??0;
         }
-        el.querySelector(".rank-name").innerText = item.player_name || "未知";
+        el.querySelector(".rank-name").innerText = item.username || "未知";
         el.querySelector(".rank-value-line").innerText = showVal;
-        el.querySelector(".rank-desc").innerText = `总击杀 ${item.total_kill??0} | KD ${Number(item.kd_value??0).toFixed(2)}`;
-    }
-    function fillEmptyCard(el){
-        el.querySelector(".rank-name").innerText = "--";
-        el.querySelector(".rank-value-line").innerText = "--";
-        el.querySelector(".rank-desc").innerText = "总击杀 -- | KD --";
+        el.querySelector(".rank-desc").innerText = `总击杀 ${item.total_kill??0} | KD ${Number(item.historical_total_kd??0).toFixed(2)}`;
     }
     fillCard(card1, first);
     fillCard(card2, second);
@@ -334,13 +334,13 @@ async function loadRankData(){
         html += `
         <tr>
             <td>${idx+1}</td>
-            <td>${row.player_name}</td>
+            <td>${row.username}</td>
             <td>${row.total_match??0}</td>
             <td>${row.total_kill??0}</td>
             <td>${row.total_death??0}</td>
             <td>${row.total_assist??0}</td>
             <td>${Math.round(row.total_damage??0)}</td>
-            <td>${Number(row.kd_value??0).toFixed(2)}</td>
+            <td>${Number(row.historical_total_kd??0).toFixed(2)}</td>
         </tr>`;
     })
     tbody.innerHTML = html;
