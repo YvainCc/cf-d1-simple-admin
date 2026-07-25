@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DMN 排行榜</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D.M.N 战队排行榜</title>
     <style>
         * {
             margin: 0;
@@ -40,7 +40,8 @@
             font-weight: 500;
             transition: 0.2s;
         }
-        .nav-links a:hover,.nav-links a.active {
+        .nav-links a:hover,
+        .nav-links a.active {
             color: #ffd700;
         }
         .logout {
@@ -54,83 +55,135 @@
             margin: 30px auto;
             padding: 0 16px;
         }
-        .tabs {
+        .top-bar-wrap {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap:12px;
+        }
+        #seasonSelect {
+            padding: 6px 12px;
+            background: #1a2430;
+            color: #fff;
+            border: 1px solid #2a3342;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .tab-group {
+            display: flex;
+            gap:10px;
             flex-wrap: wrap;
         }
-        .tab {
-            background: #2a3342;
-            color: #b8c2cc;
-            border: none;
-            padding: 10px 16px;
+        .tab-group button {
+            padding: 8px 16px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            border: none;
+            background:#222d3b;
+            color:#b8c2cc;
+            cursor:pointer;
+            font-size:14px;
+            transition:0.2s;
         }
-        .tab.active {
-            background: #ffd700;
-            color: #0f1419;
+        .tab-group button.active {
+            background:#ffd700;
+            color:#0f1419;
+            font-weight:bold;
         }
-        .panel {
-            background: #1a2430;
-            border: 1px solid #2a3342;
-            border-radius: 12px;
-            padding: 24px;
+        /* 金银铜前三名卡片 */
+        .top3-wrap {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap:16px;
+            margin:30px 0;
         }
-        .panel h3 {
-            font-size: 20px;
-            margin-bottom: 18px;
-            color: #fff;
+        .rank-card {
+            border-radius:12px;
+            padding:20px;
+            text-align:center;
+            box-shadow:0 8px 24px rgba(0,0,0,0.3);
         }
-        .rank-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
+        .rank-1 {
+            background: linear-gradient(135deg,#947400,#594600);
+            border:1px solid #ffd700;
         }
-        .rank-table th {
-            color: #7d8898;
-            text-align: left;
-            font-size: 12px;
-            padding: 0 12px 4px;
+        .rank-2 {
+            background: linear-gradient(135deg,#586370,#323a44);
+            border:1px solid #c0c8d0;
         }
-        .rank-table td {
-            background: #222d3b;
-            padding: 14px 12px;
-            font-size: 14px;
-            color: #cfd6de;
+        .rank-3 {
+            background: linear-gradient(135deg,#704c2f,#44301f);
+            border:1px solid #d49b6a;
         }
-        .rank-table tr td:first-child {
-            border-radius: 8px 0 0 8px;
+        .rank-medal {
+            font-size:32px;
+            margin-bottom:8px;
         }
-        .rank-table tr td:last-child {
-            border-radius: 0 8px 8px 0;
+        .rank-name {
+            font-size:18px;
+            font-weight:bold;
+            margin-bottom:6px;
         }
-        .rank-number {
-            width: 46px;
-            text-align: center;
-            font-weight: 800;
-            color: #ffd700;
+        .rank-data {
+            font-size:14px;
+            color:#ddd;
         }
-        .empty {
-            color: #7d8898;
-            padding: 40px 0;
-            text-align: center;
-            font-size: 14px;
+        .rank-value {
+            font-size:24px;
+            font-weight:800;
+            color:#ffd700;
+            margin:8px 0;
         }
-        @media (max-width: 600px) {
+        .table-wrap {
+            background:#1a2430;
+            border:1px solid #2a3342;
+            border-radius:12px;
+            overflow:hidden;
+        }
+        table {
+            width:100%;
+            border-collapse: collapse;
+        }
+        th,td {
+            padding:14px 12px;
+            text-align:center;
+            font-size:14px;
+            border-bottom:1px solid #2a3342;
+        }
+        th {
+            background:#222d3b;
+            color:#ffd700;
+        }
+        tr:hover {
+            background:#202c3c;
+        }
+        .empty-tip {
+            padding:40px;
+            text-align:center;
+            color:#8b95a5;
+        }
+        /* 移动端适配 */
+        @media(max-width:768px){
+            .top3-wrap {
+                grid-template-columns:1fr;
+            }
+            th,td {
+                padding:10px 6px;
+                font-size:12px;
+            }
+            .container {
+                padding:0 12px;
+            }
             header {
-                flex-direction: column;
-                gap: 12px;
+                padding:12px 16px;
+                flex-wrap:wrap;
+                gap:10px;
             }
             .nav-links {
-                gap: 12px;
-            }
-            .rank-table th:nth-child(4),
-            .rank-table td:nth-child(4) {
-                display: none;
+                order:3;
+                width:100%;
+                justify-content:space-around;
             }
         }
     </style>
@@ -148,79 +201,151 @@
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
 <div class="container">
-    <div class="tabs">
-        <button class="tab active" data-type="kill">战神榜（总击杀）</button>
-        <button class="tab" data-type="dmg">伤害榜</button>
-        <button class="tab" data-type="win">吃鸡榜</button>
-        <button class="tab" data-type="kd">KD榜</button>
-        <button class="tab" data-type="team">战队总击杀榜</button>
+    <div class="top-bar-wrap">
+        <div class="tab-group">
+            <button data-type="kill" class="active">战神榜（总击杀）</button>
+            <button data-type="damage">伤害榜</button>
+            <button data-type="win">吃鸡榜</button>
+            <button data-type="kd">KD榜</button>
+            <button data-type="teamkill">战队总击杀榜</button>
+        </div>
+        <select id="seasonSelect">
+            <option value="all">全部比赛（生涯汇总）</option>
+            <option value="S5">S5赛季</option>
+            <option value="S6">S6赛季</option>
+        </select>
     </div>
-    <div class="panel">
-        <h3 id="rankTitle">2026 S1 赛季 - 战神榜</h3>
-        <table class="rank-table">
-            <thead id="tableHead"></thead>
-            <tbody id="rankBody">
-                <tr><td colspan="5" class="empty">加载中...</td></tr>
+
+    <!-- 金银铜前三名 -->
+    <div class="top3-wrap" id="top3Box">
+        <div class="rank-card rank-2" id="card2">
+            <div class="rank-medal">🥈</div>
+            <div class="rank-name">--</div>
+            <div class="rank-value">--</div>
+            <div class="rank-data">总击杀 -- | KD --</div>
+        </div>
+        <div class="rank-card rank-1" id="card1">
+            <div class="rank-medal">🥇</div>
+            <div class="rank-name">--</div>
+            <div class="rank-value">--</div>
+            <div class="rank-data">总击杀 -- | KD --</div>
+        </div>
+        <div class="rank-card rank-3" id="card3">
+            <div class="rank-medal">🥉</div>
+            <div class="rank-name">--</div>
+            <div class="rank-value">--</div>
+            <div class="rank-data">总击杀 -- | KD --</div>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>玩家名称</th>
+                    <th>总局数</th>
+                    <th>总击杀</th>
+                    <th>总死亡</th>
+                    <th>总助攻</th>
+                    <th>总伤害</th>
+                    <th>KD值</th>
+                </tr>
+            </thead>
+            <tbody id="rankTbody">
+                <tr>
+                    <td colspan="8" class="empty-tip">加载排行榜数据...</td>
+                </tr>
             </tbody>
         </table>
     </div>
 </div>
+
 <script>
-function logout(){
-    window.location.href="index.html";
-}
 let currentType = "kill";
-const titleMap = {
-    kill:"战神榜（总击杀）",
-    dmg:"伤害榜",
-    win:"吃鸡榜",
-    kd:"KD榜",
-    team:"战队总击杀榜"
-};
-const headMap = {
-    kill:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总击杀</th><th>KD</th></tr>`,
-    dmg:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>总伤害</th><th>KD</th></tr>`,
-    win:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>吃鸡场次</th><th>KD</th></tr>`,
-    kd:`<tr><th class="rank-number">排名</th><th>选手</th><th>战队</th><th>KD值</th><th>总击杀</th></tr>`,
-    team:`<tr><th class="rank-number">排名</th><th>战队名称</th><th>全队总击杀</th><th></th><th></th></tr>`
-};
-async function loadRank(type){
-    currentType = type;
-    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
-    document.querySelector(`.tab[data-type="${type}"]`).classList.add("active");
-    document.getElementById("rankTitle").innerText = `2026 S1 赛季 - ${titleMap[type]}`;
-    document.getElementById("tableHead").innerHTML = headMap[type];
-    document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">加载中...</td></tr>`;
-    const res = await fetch(`/api/rank?type=${type}`);
-    const json = await res.json();
-    if(!json.ok || json.list.length === 0){
-        document.getElementById("rankBody").innerHTML = `<tr><td colspan="5" class="empty">暂无数据</td></tr>`;
-        return;
-    }
-    let html = "";
-    json.list.forEach((item,idx)=>{
-        const rank = idx+1;
-        const teamName = item.team_name || "无战队";
-        if(type === "kill"){
-            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_kill}</td><td>${item.historical_total_kd}</td></tr>`;
-        }else if(type === "dmg"){
-            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_damage}</td><td>${item.historical_total_kd}</td></tr>`;
-        }else if(type === "win"){
-            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.total_win}</td><td>${item.historical_total_kd}</td></tr>`;
-        }else if(type === "kd"){
-            html += `<tr><td class="rank-number">${rank}</td><td>${item.username}</td><td>${teamName}</td><td>${item.historical_total_kd}</td><td>${item.total_kill}</td></tr>`;
-        }else if(type === "team"){
-            html += `<tr><td class="rank-number">${rank}</td><td>${item.team_name}</td><td>${item.totalTeamKill}</td><td></td><td></td></tr>`;
-        }
-    })
-    document.getElementById("rankBody").innerHTML = html;
-}
-document.querySelectorAll(".tab").forEach(tab=>{
-    tab.addEventListener("click",()=>{
-        loadRank(tab.dataset.type);
+let currentSeason = "all";
+const tabBtns = document.querySelectorAll(".tab-group button");
+const seasonSel = document.getElementById("seasonSelect");
+
+tabBtns.forEach(btn=>{
+    btn.addEventListener("click",()=>{
+        tabBtns.forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        currentType = btn.dataset.type;
+        loadRankData();
     })
 })
-window.onload = ()=> loadRank("kill");
+seasonSel.addEventListener("change",()=>{
+    currentSeason = seasonSel.value;
+    loadRankData();
+})
+
+function logout() {
+    localStorage.removeItem("loginUser");
+    window.location.href = "index.html";
+}
+
+async function loadRankData(){
+    const res = await fetch(`/api/rank?season=${currentSeason}&type=${currentType}`);
+    const json = await res.json();
+    const list = json.data || [];
+    const tbody = document.getElementById("rankTbody");
+    const card1 = document.getElementById("card1");
+    const card2 = document.getElementById("card2");
+    const card3 = document.getElementById("card3");
+
+    if(list.length === 0){
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-tip">暂无榜单数据</td>`;
+        return;
+    }
+    // 填充前三名卡片
+    const first = list[0];
+    const second = list[1] || {};
+    const third = list[2] || {};
+
+    function fillCard(el, item, medalType){
+        let showVal;
+        switch(currentType){
+            case "kill": showVal = item.total_kill ?? 0; break;
+            case "damage": showVal = Math.round(item.total_damage ?? 0); break;
+            case "win": showVal = item.total_win ??0; break;
+            case "kd": showVal = Number(item.kd_value ??0).toFixed(2); break;
+            default: showVal = item.total_kill ??0;
+        }
+        el.querySelector(".rank-name").innerText = item.player_name || "未知";
+        el.querySelector(".rank-value").innerText = showVal;
+        el.querySelector(".rank-data").innerText = `总击杀 ${item.total_kill??0} | KD ${Number(item.kd_value??0).toFixed(2)}`;
+    }
+    fillCard(card1, first, 1);
+    fillCard(card2, second, 2);
+    fillCard(card3, third, 3);
+
+    // 表格渲染
+    let html = "";
+    list.forEach((row,idx)=>{
+        html += `
+        <tr>
+            <td>${idx+1}</td>
+            <td>${row.player_name}</td>
+            <td>${row.total_match??0}</td>
+            <td>${row.total_kill??0}</td>
+            <td>${row.total_death??0}</td>
+            <td>${row.total_assist??0}</td>
+            <td>${Math.round(row.total_damage??0)}</td>
+            <td>${Number(row.kd_value??0).toFixed(2)}</td>
+        </tr>`;
+    })
+    tbody.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+    const uname = localStorage.getItem("loginUser");
+    if(!uname){
+        window.location.href="index.html";
+        return;
+    }
+    loadRankData();
+})
 </script>
 </body>
 </html>
