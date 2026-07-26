@@ -58,8 +58,9 @@ export async function onRequest({ request, env }) {
     const user = sqlRes.results[0];
     const token = await createJWT({ username, role: user.role }, TOKEN_EXPIRE_HOUR);
     const expireISO = new Date(Date.now() + TOKEN_EXPIRE_HOUR * 3600 * 1000).toISOString();
+    // ✅ 修复：3个问号，绑定3个参数 username, token, expireISO
     await env.DB.prepare(`INSERT INTO login_token(username,token,expire_at) VALUES (?,?,?)`)
-      .bind(username, token).run();
+      .bind(username, token, expireISO).run();
     return Response.json({
       ok: true,
       msg: "登录成功",
