@@ -76,7 +76,7 @@
     <div class="err-text" id="errorMsg"></div>
 </div>
 <script>
-// 全局带Token请求封装
+// 全局带Token请求封装（供后续页面使用）
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -95,7 +95,7 @@ async function apiFetch(url, opt={}){
 }
 
 function showErr(text) {
-    errorMsg.innerText = '服务异常：' + text;
+    errorMsg.innerText = text;
     errorMsg.style.display = 'block';
 }
 
@@ -118,10 +118,15 @@ async function loginSubmit() {
         return;
     }
     try {
-        const data = await apiFetch("/api/login", {
+        // 登录接口直接原生fetch，避免登录阶段携带无效token干扰
+        const res = await fetch("/api/login", {
             method: "POST",
+            headers: {
+                "Content-Type":"application/json"
+            },
             body: JSON.stringify({ action: "login", username, password })
         });
+        const data = await res.json();
         if (data.ok) {
             localStorage.setItem("loginToken", data.token);
             localStorage.setItem("loginUser", data.username);
@@ -132,6 +137,7 @@ async function loginSubmit() {
         }
     } catch (err) {
         showErr('网络请求失败，请稍后重试');
+        console.error(err);
     }
 }
 </script>
