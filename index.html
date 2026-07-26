@@ -76,11 +76,6 @@
     <div class="err-text" id="errorMsg"></div>
 </div>
 <script>
-function showErr(text) {
-    errorMsg.innerText = text;
-    errorMsg.style.display = 'block';
-}
-
 const usernameInput = document.getElementById('username');
 const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
@@ -100,18 +95,21 @@ async function loginSubmit() {
         return;
     }
     try {
-        const res = await fetch("/api/login", {
-            method: "POST",
+        const res = await fetch('/api/login', {
+            method: 'POST',
             headers: {
-                "Content-Type":"application/json"
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ action: "login", username, password })
-        });
+            body: JSON.stringify({
+                action: "login",
+                username: username,
+                password: password
+            })
+        })
         const data = await res.json();
         if (data.ok) {
-            localStorage.setItem("loginToken", data.token);
-            localStorage.setItem("loginUser", data.username);
-            localStorage.setItem("userRole", data.role);
+            // 存储登录账号，用于页面鉴权、超管按钮判断
+            localStorage.setItem("loginUser", username);
             window.location.href = 'member.html';
         } else {
             showErr(data.msg);
@@ -120,6 +118,10 @@ async function loginSubmit() {
         showErr('网络请求失败，请稍后重试');
         console.error(err);
     }
+}
+function showErr(text) {
+    errorMsg.innerText = '服务异常：' + text;
+    errorMsg.style.display = 'block';
 }
 </script>
 </body>

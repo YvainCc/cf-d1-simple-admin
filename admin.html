@@ -104,7 +104,7 @@
         .btn{
             padding:6px 10px;
             border:none;
-            border-radius:6;
+            border-radius:6px;
             cursor:pointer;
             margin:0 3px;
         }
@@ -122,7 +122,7 @@
             padding:0 10px;
             background:#222d3b;
             border:1px solid #333;
-            border-radius:6px;
+            border-radius:6;
             color:#fff;
         }
         .save-btn{
@@ -215,62 +215,28 @@
     </div>
 </div>
 <script>
-// 全局Token请求封装（统一鉴权，自动带Authorization）
-async function apiFetch(url, opt={}){
-  const token = localStorage.getItem("loginToken");
-  const headers = {
-    "Content-Type":"application/json",
-    ...opt.headers
-  };
-  if(token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(url, {...opt, headers});
-  const json = await res.json();
-  // 登录失效自动清空跳转
-  if(res.status === 401 || String(json.msg).includes("登录")){
-    localStorage.clear();
-    window.location.href="index.html";
-    throw new Error("登录失效");
-  }
-  return json;
-}
-
-// 统一退出函数
+const adminName = "test";
+let currentEditPlayerId = null;
 function logout(){
-    localStorage.removeItem("loginToken");
-    localStorage.removeItem("loginUser");
-    localStorage.removeItem("userRole");
-    window.location.href="index.html";
+    window.location.href="index.html"
 }
-
-// 页面加载鉴权
-window.onload = function(){
-    const user = localStorage.getItem("loginUser");
-    const token = localStorage.getItem("loginToken");
-    if(!user || !token){
-        window.location.href="index.html";
-        return;
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+    btn.onclick = ()=>{
+        document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        const tab = btn.dataset.tab;
+        document.getElementById("playerEditPanel").style.display = tab === "playerEdit" ? "block" : "none";
+        document.getElementById("auditPanel").style.display = tab === "auditRegister" ? "block" : "none";
+        if(tab === "playerEdit") loadPlayerList();
+        if(tab === "auditRegister") loadRegList();
     }
-    // 标签切换
-    document.querySelectorAll(".tab-btn").forEach(btn=>{
-        btn.onclick = ()=>{
-            document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-            btn.classList.add("active");
-            const tab = btn.dataset.tab;
-            document.getElementById("playerEditPanel").style.display = tab === "playerEdit" ? "block" : "none";
-            document.getElementById("auditPanel").style.display = tab === "auditRegister" ? "block" : "none";
-            if(tab === "playerEdit") loadPlayerList();
-            if(tab === "auditRegister") loadRegList();
-        }
-    })
-    loadPlayerList();
-}
-
-// 加载全部选手列表
+})
 async function loadPlayerList(){
-    const json = await apiFetch(`/api/adminManage?opt=playerList`);
+    const res = await fetch(`/api/adminManage?opt=playerList`);
+    const json = await res.json();
     const body = document.getElementById("playerTableBody");
     if(!json.ok || json.list.length ===0){
-        body.innerHTML = `<tr><td colspan="8" class="empty">暂无选手数据</td>`;
+        body.innerHTML = `<tr><td colspan="8" class="empty">暂无选手数据</td></tr>`;
         return;
     }
     let html = "";
@@ -289,9 +255,8 @@ async function loadPlayerList(){
     })
     body.innerHTML = html;
 }
-
-// 打开编辑弹窗
 function openEdit(pid, uname, kill, match, win, dmg, kd){
+    currentEditPlayerId = pid;
     document.getElementById("editForm").style.display = "block";
     document.getElementById("editUserName").innerText = uname;
     document.getElementById("editPlayerId").value = pid;
@@ -301,8 +266,6 @@ function openEdit(pid, uname, kill, match, win, dmg, kd){
     document.getElementById("editDmg").value = dmg;
     document.getElementById("editKd").value = kd;
 }
-
-// 保存选手修改
 async function savePlayerEdit(){
     const pid = document.getElementById("editPlayerId").value;
     const kill = document.getElementById("editKill").value;
@@ -310,11 +273,11 @@ async function savePlayerEdit(){
     const win = document.getElementById("editWin").value;
     const dmg = document.getElementById("editDmg").value;
     const kd = document.getElementById("editKd").value;
-    const adminName = localStorage.getItem("loginUser");
-    const ret = await apiFetch("/api/adminManage",{
+    const res = await fetch("/api/adminManage",{
         method:"POST",
+        headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-            adminName,
+            adminName:adminName,
             type:"editPlayerStat",
             playerId:pid,
             total_kill:Number(kill),
@@ -323,20 +286,20 @@ async function savePlayerEdit(){
             total_damage:Number(dmg),
             historical_total_kd:Number(kd)
         })
-    });
+    })
+    const ret = await res.json();
     alert(ret.msg);
     if(ret.ok){
         document.getElementById("editForm").style.display = "none";
         loadPlayerList();
     }
 }
-
-// 加载报名审核列表
 async function loadRegList(){
-    const json = await apiFetch(`/api/adminManage?opt=regList`);
+    const res = await fetch(`/api/adminManage?opt=regList`);
+    const json = await res.json();
     const body = document.getElementById("regTableBody");
     if(!json.ok || json.list.length ===0){
-        body.innerHTML = `<tr><td colspan="7" class="empty">暂无报名记录</td>`;
+        body.innerHTML = `<tr><td colspan="7" class="empty">暂无报名记录</td></tr>`;
         return;
     }
     let html = "";
@@ -361,24 +324,26 @@ async function loadRegList(){
     })
     body.innerHTML = html;
 }
-
-// 审核操作
 async function auditReg(regId, status){
     const confirmTip = status === "pass" ? "确认通过该战队报名？" : "确认驳回该战队报名？";
     if(!confirm(confirmTip)) return;
-    const adminName = localStorage.getItem("loginUser");
-    const ret = await apiFetch("/api/adminManage",{
+    const res = await fetch("/api/adminManage",{
         method:"POST",
+        headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-            adminName,
+            adminName:adminName,
             type:"auditReg",
             regId:regId,
             newStatus:status
         })
-    });
+    })
+    const ret = await res.json();
     alert(ret.msg);
     if(ret.ok) loadRegList();
 }
+window.onload = ()=> loadPlayerList();
 </script>
 </body>
 </html>
+<!-- rebuild trigger -->
+
