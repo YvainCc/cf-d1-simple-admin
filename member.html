@@ -152,7 +152,6 @@
 </div>
 
 <script>
-// 封装请求：增加html拦截判断，防止接口返回页面代码解析报错
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -161,10 +160,9 @@ async function apiFetch(url, opt={}){
   };
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
-
   const contentType = res.headers.get("content-type") || "";
   if(contentType.includes("text/html")){
-      throw new Error("路由异常：接口返回HTML页面");
+      throw new Error("路由命中静态页面，重试");
   }
   const json = await res.json();
   if(res.status === 401){
@@ -177,7 +175,21 @@ async function apiFetch(url, opt={}){
   return json;
 }
 
-// 退出登录
+// 自动重试函数，最多尝试5次
+async function fetchWithRetry(url, opt={}, maxRetry=5){
+    let retry = 0;
+    while(retry < maxRetry){
+        try{
+            return await apiFetch(url, opt);
+        }catch(e){
+            retry++;
+            console.log(`请求失败，重试 ${retry}/${maxRetry}`, e.message);
+            await new Promise(r => setTimeout(r, 300));
+        }
+    }
+    throw new Error("多次重试依然失败");
+}
+
 function logout(){
     localStorage.removeItem("loginToken");
     localStorage.removeItem("loginUser");
@@ -185,7 +197,6 @@ function logout(){
     window.location.href="index.html";
 }
 
-// 页面载入鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
     if(!token){
@@ -200,8 +211,8 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // 标准接口地址，不带.js，和全站保持统一
-        const data = await apiFetch(`/api/playerData?username=${username}`,{
+        // 使用带自动重试的请求
+        const data = await fetchWithRetry(`/api/playerData?username=${username}`,{
             method:"GET"
         });
         if(data.ok){
@@ -212,7 +223,7 @@ window.onload = async function(){
             document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
         }
     } catch(e){
-        console.log("数据加载异常：",e);
+        console.log("最终加载失败：",e);
     }
 }
 </script>
