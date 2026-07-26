@@ -11,12 +11,13 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
         }
         body {
             background: #0f1419;
             color: #f0f2f5;
             padding: 20px;
+            min-height: 100vh;
         }
         .container {
             max-width: 900px;
@@ -24,7 +25,12 @@
         }
         h1 {
             color: #ffd700;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+        }
+        .sub-title {
+            color: #8b95a5;
+            margin-bottom: 24px;
+            font-size: 14px;
         }
         .back-link {
             color: #8b95a5;
@@ -49,6 +55,7 @@
             margin: 16px auto;
             color: #ccc;
             cursor: pointer;
+            font-size: 14px;
         }
         .upload-area .btn {
             background: #ffd700;
@@ -92,7 +99,7 @@
             border: 1px solid #2a3342;
             border-radius: 8px;
             padding: 12px;
-            max-height: 300px;
+            max-height: 350px;
             overflow-y: auto;
             font-family: monospace;
             font-size: 13px;
@@ -103,6 +110,7 @@
         .log-box .success { color: #7bed9f; }
         .log-box .error { color: #ff6b81; }
         .log-box .info { color: #70a1ff; }
+        .log-box .warn { color: #feca57; }
         .permission-denied {
             color: #ff6b81;
             font-size: 18px;
@@ -110,25 +118,34 @@
             text-align: center;
             padding: 30px 0;
         }
+        .file-info {
+            color: #8b95a5;
+            font-size: 13px;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <a href="member.html" class="back-link">← 返回队员中心</a>
-    <h1>⚙️ 后台管理 – 战绩数据导入</h1>
+    <h1>⚙️ 后台管理</h1>
+    <p class="sub-title">导入 Excel 战绩数据（支持 .xlsx / .xls）</p>
 
     <div id="permissionMsg" class="permission-denied" style="display:none;">
         ⛔ 您不是超级管理员，无权访问此功能！
     </div>
 
     <div id="uploadArea" class="upload-area">
-        <p style="color:#8b95a5; margin-bottom:8px;">请上传 <strong>.xlsx</strong> 或 <strong>.xls</strong> 文件（支持多 Sheet）</p>
+        <p style="color:#8b95a5; margin-bottom:8px;">请选择要导入的 Excel 文件</p>
         <input type="file" id="fileInput" accept=".xlsx,.xls" />
-        <button class="btn" id="uploadBtn">开始导入</button>
+        <div style="margin: 12px 0;">
+            <button class="btn" id="uploadBtn">开始导入</button>
+        </div>
         <div class="progress-wrap">
             <div class="progress-bar" id="progressBar">0%</div>
         </div>
         <div id="statusMsg" style="color:#8b95a5; font-size:14px; margin-top:6px;">等待操作...</div>
+        <div id="fileInfo" class="file-info"></div>
     </div>
 
     <div class="log-box" id="logBox">📋 日志将在此显示...</div>
@@ -145,7 +162,9 @@
         const progressBar = document.getElementById('progressBar');
         const statusMsg = document.getElementById('statusMsg');
         const logBox = document.getElementById('logBox');
+        const fileInfo = document.getElementById('fileInfo');
 
+        // 非管理员直接拒绝
         if (role !== 'admin') {
             permissionMsg.style.display = 'block';
             uploadArea.style.display = 'none';
@@ -169,6 +188,21 @@
             if (text) statusMsg.textContent = text;
         }
 
+        // 文件选择时显示文件名和大小
+        fileInput.addEventListener('change', function(e) {
+            const file = this.files[0];
+            if (file) {
+                const size = (file.size / 1024 / 1024).toFixed(2);
+                fileInfo.textContent = `已选择：${file.name} (${size} MB)`;
+                statusMsg.textContent = '已准备就绪，点击 "开始导入"';
+                setProgress(0, '待开始');
+            } else {
+                fileInfo.textContent = '';
+                statusMsg.textContent = '等待操作...';
+                setProgress(0, '等待文件');
+            }
+        });
+
         // ========== 上传按钮事件 ==========
         uploadBtn.addEventListener('click', async () => {
             const file = fileInput.files[0];
@@ -179,7 +213,7 @@
 
             uploadBtn.disabled = true;
             setProgress(0, '正在解析文件...');
-            appendLog(`📂 开始解析文件: ${file.name}`);
+            appendLog(`📂 开始解析文件: ${file.name} (${(file.size/1024/1024).toFixed(2)} MB)`);
 
             try {
                 // 1. 读取 Excel
@@ -198,7 +232,7 @@
                 });
 
                 if (allRows.length === 0) {
-                    appendLog('⚠️ 未解析到任何数据行', 'error');
+                    appendLog('⚠️ 未解析到任何数据行', 'warn');
                     uploadBtn.disabled = false;
                     setProgress(0, '无数据');
                     return;
@@ -209,6 +243,7 @@
                 // 3. 分批上传（每批 500 条）
                 const BATCH_SIZE = 500;
                 let totalInserted = 0;
+                let errorCount = 0;
 
                 for (let i = 0; i < allRows.length; i += BATCH_SIZE) {
                     const batch = allRows.slice(i, i + BATCH_SIZE);
@@ -226,11 +261,23 @@
                         throw new Error(result.error || `批次 ${i/BATCH_SIZE+1} 导入失败`);
                     }
                     totalInserted += result.inserted || 0;
-                    appendLog(`✅ 批次 ${i/BATCH_SIZE+1} 成功写入 ${result.inserted} 条`, 'success');
+                    if (result.errors && result.errors.length > 0) {
+                        errorCount += result.errors.length;
+                        appendLog(`⚠️ 批次 ${i/BATCH_SIZE+1} 有 ${result.errors.length} 行失败`, 'warn');
+                        // 可打印前3个错误详情
+                        result.errors.slice(0, 3).forEach(e => {
+                            appendLog(`  行 ${e.index}: ${e.error}`, 'error');
+                        });
+                    }
+                    appendLog(`✅ 批次 ${i/BATCH_SIZE+1} 成功写入 ${result.inserted || 0} 条`, 'success');
                 }
 
-                setProgress(100, `🎉 全部导入完成！共 ${totalInserted} 条`);
-                appendLog(`🎉 导入完成，总计 ${totalInserted} 条战绩已入库`, 'success');
+                if (errorCount > 0) {
+                    appendLog(`⚠️ 导入完成，但 ${errorCount} 行数据失败，请检查日志`, 'warn');
+                } else {
+                    appendLog(`🎉 全部导入完成！共 ${totalInserted} 条战绩已入库`, 'success');
+                }
+                setProgress(100, `导入完成（成功 ${totalInserted} 条${errorCount > 0 ? `，失败 ${errorCount} 条` : ''}）`);
 
             } catch (err) {
                 appendLog(`❌ 导入失败：${err.message}`, 'error');
