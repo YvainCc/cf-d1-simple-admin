@@ -22,7 +22,7 @@ export async function onRequest({ request, env }) {
             return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
         }
 
-        // 1. 根据用户名获取玩家ID（只查当前有效名称）
+        // 1. 获取玩家ID
         const userSql = `SELECT id FROM 人员表 WHERE 游戏名称 = ? AND 是否当前 = 1 AND 状态 = 'active'`;
         const userResult = await env.DB.prepare(userSql).bind(username).first();
         if (!userResult) {
@@ -30,7 +30,7 @@ export async function onRequest({ request, env }) {
         }
         const playerId = userResult.id;
 
-        // 2. 查询该玩家的战绩明细
+        // 2. 查询战绩明细
         let detailSql, detailParams;
         if (season === "all") {
             detailSql = `
@@ -56,11 +56,9 @@ export async function onRequest({ request, env }) {
 
         const { results } = await env.DB.prepare(detailSql).bind(...detailParams).all();
 
-        // 3. 计算当前玩家在该赛季（或全部）中的 KD 排名
+        // 3. 计算 KD 排名
         let rank = null;
         if (results && results.length > 0) {
-            // 构建排名查询
-            // 统计所有玩家在该赛季（或全部）的击杀、死亡
             let rankSql, rankParams;
             if (season === "all") {
                 rankSql = `
@@ -80,8 +78,7 @@ export async function onRequest({ request, env }) {
                             END AS kd
                         FROM player_stats
                     )
-                    SELECT 
-                        COUNT(*) + 1 AS rank
+                    SELECT COUNT(*) + 1 AS rank
                     FROM player_kd
                     WHERE kd > (SELECT kd FROM player_kd WHERE 玩家账号ID = ?)
                 `;
@@ -105,8 +102,7 @@ export async function onRequest({ request, env }) {
                             END AS kd
                         FROM player_stats
                     )
-                    SELECT 
-                        COUNT(*) + 1 AS rank
+                    SELECT COUNT(*) + 1 AS rank
                     FROM player_kd
                     WHERE kd > (SELECT kd FROM player_kd WHERE 玩家账号ID = ?)
                 `;
