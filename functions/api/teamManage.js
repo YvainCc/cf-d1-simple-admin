@@ -94,7 +94,7 @@ export async function onRequest({ request, env }) {
     }
     if (newRole === "starter") {
       const starterCount = await env.DB.prepare(`
-        SELECT COUNT(*) cnt FROM team_members WHERE team_id = ? AND member_role = "starter"
+        SELECT COUNT(*) cnt FROM team_members WHERE team_id = ? AND member_role = 'starter'
       `).bind(teamId).first();
       if (starterCount.cnt >= 4) {
         return Response.json({ ok: false, msg: "首发位已满4人" }, { headers: corsHeaders });
