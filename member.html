@@ -2,232 +2,686 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D.M.N 战队管理系统 - 队员中心</title>
-    <!-- deploy refresh 2026 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>D.M.N 战队队员中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            color: #eee;
-            font-family: system-ui, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
         }
         body {
-            background-color: #181a20;
+            background: #0f1419;
+            color: #f0f2f5;
         }
         header {
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            padding: 18px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 14px 24px;
-            background-color: #111317;
+            border-bottom: 1px solid #2a3342;
         }
-        .header-title {
-            font-size: 22;
-            color: #ffd337;
-            font-weight: bold;
+        .logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #ffd700;
         }
-        nav a {
-            margin: 0 10px;
+        .nav-links {
+            display: flex;
+            gap: 24px;
+        }
+        .nav-links a {
+            color: #b8c2cc;
             text-decoration: none;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
         }
-        nav a.active {
-            color: #ffd337;
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: #ffd700;
         }
-        .logout-btn {
-            color: #ff5050;
+        .logout {
+            color: #ff5555;
             cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
         }
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 30px auto;
-            padding: 0 20px;
+            padding: 0 16px;
         }
-        .user-card {
-            background-color: #22252c;
+        .season-select-wrap {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        #seasonSelect {
+            padding: 6px 12px;
+            background: #1a2430;
+            color: #fff;
+            border: 1px solid #2a3342;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .section-title {
+            font-size: 18px;
+            margin: 24px 0 16px;
+            color: #ffd700;
+            font-weight: 700;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .card {
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
+        }
+        .card-title {
+            font-size: 13px;
+            color: #8b95a5;
+            margin-bottom: 8px;
+        }
+        .card-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffd700;
+        }
+        .card-sub {
+            font-size: 12px;
+            color: #6e7888;
+            margin-top: 6px;
+        }
+        .toggle-wrap {
+            text-align: center;
+            margin: 12px 0;
+        }
+        #toggleMore {
+            width: 100%;
+            background: #1a2430;
+            border: 1px solid #2a3342;
+            color: #cccccc;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: .2s;
+        }
+        #toggleMore:hover {
+            color: #ffd700;
+            border-color: #ffd700;
+        }
+        .collapse-box {
+            display: none;
+            margin-bottom: 24px;
+        }
+        .collapse-box.show {
+            display: block;
+        }
+        .panel {
+            background: #1a2430;
+            border: 1px solid #2a3342;
             border-radius: 12px;
             padding: 24px;
+            margin-bottom: 24px;
+        }
+        .radar-wrap {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3,1fr);
+            gap:12px;
+            margin-bottom:20px;
+        }
+        table{
+            width:100%;
+            border-collapse: collapse;
+        }
+        table th,table td{
+            border:1px solid #2a3342;
+            padding:12px;
+            text-align:center;
+            font-size:14px;
+        }
+        table th{
+            background:#222d3b;
+            color:#ffd700;
+        }
+        .empty {
+            color: #7d8898;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        .full-match-btn {
+            display:block;
+            width:100%;
+            text-align:center;
+            margin-top:16px;
+            padding:12px;
+            background:#ffd700;
+            color:#0f1419;
+            text-decoration:none;
+            border-radius:8px;
+            font-weight:bold;
+        }
+        .weapon-row a {
+            color:#ffd700;
+            text-decoration:none;
+        }
+        /* 小黑盒顶部玩家信息卡片 */
+        .profile-header {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom:24px;
+            gap: 14px;
+            background: linear-gradient(135deg, #1a2a48 0%, #0f1419 100%);
+            border: 1px solid #2a3342;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,.35);
         }
-        .user-left {
-            display:flex;
-            align-items:center;
-            gap:16px;
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid #ffd700;
+            flex-shrink: 0;
         }
-        .avatar {
-            width:64px;
-            height:64px;
-            border-radius:50%;
-            background:#444;
-            overflow:hidden;
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
-        .kd-num {
-            font-size:32px;
-            font-weight:bold;
-            color:#ffd337;
-            text-align:right;
+        .profile-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
-        .grid-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            gap:16px;
-            margin-bottom:24px;
+        .profile-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffd700;
         }
-        .stat-item {
-            background:#22252c;
-            border-radius:10px;
-            padding:20px;
+        .profile-tag {
+            font-size: 13px;
+            color: #8b95a5;
         }
-        .stat-label {
-            font-size:14px;
-            color:#aaa;
-            margin-bottom:8px;
+        .profile-rating {
+            text-align: center;
+            min-width: 70px;
         }
-        .stat-value {
-            font-size:26px;
-            font-weight:bold;
+        .rating-num {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffd700;
         }
-        .radar-wrap{
-            background:#22252c;
-            border-radius:10px;
-            padding:20px;
-            min-height:320px;
+        .rating-label {
+            font-size: 12px;
+            color: #8b95a5;
+        }
+
+        /* ===== 移动端小黑盒适配核心样式 ===== */
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .nav-links {
+                gap: 12px;
+            }
+            .nav-links a {
+                font-size: 12px;
+            }
+            .radar-wrap {
+                max-width: 100%;
+            }
+        }
+        @media (max-width: 600px) {
+            body {
+                background: #111723;
+            }
+            header {
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 12px 16px;
+            }
+            .logo {
+                font-size: 18px;
+            }
+            .nav-links {
+                order: 3;
+                width: 100%;
+                justify-content: space-around;
+            }
+            .nav-links a {
+                font-size: 13px;
+            }
+            .container {
+                margin: 20px auto;
+                padding: 0 12px;
+            }
+            .season-select-wrap {
+                text-align: left;
+                margin-bottom: 16px;
+            }
+            .section-title {
+                font-size: 16px;
+                margin: 20px 0 12px;
+            }
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .card {
+                padding: 16px;
+                border-radius: 10px;
+                background: linear-gradient(135deg, #1e2a3a 0%, #161d29 100%);
+            }
+            .card-value {
+                font-size: 22px;
+            }
+            .card-title {
+                font-size: 12px;
+            }
+            .stat-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .stat-grid .card {
+                padding: 12px;
+                text-align: center;
+            }
+            .stat-grid .card-title {
+                font-size: 11px;
+                margin-bottom: 4px;
+            }
+            .stat-grid .card-value {
+                font-size: 16px;
+            }
+            .panel {
+                padding: 16px;
+                border-radius: 10px;
+            }
+            table th, table td {
+                padding: 10px 8px;
+                font-size: 13px;
+            }
+            #toggleMore, .full-match-btn {
+                padding: 14px;
+                font-size: 15px;
+                border-radius: 10px;
+            }
+            /* 头部信息卡片移动端 */
+            .profile-header {
+                padding: 14px;
+                gap: 12px;
+            }
+            .profile-avatar {
+                width: 56px;
+                height: 56px;
+            }
+            .profile-name {
+                font-size: 18px;
+            }
+            .profile-rating {
+                min-width: 60px;
+            }
+            .rating-num {
+                font-size: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            table th, table td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            .card-value {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
 <header>
-    <div class="header-title">D.M.N</div>
-    <nav>
+    <div class="logo">D.M.N</div>
+    <nav class="nav-links">
         <a href="member.html" class="active">队员中心</a>
         <a href="ranks.html">排行榜</a>
         <a href="team.html">我的战队</a>
         <a href="#">比赛回放</a>
         <a href="#">赞助公示</a>
     </nav>
-    <div class="logout-btn" onclick="logout()">退出登录</div>
+    <div class="logout" onclick="logout()">退出登录</div>
 </header>
 <div class="container">
-    <div class="user-card">
-        <div class="user-left">
-            <div class="avatar">
-                <img style="width:100%;height:100%;object-fit:cover" src="" id="avatarImg">
-            </div>
-            <div>
-                <div style="font-size:22px;font-weight:bold" id="showUsername"></div>
-                <div style="color:#aaa;margin-top:4px" id="showRole"></div>
-            </div>
+    <div class="season-select-wrap">
+        <select id="seasonSelect">
+            <option value="all">全部比赛（生涯汇总）</option>
+            <option value="S5">S5赛季</option>
+            <option value="S6">S6赛季</option>
+        </select>
+    </div>
+
+    <!-- 小黑盒风格玩家信息头部【名称动态读取】 -->
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
         </div>
-        <div>
-            <div class="kd-num" id="showKD">0.00</div>
-            <div style="text-align:right;color:#aaa;font-size:13px">KD</div>
+        <div class="profile-info">
+            <div class="profile-name" id="profileUserName">--</div>
+            <div class="profile-tag">D.M.N 战队队员</div>
+        </div>
+        <div class="profile-rating">
+            <div class="rating-num" id="headerKD">--</div>
+            <div class="rating-label">KD</div>
         </div>
     </div>
-    <h3 style="margin-bottom:16px">个人生涯概况</h3>
-    <div class="grid-row">
-        <div class="stat-item">
-            <div class="stat-label">当前赛季排名</div>
-            <div class="stat-value" id="rankText">--</div>
-            <div style="font-size:12px;color:#aaa;margin-top:4px">赛季分段总排名</div>
+
+    <div class="section-title">个人生涯概况</div>
+    <div class="grid">
+        <div class="card">
+            <div class="card-title">当前赛季排名</div>
+            <div class="card-value" id="rankVal">--</div>
+            <div class="card-sub">赛季分段总排名</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label">总场次</div>
-            <div class="stat-value" id="matchCount">0</div>
-            <div style="font-size:12px;color:#aaa;margin-top:4px">本赛季参赛局数</div>
+        <div class="card">
+            <div class="card-title">总场次</div>
+            <div class="card-value" id="matchVal">--</div>
+            <div class="card-sub">本赛季参赛局数</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label">吃鸡数</div>
-            <div class="stat-value" id="winCount">0</div>
-            <div style="font-size:12px;color:#aaa;margin-top:4px">第一名次数</div>
+        <div class="card">
+            <div class="card-title">吃鸡数</div>
+            <div class="card-value" id="winVal">--</div>
+            <div class="card-sub">第一名次数</div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label">段位KD</div>
-            <div class="stat-value" id="kdText">0.00</div>
-            <div style="font-size:12px;color:#aaa;margin-top:4px">击杀/死亡比值</div>
+        <div class="card">
+            <div class="card-title">段位KD</div>
+            <div class="card-value" id="kdVal">--</div>
+            <div class="card-sub">击杀/死亡比值</div>
         </div>
     </div>
-    <div class="radar-wrap">
-        <div id="radarChart"></div>
+
+    <div class="toggle-wrap">
+        <button id="toggleMore">更多摘要 ▼</button>
+    </div>
+
+    <div class="collapse-box" id="collapseWrap">
+        <div class="section-title">详细赛季数据</div>
+        <div class="stat-grid">
+            <div class="card"><div class="card-title">总死亡</div><div class="card-value" id="deathVal">--</div></div>
+            <div class="card"><div class="card-title">总助攻</div><div class="card-value" id="assistVal">--</div></div>
+            <div class="card"><div class="card-title">总伤害</div><div class="card-value" id="dmgTotalVal">--</div></div>
+            <div class="card"><div class="card-title">场均存活(min)</div><div class="card-value" id="avgSurviveVal">--</div></div>
+            <div class="card"><div class="card-title">吃鸡率</div><div class="card-value" id="winRateVal">--%</div></div>
+            <div class="card"><div class="card-title">前十场次</div><div class="card-value" id="top10Val">--</div></div>
+            <div class="card"><div class="card-title">前十率</div><div class="card-value" id="top10RateVal">--%</div></div>
+            <div class="card"><div class="card-title">爆头率</div><div class="card-value" id="headRateVal">--%</div></div>
+            <div class="card"><div class="card-title">赛季最高排名</div><div class="card-value" id="bestRankVal">--</div></div>
+            <div class="card"><div class="card-title">场均伤害</div><div class="card-value" id="avgDmgVal">--</div></div>
+            <div class="card"><div class="card-title">最长存活</div><div class="card-value" id="maxSurviveVal">--</div></div>
+        </div>
+
+        <div class="section-title">个人综合能力雷达图</div>
+        <div class="panel radar-wrap">
+            <canvas id="abilityRadar"></canvas>
+        </div>
+    </div>
+
+    <div class="section-title">近期比赛战绩（近10场）</div>
+    <div class="panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>排名</th>
+                    <th>模式</th>
+                    <th>段位</th>
+                    <th>击杀</th>
+                    <th>伤害</th>
+                    <th>单局评分</th>
+                </tr>
+            </thead>
+            <tbody id="matchTableBody">
+                <tr>
+                    <td colspan="6" class="empty">加载对局数据...</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="6">
+                        <a href="matchAll.html" class="full-match-btn">查看全部比赛</a>
+                    </td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="section-title">武器熟练度</div>
+    <div class="panel">
+        <table>
+            <thead>
+                <tr>
+                    <th>武器</th>
+                    <th>熟练度等级</th>
+                    <th>总击杀 / 单场最高</th>
+                    <th>最远击杀(m)</th>
+                    <th>详情</th>
+                </tr>
+            </thead>
+            <tbody id="weaponTableBody">
+                <tr>
+                    <td colspan="5" class="empty">暂无武器数据</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
 <script>
-// 导航链接自动追加防缓存参数
-document.querySelectorAll("nav a").forEach(a=>{
-    const sep = a.href.includes("?") ? "&" : "?";
-    a.href += sep + "_t=" + Date.now();
+let radarChartInstance = null;
+let radarRendered = false;
+const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
+let seasonStat = {};
+
+function calcSingleScore(kill, dmg, rank, win, top10Rate) {
+    let rankScore = rank === 1 ? 100 : rank <= 10 ? 70 : Math.max(0, 100 - rank * 4);
+    let killScore = Math.min(kill * 12, 100);
+    let dmgScore = Math.min(dmg / 12, 100);
+    let winBonus = win ? 12 : 0;
+    return Math.round((rankScore * 0.35 + killScore * 0.35 + dmgScore * 0.2 + winBonus * 0.1) * 10) / 10;
+}
+
+function calcRadarData(data) {
+    const {avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate} = data;
+    let survive = Math.min(avgSurvive / 22 * 100, top10Rate || 0);
+    survive = Math.round(survive);
+    let rating = Math.min(maxRating / 2400 * 100 || 0, 100);
+    rating = Math.round(rating);
+    let fight = Math.min(avgKD * 28 + avgDmg / 15 || 0, 100);
+    fight = Math.round(fight);
+    let assist = Math.min(totalAssist / ((avgSurvive||0.1) * 0.8) * 100 || 0, 100);
+    assist = Math.round(assist);
+    let win = Math.min(winRate * 2.2 || 0, 100);
+    win = Math.round(win);
+    return [survive, rating, fight, assist, win];
+}
+
+function initRadarChart(dataArr) {
+    const canvas = document.getElementById("abilityRadar");
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (radarChartInstance) radarChartInstance.destroy();
+    radarChartInstance = new Chart(ctx, {
+        type: "radar",
+        data: {
+            labels: radarLabels,
+            datasets: [{
+                label: "本赛季综合能力",
+                data: dataArr,
+                backgroundColor: "rgba(255, 215, 0, 0.12)",
+                borderColor: "#ffd700",
+                pointBackgroundColor: "#ffd700",
+                pointBorderColor: "#000",
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                r: {
+                    min:0,max:100,
+                    ticks:{display:false},
+                    grid:{color:"#2a3342"},
+                    angleLines:{color:"#2a3342"}
+                }
+            },
+            plugins:{
+                legend:{labels:{color:"#ddd"}},
+                datalabels:{
+                    color:"#fff",
+                    font:{size:12,weight:"bold"}
+                }
+            }
+        },
+        plugins: [ChartDataLabels]
+    })
+}
+
+const toggleBtn = document.getElementById('toggleMore');
+const collapseWrap = document.getElementById('collapseWrap');
+toggleBtn.addEventListener('click', ()=>{
+    collapseWrap.classList.toggle('show');
+    const show = collapseWrap.classList.contains('show');
+    toggleBtn.innerText = show ? '收起摘要 ▲' : '更多摘要 ▼';
+    if(show && !radarRendered){
+        const radarScore = calcRadarData(seasonStat);
+        initRadarChart(radarScore);
+        radarRendered = true;
+    }
 })
 
-let isRedirecting = false;
-function safeGoLogin(){
-    if (isRedirecting) return;
-    isRedirecting = true;
-    location.href = "index.html";
-}
-
-async function apiFetch(url, opt={}){
-  const token = localStorage.getItem("loginToken");
-  const headers = {
-    "Content-Type":"application/json",
-    ...opt.headers
-  };
-  if(token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(url, {...opt, headers});
-  const contentType = res.headers.get("content-type") || "";
-  if(contentType.includes("text/html")){
-      safeGoLogin();
-      throw new Error("返回页面，鉴权失效");
-  }
-  const json = await res.json();
-  if(res.status === 401 || json.ok === false){
-      localStorage.removeItem("loginToken");
-      localStorage.removeItem("loginUser");
-      localStorage.removeItem("loginRole");
-      safeGoLogin();
-      throw new Error("登录凭证无效");
-  }
-  return json;
-}
-
-function logout(){
-    localStorage.removeItem("loginToken");
+function logout() {
     localStorage.removeItem("loginUser");
-    localStorage.removeItem("loginRole");
-    safeGoLogin();
+    window.location.href = "index.html";
 }
+let currentSeason = "all";
 
-(function initCheck(){
-    const token = localStorage.getItem("loginToken");
-    const username = localStorage.getItem("loginUser");
-    if(!token || !username){
-        safeGoLogin();
+document.addEventListener('DOMContentLoaded', function(){
+    const userName = localStorage.getItem("loginUser");
+    if (!userName) {
+        window.location.href = "index.html";
+        return;
     }
-})();
+    // 【重点】动态渲染登录用户名，修复固定YvainCC
+    document.getElementById("profileUserName").innerText = userName;
 
-window.onload = async function(){
-    const username = localStorage.getItem("loginUser");
-    const role = localStorage.getItem("loginRole");
-    document.getElementById("showUsername").innerText = username;
-    document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
+    loadPlayerStats();
+    document.getElementById('seasonSelect').addEventListener("change", function () {
+        currentSeason = this.value;
+        radarRendered = false;
+        collapseWrap.classList.remove('show');
+        toggleBtn.innerText = '更多摘要 ▼';
+        loadPlayerStats();
+    })
+})
+
+async function loadPlayerStats() {
+    document.getElementById("rankVal").innerText = "--";
+    document.getElementById("matchVal").innerText = "--";
+    document.getElementById("winVal").innerText = "--";
+    document.getElementById("kdVal").innerText = "--";
+    document.getElementById("headerKD").innerText = "--";
+    document.getElementById("deathVal").innerText = "--";
+    document.getElementById("assistVal").innerText = "--";
+    document.getElementById("dmgTotalVal").innerText = "--";
+    document.getElementById("avgSurviveVal").innerText = "--";
+    document.getElementById("winRateVal").innerText = "--%";
+    document.getElementById("top10Val").innerText = "--";
+    document.getElementById("top10RateVal").innerText = "--%";
+    document.getElementById("headRateVal").innerText = "0.0";
+    document.getElementById("bestRankVal").innerText = "--";
+    document.getElementById("avgDmgVal").innerText = "--";
+    document.getElementById("maxSurviveVal").innerText = "--";
+    document.getElementById("matchTableBody").innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
+    document.getElementById("weaponTableBody").innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+    seasonStat = {};
     try {
-        const ts = Date.now();
-        const data = await apiFetch(`/api/playerData.js?username=${username}&_t=${ts}`,{
-            method:"GET"
-        });
-        if(data.ok){
-            const d = data.data;
-            document.getElementById("matchCount").innerText = d.total_match || 0;
-            document.getElementById("winCount").innerText = d.total_win || 0;
-            document.getElementById("kdText").innerText = d.historical_total_kd || "0.00";
-            document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
+        const userName = localStorage.getItem("loginUser");
+        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
+        const json = await res.json();
+        if (!json.ok || !json.data) {
+            return;
         }
-    } catch(e){
-        console.log("数据加载异常：",e);
+        const d = json.data;
+        const totalMatch = Number(d.total_match || 0);
+        const totalWin = Number(d.total_win || 0);
+        const totalKill = Number(d.total_kill || 0);
+        const totalDeath = Number(d.total_death || 0);
+        const totalDamage = Number(d.total_damage || 0);
+        const kdVal = Number(d.historical_total_kd || 0);
+
+        document.getElementById("rankVal").innerText = "-";
+        document.getElementById("matchVal").innerText = totalMatch;
+        document.getElementById("winVal").innerText = totalWin;
+        document.getElementById("kdVal").innerText = kdVal.toFixed(2);
+        document.getElementById("headerKD").innerText = kdVal.toFixed(2);
+        document.getElementById("deathVal").innerText = totalDeath;
+        document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
+
+        const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
+        document.getElementById("winRateVal").innerText = winRate;
+
+        document.getElementById("assistVal").innerText = 0;
+        document.getElementById("avgSurviveVal").innerText = "0.0";
+        document.getElementById("top10Val").innerText = 0;
+        document.getElementById("top10RateVal").innerText = "0.0";
+        document.getElementById("bestRankVal").innerText = "-";
+        document.getElementById("avgDmgVal").innerText = totalMatch > 0 ? Math.round(totalDamage / totalMatch) : 0;
+        document.getElementById("maxSurviveVal").innerText = "0.0";
+
+        seasonStat = {
+            avgSurvive: 0,
+            top10Rate: Number(winRate),
+            maxRating: 1000,
+            avgKD: kdVal,
+            avgDmg: totalMatch > 0 ? totalDamage / totalMatch : 0,
+            totalAssist: 0,
+            winRate: Number(winRate)
+        };
+
+        const matchTbody = document.getElementById("matchTableBody");
+        matchTbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局记录</td>`;
+        const weaponTbody = document.getElementById("weaponTableBody");
+        weaponTbody.innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+    } catch (err) {
+        console.error("加载数据异常", err);
     }
 }
 </script>
