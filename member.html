@@ -82,6 +82,7 @@
             color: #ffd700;
             font-weight: 700;
         }
+        /* 生涯概况卡片：4列 */
         .grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -147,11 +148,32 @@
             max-width: 480px;
             margin: 0 auto;
         }
+        /* 详细赛季数据 - 紧凑卡片 */
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(3,1fr);
-            gap:12px;
-            margin-bottom:20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .stat-grid .card {
+            padding: 12px 14px;
+            border-radius: 8px;
+            background: #1e293b;
+            border-color: #334155;
+        }
+        .stat-grid .card-title {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .stat-grid .card-value {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .stat-grid .card-sub {
+            font-size: 10px;
+            color: #64748b;
+            margin-top: 2px;
         }
         table{
             width:100%;
@@ -159,9 +181,9 @@
         }
         table th,table td{
             border:1px solid #2a3342;
-            padding:12px;
+            padding:10px 8px;
             text-align:center;
-            font-size:14px;
+            font-size:13px;
         }
         table th{
             background:#222d3b;
@@ -243,7 +265,43 @@
             color: #8b95a5;
         }
 
-        /* ===== 移动端适配 ===== */
+        /* 雷达图评分 & 评级 */
+        .radar-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 20px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #2a3342;
+        }
+        .radar-score-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .radar-score-item .label {
+            color: #94a3b8;
+        }
+        .radar-score-item .value {
+            color: #ffd700;
+            font-weight: 700;
+        }
+        .radar-score-item .rating {
+            font-weight: 800;
+            padding: 0 6px;
+            border-radius: 4px;
+            background: #2a3342;
+            color: #fff;
+        }
+        .rating-S { background: #ff6b6b; color: #fff; }
+        .rating-A { background: #feca57; color: #000; }
+        .rating-B { background: #54a0ff; color: #fff; }
+        .rating-C { background: #5f6c80; color: #fff; }
+        .rating-D { background: #2d3436; color: #aaa; }
+
+        /* 移动端适配 */
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -312,27 +370,27 @@
                 font-size: 12px;
             }
             .stat-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
             .stat-grid .card {
-                padding: 12px;
+                padding: 10px 12px;
                 text-align: center;
             }
             .stat-grid .card-title {
-                font-size: 11px;
-                margin-bottom: 4px;
+                font-size: 10px;
+                margin-bottom: 3px;
             }
             .stat-grid .card-value {
-                font-size: 16px;
+                font-size: 15px;
             }
             .panel {
                 padding: 16px;
                 border-radius: 10px;
             }
             table th, table td {
-                padding: 10px 8px;
-                font-size: 13px;
+                padding: 8px 6px;
+                font-size: 12px;
             }
             #toggleMore, .full-match-btn {
                 padding: 14px;
@@ -365,11 +423,11 @@
                 grid-template-columns: repeat(2, 1fr);
             }
             table th, table td {
-                padding: 8px 6px;
-                font-size: 12px;
+                padding: 6px 4px;
+                font-size: 11px;
             }
             .card-value {
-                font-size: 20px;
+                font-size: 18px;
             }
         }
     </style>
@@ -415,7 +473,7 @@
         <div class="card">
             <div class="card-title">当前赛季排名</div>
             <div class="card-value" id="rankVal">--</div>
-            <div class="card-sub">赛季分段总排名</div>
+            <div class="card-sub">（暂未实现）</div>
         </div>
         <div class="card">
             <div class="card-title">总场次</div>
@@ -440,23 +498,15 @@
 
     <div class="collapse-box" id="collapseWrap">
         <div class="section-title">详细赛季数据</div>
-        <div class="stat-grid">
-            <div class="card"><div class="card-title">总死亡</div><div class="card-value" id="deathVal">--</div></div>
-            <div class="card"><div class="card-title">总助攻</div><div class="card-value" id="assistVal">--</div></div>
-            <div class="card"><div class="card-title">总伤害</div><div class="card-value" id="dmgTotalVal">--</div></div>
-            <div class="card"><div class="card-title">场均存活(min)</div><div class="card-value" id="avgSurviveVal">--</div></div>
-            <div class="card"><div class="card-title">吃鸡率</div><div class="card-value" id="winRateVal">--%</div></div>
-            <div class="card"><div class="card-title">前十场次</div><div class="card-value" id="top10Val">--</div></div>
-            <div class="card"><div class="card-title">前十率</div><div class="card-value" id="top10RateVal">--%</div></div>
-            <div class="card"><div class="card-title">爆头率</div><div class="card-value" id="headRateVal">--%</div></div>
-            <div class="card"><div class="card-title">赛季最高排名</div><div class="card-value" id="bestRankVal">--</div></div>
-            <div class="card"><div class="card-title">场均伤害</div><div class="card-value" id="avgDmgVal">--</div></div>
-            <div class="card"><div class="card-title">最长存活</div><div class="card-value" id="maxSurviveVal">--</div></div>
+        <div class="stat-grid" id="statGrid">
+            <!-- 由 JS 动态生成，便于控制顺序 -->
         </div>
 
         <div class="section-title">个人综合能力雷达图</div>
         <div class="panel radar-wrap">
             <canvas id="abilityRadar"></canvas>
+            <!-- 雷达图评分与评级 -->
+            <div class="radar-footer" id="radarFooter"></div>
         </div>
     </div>
 
@@ -466,10 +516,10 @@
             <thead>
                 <tr>
                     <th>排名</th>
-                    <th>模式</th>
-                    <th>段位</th>
                     <th>击杀</th>
                     <th>伤害</th>
+                    <th>助攻</th>
+                    <th>爆头</th>
                     <th>单局评分</th>
                 </tr>
             </thead>
@@ -500,7 +550,7 @@
 <script>
 let radarChartInstance = null;
 let radarRendered = false;
-const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
+const radarLabels = ["生存", "Rating", "战斗", "支援", "吃鸡率"];
 let allMatchData = [];
 let currentSeason = "all";
 
@@ -521,6 +571,7 @@ function calcRadarData(matches) {
     const winRate = (winCount / total) * 100;
     const top10Rate = (top10Count / total) * 100;
 
+    // 小黑盒风格评分（0-100）
     let survive = Math.min((avgSurvive / 25) * 100, 100);
     let rating = Math.min((avgKD / 3) * 100 + (avgDmg / 300) * 20, 100);
     let fight = Math.min((avgKD * 25) + (avgDmg / 20), 100);
@@ -529,6 +580,15 @@ function calcRadarData(matches) {
     return [Math.round(survive), Math.round(rating), Math.round(fight), Math.round(assist), Math.round(win)];
 }
 
+function getRadarRating(score) {
+    if (score >= 90) return { label: 'S', cls: 'rating-S' };
+    if (score >= 80) return { label: 'A', cls: 'rating-A' };
+    if (score >= 70) return { label: 'B', cls: 'rating-B' };
+    if (score >= 60) return { label: 'C', cls: 'rating-C' };
+    return { label: 'D', cls: 'rating-D' };
+}
+
+// 单局评分（黑盒风格）
 function calcSingleScore(kill, dmg, rank, win, top10Rate) {
     let rankScore = rank === 1 ? 100 : rank <= 10 ? 70 : Math.max(0, 100 - rank * 4);
     let killScore = Math.min(kill * 12, 100);
@@ -540,9 +600,15 @@ function calcSingleScore(kill, dmg, rank, win, top10Rate) {
 // ---------- 主加载 ----------
 async function loadPlayerStats() {
     // 清空
-    document.querySelectorAll('.card-value, #headerKD').forEach(el => el.innerText = '--');
+    document.getElementById('rankVal').innerText = '--';
+    document.getElementById('matchVal').innerText = '--';
+    document.getElementById('winVal').innerText = '--';
+    document.getElementById('kdVal').innerText = '--';
+    document.getElementById('headerKD').innerText = '--';
     document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
     document.getElementById('weaponTableBody').innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+    document.getElementById('statGrid').innerHTML = '';
+    document.getElementById('radarFooter').innerHTML = '';
     allMatchData = [];
 
     try {
@@ -572,6 +638,7 @@ async function loadPlayerStats() {
         const headshotCount = matches.reduce((s,m) => s + (m.爆头击杀数||0), 0);
         const bestRank = Math.min(...matches.map(m => m.队伍排名||999));
         const maxSurvive = Math.max(...matches.map(m => m.存活时间||0));
+        const maxKillDist = Math.max(...matches.map(m => m.最长击杀距离||0));
 
         const avgSurviveMin = totalSurvive / total / 60;
         const kd = totalDeath === 0 ? totalKill : totalKill / totalDeath;
@@ -580,39 +647,54 @@ async function loadPlayerStats() {
         const headRate = totalKill === 0 ? 0 : (headshotCount / totalKill) * 100;
         const avgDmg = totalDamage / total;
 
-        // 填充卡片
+        // 填充生涯概况卡片
         document.getElementById("rankVal").innerText = "-";
         document.getElementById("matchVal").innerText = total;
         document.getElementById("winVal").innerText = winCount;
         document.getElementById("kdVal").innerText = kd.toFixed(2);
         document.getElementById("headerKD").innerText = kd.toFixed(2);
-        document.getElementById("deathVal").innerText = totalDeath;
-        document.getElementById("assistVal").innerText = totalAssist;
-        document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
-        document.getElementById("avgSurviveVal").innerText = avgSurviveMin.toFixed(1);
-        document.getElementById("winRateVal").innerText = winRate.toFixed(1) + '%';
-        document.getElementById("top10Val").innerText = top10Count;
-        document.getElementById("top10RateVal").innerText = top10Rate.toFixed(1) + '%';
-        document.getElementById("headRateVal").innerText = headRate.toFixed(1) + '%';
-        document.getElementById("bestRankVal").innerText = bestRank === 999 ? '-' : bestRank;
-        document.getElementById("avgDmgVal").innerText = Math.round(avgDmg);
-        document.getElementById("maxSurviveVal").innerText = (maxSurvive / 60).toFixed(1) + 'min';
+
+        // 详细赛季数据（紧凑卡片）
+        const statGrid = document.getElementById('statGrid');
+        const statItems = [
+            { label: '总死亡', value: totalDeath, suffix: '' },
+            { label: '总助攻', value: totalAssist, suffix: '' },
+            { label: '总伤害', value: totalDamage.toFixed(2), suffix: '' },
+            { label: '场均存活(min)', value: avgSurviveMin.toFixed(1), suffix: 'min' },
+            { label: '吃鸡率', value: winRate.toFixed(1), suffix: '%' },
+            { label: '前十场次', value: top10Count, suffix: '' },
+            { label: '前十率', value: top10Rate.toFixed(1), suffix: '%' },
+            { label: '爆头率', value: headRate.toFixed(1), suffix: '%' },
+            { label: '赛季队伍最高排名', value: bestRank === 999 ? '-' : bestRank, suffix: '' },
+            { label: '场均伤害', value: avgDmg.toFixed(2), suffix: '' },
+            { label: '最长存活', value: (maxSurvive / 60).toFixed(1), suffix: 'min' },
+            { label: '最长击杀距离(米)', value: maxKillDist.toFixed(2), suffix: '' }
+        ];
+        statGrid.innerHTML = statItems.map(item => `
+            <div class="card">
+                <div class="card-title">${item.label}</div>
+                <div class="card-value">${item.value}</div>
+                <div class="card-sub">${item.suffix}</div>
+            </div>
+        `).join('');
 
         // 雷达图数据
-        seasonStat = {
-            avgSurvive: avgSurviveMin,
-            top10Rate: top10Rate,
-            maxRating: kd * 200 + avgDmg * 0.5,
-            avgKD: kd,
-            avgDmg: avgDmg,
-            totalAssist: totalAssist,
-            winRate: winRate
-        };
+        const radarData = calcRadarData(matches);
         if (radarRendered && radarChartInstance) {
-            const radarData = calcRadarData(matches);
             radarChartInstance.data.datasets[0].data = radarData;
             radarChartInstance.update();
         }
+        // 雷达图下方评分与评级
+        const footer = document.getElementById('radarFooter');
+        const labels = ['生存', 'Rating', '战斗', '支援', '吃鸡率'];
+        footer.innerHTML = radarData.map((score, idx) => {
+            const rating = getRadarRating(score);
+            return `<div class="radar-score-item">
+                <span class="label">${labels[idx]}</span>
+                <span class="value">${score}</span>
+                <span class="rating ${rating.cls}">${rating.label}</span>
+            </div>`;
+        }).join('');
 
         // 近期10场（按赛季降序，同赛季按数组顺序）
         const sorted = [...matches].sort((a,b) => {
@@ -631,12 +713,19 @@ async function loadPlayerStats() {
             recent.forEach(m => {
                 const rank = m.队伍排名 || '-';
                 const kills = m.击杀数 || 0;
-                const damage = Math.round(m.总伤害量 || 0);
+                const damage = (m.总伤害量 || 0);
+                const assist = m.助攻数 || 0;
+                const headshot = m.爆头击杀数 || 0;
                 const score = calcSingleScore(kills, damage, rank, rank === 1, 0);
-                const mode = 'TPP';
-                const tier = '钻石';
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${rank}</td><td>${mode}</td><td>${tier}</td><td>${kills}</td><td>${damage}</td><td>${score}</td>`;
+                tr.innerHTML = `
+                    <td>${rank}</td>
+                    <td>${kills}</td>
+                    <td>${damage.toFixed(2)}</td>
+                    <td>${assist}</td>
+                    <td>${headshot}</td>
+                    <td>${score}</td>
+                `;
                 tbody.appendChild(tr);
             });
         }
@@ -647,6 +736,7 @@ async function loadPlayerStats() {
     }
 }
 
+// ---------- 雷达图初始化 ----------
 function initRadarChart(dataArr) {
     const canvas = document.getElementById("abilityRadar");
     if (!canvas) return;
@@ -657,31 +747,45 @@ function initRadarChart(dataArr) {
         data: {
             labels: radarLabels,
             datasets: [{
-                label: "本赛季综合能力",
+                label: "综合能力",
                 data: dataArr,
-                backgroundColor: "rgba(255, 215, 0, 0.12)",
+                backgroundColor: "rgba(255, 215, 0, 0.15)",
                 borderColor: "#ffd700",
                 pointBackgroundColor: "#ffd700",
-                pointBorderColor: "#000",
-                pointRadius: 4
+                pointBorderColor: "#0f1419",
+                pointRadius: 4,
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: true,
             scales: {
-                r: { min:0, max:100, ticks:{display:false}, grid:{color:"#2a3342"}, angleLines:{color:"#2a3342"} }
+                r: {
+                    min: 0,
+                    max: 100,
+                    ticks: { display: false },
+                    grid: { color: "#2a3342" },
+                    angleLines: { color: "#2a3342" },
+                    pointLabels: { color: "#b8c2cc", font: { size: 12 } }
+                }
             },
             plugins: {
-                legend: { labels: { color:"#ddd" } },
-                datalabels: { color:"#fff", font:{size:12,weight:"bold"} }
+                legend: { display: false },
+                datalabels: {
+                    color: "#fff",
+                    font: { size: 11, weight: "bold" },
+                    anchor: 'end',
+                    align: 'end',
+                    offset: 2
+                }
             }
         },
         plugins: [ChartDataLabels]
     });
 }
 
-// 展开/收起
+// ---------- 展开/收起 ----------
 const toggleBtn = document.getElementById('toggleMore');
 const collapseWrap = document.getElementById('collapseWrap');
 toggleBtn.addEventListener('click', ()=>{
@@ -695,12 +799,14 @@ toggleBtn.addEventListener('click', ()=>{
     }
 });
 
+// ---------- 退出登录 ----------
 function logout() {
     localStorage.removeItem("loginUser");
     localStorage.removeItem("userRole");
     window.location.href = "index.html";
 }
 
+// ---------- 页面初始化 ----------
 document.addEventListener('DOMContentLoaded', function(){
     const userName = localStorage.getItem("loginUser");
     if (!userName) {
