@@ -24,6 +24,8 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #2a3342;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         .logo {
             font-size: 22px;
@@ -34,6 +36,7 @@
         .nav-links {
             display: flex;
             gap: 24px;
+            flex-wrap: wrap;
         }
         .nav-links a {
             color: #b8c2cc;
@@ -45,6 +48,10 @@
         .nav-links a:hover,
         .nav-links a.active {
             color: #ffd700;
+        }
+        .nav-links a.admin-link {
+            color: #ffd700;
+            font-weight: 700;
         }
         .logout {
             color: #ff5555;
@@ -236,7 +243,7 @@
             color: #8b95a5;
         }
 
-        /* ===== 移动端小黑盒适配核心样式 ===== */
+        /* ===== 移动端适配 ===== */
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -332,7 +339,6 @@
                 font-size: 15px;
                 border-radius: 10px;
             }
-            /* 头部信息卡片移动端 */
             .profile-header {
                 padding: 14px;
                 gap: 12px;
@@ -377,6 +383,8 @@
         <a href="team.html">我的战队</a>
         <a href="#">比赛回放</a>
         <a href="#">赞助公示</a>
+        <!-- 后台管理入口：默认隐藏，由 JS 控制显示 -->
+        <a href="admin.html" id="adminLink" class="admin-link" style="display:none;">⚙️ 后台管理</a>
     </nav>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
@@ -389,7 +397,7 @@
         </select>
     </div>
 
-    <!-- 小黑盒风格玩家信息头部【名称动态读取】 -->
+    <!-- 小黑盒风格玩家信息头部 -->
     <div class="profile-header">
         <div class="profile-avatar">
             <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
@@ -589,6 +597,7 @@ toggleBtn.addEventListener('click', ()=>{
 
 function logout() {
     localStorage.removeItem("loginUser");
+    localStorage.removeItem("userRole");
     window.location.href = "index.html";
 }
 let currentSeason = "all";
@@ -599,8 +608,15 @@ document.addEventListener('DOMContentLoaded', function(){
         window.location.href = "index.html";
         return;
     }
-    // 【重点】动态渲染登录用户名，修复固定YvainCC
+    // 显示登录用户名
     document.getElementById("profileUserName").innerText = userName;
+
+    // ===== 超级管理员后台入口控制 =====
+    const userRole = localStorage.getItem("userRole");
+    const adminLink = document.getElementById("adminLink");
+    if (userRole === "admin") {
+        adminLink.style.display = "inline";
+    }
 
     loadPlayerStats();
     document.getElementById('seasonSelect').addEventListener("change", function () {
