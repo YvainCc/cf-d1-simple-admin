@@ -51,7 +51,7 @@ export async function onRequest({ request, env }) {
       }
     }
     return Response.json({ ok: false, msg: "非法请求" }, { headers: corsHeaders });
-  } catch (err)
+  } catch (err) {
     return Response.json({ ok: false, msg: "服务异常：" + err.message }, { status: 500, headers: corsHeaders });
   }
 }
