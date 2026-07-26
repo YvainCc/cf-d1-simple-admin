@@ -65,7 +65,7 @@
 </head>
 <body>
 <div class="login-box">
-    <h2 class="login-title">D.M.N 战队管理系统登录</h2>
+    <h2 class="login-title">D.M.N 战队管理系统登录</h2
     <div class="item">
         <input type="text" id="username" placeholder="请输入账号">
     </div>
@@ -76,12 +76,35 @@
     <div class="err-text" id="errorMsg"></div>
 </div>
 <script>
+// 全局带Token请求封装
+async function apiFetch(url, opt={}){
+  const token = localStorage.getItem("loginToken");
+  const headers = {
+    "Content-Type":"application/json",
+    ...opt.headers
+  };
+  if(token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(url, {...opt, headers});
+  const json = await res.json();
+  if(res.status === 401 || String(json.msg).includes("登录")){
+    localStorage.clear();
+    window.location.href="index.html";
+    throw new Error("登录失效");
+  }
+  return json;
+}
+
+function showErr(text) {
+    errorMsg.innerText = '服务异常：' + text;
+    errorMsg.style.display = 'block';
+}
+
 const usernameInput = document.getElementById('username');
 const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
 const errorMsg = document.getElementById('errorMsg');
 
-submitBtn.addEventListener('click', loginSubmit);
+submit.addEventListener('click', loginSubmit);
 document.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') loginSubmit();
 })
@@ -95,34 +118,63 @@ async function loginSubmit() {
         return;
     }
     try {
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: "login",
-                username: username,
-                password: password
-            })
-        })
-        const data = await res.json();
+        const data = await apiFetch("/api/login", {
+            method: "POST",
+            body: JSON.stringify({ action: "login", username, password })
+        });
         if (data.ok) {
-            // 存储登录账号，用于页面鉴权、超管按钮判断
-            localStorage.setItem("loginUser", username);
+            // 存储Token、用户名、角色
+            localStorage.setItem("loginToken", data.token);
+            localStorage.setItem("loginUser", data.username);
+            localStorage.setItem("userRole", data.role);
             window.location.href = 'member.html';
         } else {
             showErr(data.msg);
         }
     } catch (err) {
         showErr('网络请求失败，请稍后重试');
-        console.error(err);
     }
-}
-function showErr(text) {
-    errorMsg.innerText = '服务异常：' + text;
-    errorMsg.style.display = 'block';
 }
 </script>
 </body>
 </html>
+
+# 二、通用JS片段（所有页面member.html / team.html / ranks.html / admin.html / admin_db.html / sponsor.html 头部直接插入）
+## 每个html的`<script>`标签最顶部粘贴这段
+```js
+// 全局带Token请求封装，自动携带登录凭证、过期跳转登录
+async function apiFetch(url, opt={}){
+  const token = localStorage.getItem("loginToken");
+  const headers = {
+    "Content-Type":"application/json",
+    ...opt.headers
+  };
+  if(token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(url, {...opt, headers});
+  const json = await res.json();
+  // 401/登录失效自动清空缓存跳登录页
+  if(res.status === 401 || String(json.msg).includes("登录")){
+    localStorage.clear();
+    window.location.href="index.html";
+    throw new Error("登录失效");
+  }
+  return json;
+}
+
+// 统一退出登录函数（替换原有logout）
+function logout(){
+  localStorage.removeItem("loginToken");
+  localStorage.removeItem("loginUser");
+  localStorage.removeItem("userRole");
+  window.location.href="index.html";
+}
+
+// 页面鉴权：无登录直接跳登录
+window.onload = function(){
+  const user = localStorage.getItem("loginUser");
+  const token = localStorage.getItem("loginToken");
+  if(!user || !token){
+    window.location.href="index.html";
+  }
+  // 原有页面加载逻辑写在下方
+}
