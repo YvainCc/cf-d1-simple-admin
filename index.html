@@ -81,7 +81,6 @@ const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
 const errorMsg = document.getElementById('errorMsg');
 
-// 修复！变量名 submitBtn，不是 submit
 submitBtn.addEventListener('click', loginSubmit);
 document.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') loginSubmit();
@@ -96,7 +95,7 @@ async function loginSubmit() {
         return;
     }
     try {
-        const res = await fetch('/api/login.js', {
+        const res = await fetch('/api/login', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -109,10 +108,9 @@ async function loginSubmit() {
         })
         const data = await res.json();
         if (data.ok) {
-            localStorage.setItem("loginToken", data.token);
+            // 存储登录账号，用于页面鉴权、超管按钮判断
             localStorage.setItem("loginUser", username);
-            localStorage.setItem("loginRole", data.role);
-            window.location.assign('member.html?_t=' + Date.now());
+            window.location.href = 'member.html';
         } else {
             showErr(data.msg);
         }
@@ -122,7 +120,7 @@ async function loginSubmit() {
     }
 }
 function showErr(text) {
-    errorMsg.innerText = text;
+    errorMsg.innerText = '服务异常：' + text;
     errorMsg.style.display = 'block';
 }
 </script>
