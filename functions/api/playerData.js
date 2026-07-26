@@ -22,7 +22,7 @@ export async function onRequest({ request, env }) {
             return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
         }
 
-        // 1. 根据用户名获取玩家ID（仅查当前有效名称）
+        // 1. 根据用户名获取玩家ID
         const userSql = `SELECT id FROM 人员表 WHERE 游戏名称 = ? AND 是否当前 = 1 AND 状态 = 'active'`;
         const userResult = await env.DB.prepare(userSql).bind(username).first();
         if (!userResult) {
@@ -30,13 +30,13 @@ export async function onRequest({ request, env }) {
         }
         const playerId = userResult.id;
 
-        // 2. 构建战绩查询
+        // 2. 构建战绩查询（包含最长击杀距离）
         let sql, params;
         if (season === "all") {
             sql = `
                 SELECT 
                     赛季, 队伍排名, 击杀数, 死亡类型, 总伤害量, 
-                    助攻数, 存活时间, 爆头击杀数
+                    助攻数, 存活时间, 爆头击杀数, 最长击杀距离
                 FROM 战绩表
                 WHERE 玩家账号ID = ?
                 ORDER BY 赛季 DESC
@@ -46,7 +46,7 @@ export async function onRequest({ request, env }) {
             sql = `
                 SELECT 
                     赛季, 队伍排名, 击杀数, 死亡类型, 总伤害量, 
-                    助攻数, 存活时间, 爆头击杀数
+                    助攻数, 存活时间, 爆头击杀数, 最长击杀距离
                 FROM 战绩表
                 WHERE 玩家账号ID = ? AND 赛季 = ?
                 ORDER BY 赛季 DESC
