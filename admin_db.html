@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>超级管理员数据库建模后台</title>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
 body{background:#0c1117;color:#e6edf7;height:100vh;display:flex;overflow:hidden}
@@ -64,6 +65,7 @@ th{background:#1a2332;color:#ffd700}
     <h4>快捷运维功能</h4>
     <button class="func-btn btn-green" onclick="openModal('sqlModal')">自定义SQL执行</button>
     <button class="func-btn btn-blue" onclick="openModal('excelImportModal')">Excel赛季数据导入</button>
+    <button class="func-btn btn-blue" onclick="openModal('matchCsvImportModal')">CSV对局战绩导入(player_match)</button>
     <button class="func-btn btn-gray" onclick="aggSeasonData()">一键聚合赛季汇总</button>
     <button class="func-btn btn-gray" onclick="exportAllTableSQL()">全库备份导出SQL</button>
     <button class="func-btn btn-blue" onclick="openModal('userManageModal')">账号权限管理</button>
@@ -119,7 +121,28 @@ th{background:#1a2332;color:#ffd700}
   </div>
 </div>
 
-<!-- 3.新建表弹窗 -->
+<!-- 3.player_match CSV对局导入弹窗 -->
+<div class="mask" id="matchCsvImportModal">
+  <div class="modal">
+    <h3>📁 player_match 对局战绩 CSV批量导入（仅超级管理员）</h3>
+    <div style="color:#ffc970;font-size:13px;margin:6px 0;">
+CSV表头字段顺序（严格一致，不含id）：<br>
+team_no,team_rank,team_rank_score,player_name,kills,final_rank,total_score,total_damage,knockdowns,assists,energy_items,death_type,headshot_kills,heal_items,kill_rank,kill_streak,longest_kill_distance,player_account_id,revives,vehicle_distance,vehicle_kills,swim_distance,team_kills,survival_time,vehicle_destroyed,walk_distance,weapons_picked,season
+    </div>
+    <input type="file" id="csvMatchFile" accept=".csv" class="file-input">
+    <div style="margin:8px 0;display:flex;gap:8px">
+      <button class="func-btn btn-gray" style="width:auto" onclick="previewMatchCsv()">预览前10条</button>
+      <button class="func-btn btn-green" style="width:auto" onclick="startImportMatchCsv()">开始批量导入</button>
+    </div>
+    <div id="csvMatchPreview" style="max-height:240px;overflow:auto;border:1px solid #242e3f;padding:8px;font-size:12px;white-space:pre;color:#b8c2cc;"></div>
+    <div id="csvMatchLog" style="margin-top:10px;color:#8cb4e8;"></div>
+    <div class="modal-buttons">
+      <button class="func-btn btn-gray" onclick="closeModal('matchCsvImportModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4.新建表弹窗 -->
 <div class="mask" id="createTableModal">
   <div class="modal">
     <h3>可视化新建数据表</h3>
@@ -134,7 +157,7 @@ th{background:#1a2332;color:#ffd700}
   </div>
 </div>
 
-<!-- 4.账号管理弹窗 -->
+<!-- 5.账号管理弹窗 -->
 <div class="mask" id="userManageModal">
   <div class="modal" style="width:800px">
     <h3>队员账号权限管理（仅超级管理员可操作）</h3>
@@ -172,12 +195,35 @@ const DB_META = [
     tableName:"player_match",
     tableDesc:"单局对局明细表，存储每一把游戏原始对战数据",
     fields:[
-      {name:"user_id",type:"INTEGER",constraint:"",desc:"关联users表id，玩家账号ID"},
-      {name:"season",type:"TEXT",constraint:"",desc:"赛季 S5/S6"},
-      {name:"kills",type:"INTEGER",constraint:"",desc:"单局击杀数"},
-      {name:"damage",type:"REAL",constraint:"",desc:"单局总伤害"},
-      {name:"assist",type:"INTEGER",constraint:"",desc:"单局助攻"},
-      {name:"survive_min",type:"INTEGER",constraint:"",desc:"本局存活分钟"}
+      {name:"id",type:"INTEGER",constraint:"PRIMARY KEY AUTOINCREMENT",desc:"自增主键"},
+      {name:"team_no",type:"TEXT",constraint:"",desc:"队伍编号"},
+      {name:"team_rank",type:"INTEGER",constraint:"",desc:"队伍排名"},
+      {name:"team_rank_score",type:"REAL",constraint:"",desc:"队伍排名分数"},
+      {name:"player_name",type:"TEXT",constraint:"",desc:"玩家名称"},
+      {name:"kills",type:"INTEGER",constraint:"",desc:"击杀数"},
+      {name:"final_rank",type:"INTEGER",constraint:"",desc:"最终排名"},
+      {name:"total_score",type:"REAL",constraint:"",desc:"总分数"},
+      {name:"total_damage",type:"INTEGER",constraint:"",desc:"总伤害量"},
+      {name:"knockdowns",type:"INTEGER",constraint:"",desc:"击倒数"},
+      {name:"assists",type:"INTEGER",constraint:"",desc:"助攻数"},
+      {name:"energy_items",type:"INTEGER",constraint:"",desc:"能量道具使用数"},
+      {name:"death_type",type:"TEXT",constraint:"",desc:"死亡类型"},
+      {name:"headshot_kills",type:"INTEGER",constraint:"",desc:"爆头击杀数"},
+      {name:"heal_items",type:"INTEGER",constraint:"",desc:"治疗道具使用数"},
+      {name:"kill_rank",type:"INTEGER",constraint:"",desc:"击杀排名"},
+      {name:"kill_streak",type:"INTEGER",constraint:"",desc:"连杀数"},
+      {name:"longest_kill_distance",type:"REAL",constraint:"",desc:"最长击杀距离（米）"},
+      {name:"player_account_id",type:"TEXT",constraint:"",desc:"玩家账号ID"},
+      {name:"revives",type:"INTEGER",constraint:"",desc:"救援队友数"},
+      {name:"vehicle_distance",type:"REAL",constraint:"",desc:"载具行驶距离（米）"},
+      {name:"vehicle_kills",type:"INTEGER",constraint:"",desc:"载具击杀数"},
+      {name:"swim_distance",type:"REAL",constraint:"",desc:"游泳距离（米）"},
+      {name:"team_kills",type:"INTEGER",constraint:"",desc:"误伤队友击杀数"},
+      {name:"survival_time",type:"INTEGER",constraint:"",desc:"存活时间（秒）"},
+      {name:"vehicle_destroyed",type:"INTEGER",constraint:"",desc:"载具摧毁数"},
+      {name:"walk_distance",type:"REAL",constraint:"",desc:"步行距离（米）"},
+      {name:"weapons_picked",type:"INTEGER",constraint:"",desc:"拾取武器数"},
+      {name:"season",type:"TEXT",constraint:"",desc:"赛季"}
     ]
   },
   {
@@ -420,7 +466,6 @@ async function uploadExcelData(){
   const file = document.getElementById("excelFile").files[0];
   if(!file) return alert("请选择Excel文件");
   alert("前端解析Excel逻辑需引入xlsx.js，Worker接收数组批量执行INSERT OR REPLACE");
-  // 完整逻辑需引入 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 }
 
 // ====================== 5.新建表可视化 ======================
@@ -518,6 +563,73 @@ function genTableER(){
     <p style="margin:10px 0;color:#b8c2cc">2. users.id ↔ player_season_total.user_id</p>
     <p style="margin:10px 0;color:#b8c2cc">3. player_match.season 关联 player_season_total.season</p>
   </div>`;
+}
+
+// ====================== player_match CSV导入功能 ======================
+let matchCsvRows = [];
+const matchColNames = [
+    "team_no","team_rank","team_rank_score","player_name","kills","final_rank","total_score",
+    "total_damage","knockdowns","assists","energy_items","death_type","headshot_kills",
+    "heal_items","kill_rank","kill_streak","longest_kill_distance","player_account_id",
+    "revives","vehicle_distance","vehicle_kills","swim_distance","team_kills","survival_time",
+    "vehicle_destroyed","walk_distance","weapons_picked","season"
+];
+
+function previewMatchCsv(){
+    const file = document.getElementById("csvMatchFile").files[0];
+    if(!file) return alert("请先选择CSV文件");
+    Papa.parse(file,{
+        header:true,
+        skipEmptyLines:true,
+        complete:function(res){
+            matchCsvRows = res.data;
+            const show = matchCsvRows.slice(0,10);
+            document.getElementById("csvMatchPreview").innerText = JSON.stringify(show,null,2);
+            document.getElementById("csvMatchLog").innerText = `解析完成，总计待导入：${matchCsvRows.length} 条对局`;
+        }
+    })
+}
+
+async function startImportMatchCsv(){
+    if(matchCsvRows.length === 0){
+        alert("请先选择文件并预览解析");
+        return;
+    }
+    if(!confirm(`确认导入 ${matchCsvRows.length} 条对局记录到 player_match？`)) return;
+    const logBox = document.getElementById("csvMatchLog");
+    logBox.innerText = "正在生成批量SQL...";
+    const batchSize = 120;
+    const sqlBatchList = [];
+
+    for(let i=0;i<matchCsvRows.length;i+=batchSize){
+        const slice = matchCsvRows.slice(i,i+batchSize);
+        const valueLines = [];
+        for(const row of slice){
+            const vals = matchColNames.map(key=>{
+                const v = row[key] ?? "";
+                if(!isNaN(Number(v)) && v !== "") return Number(v);
+                return "'" + String(v).replaceAll("'","''") + "'";
+            })
+            valueLines.push("(" + vals.join(",") + ")");
+        }
+        const sql = `INSERT INTO player_match(
+team_no,team_rank,team_rank_score,player_name,kills,final_rank,total_score,total_damage,knockdowns,assists,energy_items,death_type,headshot_kills,heal_items,kill_rank,kill_streak,longest_kill_distance,player_account_id,revives,vehicle_distance,vehicle_kills,swim_distance,team_kills,survival_time,vehicle_destroyed,walk_distance,weapons_picked,season
+) VALUES ${valueLines.join(",")};`;
+        sqlBatchList.push(sql);
+    }
+
+    logBox.innerText = `拆分${sqlBatchList.length}批，开始导入`;
+    let success = 0;
+    for(let idx=0;idx<sqlBatchList.length;idx++){
+        try{
+            await submitSqlRequest(sqlBatchList[idx]);
+            success++;
+            logBox.innerText = `进度：${success}/${sqlBatchList.length}`;
+        }catch(err){
+            logBox.innerText += `\n第${idx+1}批失败:${err.message}`;
+        }
+    }
+    logBox.innerText += "\n====全部批次执行完成====";
 }
 
 // 页面初始化
