@@ -24,7 +24,7 @@
             background-color: #111317;
         }
         .header-title {
-            font-size: 22px;
+            font-size: 22;
             color: #ffd337;
             font-weight: bold;
         }
@@ -128,7 +128,6 @@
             <div style="text-align:right;color:#aaa;font-size:13px">KD</div>
         </div>
     </div>
-
     <h3 style="margin-bottom:16px">个人生涯概况</h3>
     <div class="grid-row">
         <div class="stat-item">
@@ -158,7 +157,7 @@
 </div>
 
 <script>
-// 导航链接自动追加随机防缓存参数
+// 导航链接自动追加防缓存参数
 document.querySelectorAll("nav a").forEach(a=>{
     const sep = a.href.includes("?") ? "&" : "?";
     a.href += sep + "_t=" + Date.now();
@@ -166,7 +165,7 @@ document.querySelectorAll("nav a").forEach(a=>{
 
 let isRedirecting = false;
 function safeGoLogin(){
-    if(isRedirecting) return;
+    if (isRedirecting) return;
     isRedirecting = true;
     location.href = "index.html";
 }
@@ -180,7 +179,6 @@ async function apiFetch(url, opt={}){
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
   const contentType = res.headers.get("content-type") || "";
-
   if(contentType.includes("text/html")){
       safeGoLogin();
       throw new Error("返回页面，鉴权失效");
@@ -203,7 +201,6 @@ function logout(){
     safeGoLogin();
 }
 
-// 页面最优先鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
     const username = localStorage.getItem("loginUser");
@@ -217,7 +214,6 @@ window.onload = async function(){
     const role = localStorage.getItem("loginRole");
     document.getElementById("showUsername").innerText = username;
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
-
     try {
         const ts = Date.now();
         const data = await apiFetch(`/api/playerData.js?username=${username}&_t=${ts}`,{
