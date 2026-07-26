@@ -1,11 +1,29 @@
-export async function onRequest({ request, env }) {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
-  if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+import { jwtVerify } from 'jose';
+const JWT_SECRET = new TextEncoder("DMN2026_SecretKey_99887766");
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type,Authorization"
+};
+function getBearerToken(req) {
+  const auth = req.headers.get("Authorization") || "";
+  return auth.startsWith("Bearer ") ? auth.slice(7) : null;
+}
+async function verifyLogin(req) {
+  const token = getBearerToken(req);
+  if (!token) throw new Error("未登录，请重新登录");
+  const { payload } = await jwtVerify(token);
+  return payload;
+}
 
+export async function onRequest({ request, env }) {
+  if (request.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  let loginInfo;
+  try {
+    loginInfo = await verifyLogin(request);
+  } catch (e) {
+    return Response.json({ ok:false, msg:e.message },{status:401, headers:corsHeaders});
+  }
   // GET 接口：获取选手列表 / 报名审核列表
   if (request.method === "GET") {
     const url = new URL(request.url);
@@ -30,22 +48,16 @@ export async function onRequest({ request, env }) {
       return Response.json({ok:true,list:list.results},{headers:corsHeaders});
     }
   }
-
   // POST 接口：修改选手KD / 审核战队报名
   if (request.method === "POST") {
     const body = await request.json();
-    // 权限校验：仅管理员可操作
-    const adminCheck = await env.DB.prepare(`
-      SELECT role FROM admin WHERE username = ?
-    `).bind(body.adminName).first();
-    if(!adminCheck || adminCheck.role !== "admin"){
+    // 权限校验：仅admin/super可操作
+    if(loginInfo.role !== "admin" && loginInfo.role !== "super"){
       return Response.json({ok:false,msg:"无管理员操作权限"},{headers:corsHeaders});
     }
-
     // 功能1：选手KD数据录入/编辑
     if(body.type === "editPlayerStat"){
       const {playerId, total_kill, total_match, total_win, total_damage, historical_total_kd} = body;
-      // 判断是否已有数据，更新或新增
       const existStat = await env.DB.prepare(`SELECT id FROM player_stats WHERE player_id = ?`).bind(playerId).first();
       if(existStat){
         await env.DB.prepare(`
@@ -61,14 +73,12 @@ export async function onRequest({ request, env }) {
       }
       return Response.json({ok:true,msg:"选手数据修改保存成功"},{headers:corsHeaders});
     }
-
-    // 功能2：战队报名审核（通过/驳回）
+    // 功能2：战队报名审核
     if(body.type === "auditReg"){
       const {regId, newStatus} = body;
       await env.DB.prepare(`UPDATE registrations SET status = ? WHERE id = ?`).bind(newStatus, regId).run();
       return Response.json({ok:true,msg:"报名审核状态更新完成"},{headers:corsHeaders});
     }
   }
-
   return Response.json({ok:false,msg:"非法请求方式"},{status:405,headers:corsHeaders});
 }
