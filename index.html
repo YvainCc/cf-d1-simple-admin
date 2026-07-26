@@ -95,7 +95,8 @@ async function loginSubmit() {
         return;
     }
     try {
-        const res = await fetch('/api/login', {
+        // 接口地址更正为 /api/login.js
+        const res = await fetch('/api/login.js', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -108,9 +109,12 @@ async function loginSubmit() {
         })
         const data = await res.json();
         if (data.ok) {
-            // 存储登录账号，用于页面鉴权、超管按钮判断
+            // 三个存储键名和member.html完全对齐
+            localStorage.setItem("loginToken", data.token);
             localStorage.setItem("loginUser", username);
-            window.location.href = 'member.html';
+            localStorage.setItem("loginRole", data.role);
+            // 携带随机时间戳跳转，防止308缓存
+            window.location.assign('member.html?_t=' + Date.now());
         } else {
             showErr(data.msg);
         }
@@ -120,7 +124,7 @@ async function loginSubmit() {
     }
 }
 function showErr(text) {
-    errorMsg.innerText = '服务异常：' + text;
+    errorMsg.innerText = text;
     errorMsg.style.display = 'block';
 }
 </script>
