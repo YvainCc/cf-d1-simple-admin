@@ -158,6 +158,12 @@
 </div>
 
 <script>
+// 导航链接自动追加随机防缓存参数
+document.querySelectorAll("nav a").forEach(a=>{
+    const sep = a.href.includes("?") ? "&" : "?";
+    a.href += sep + "_t=" + Date.now();
+})
+
 let isRedirecting = false;
 function safeGoLogin(){
     if(isRedirecting) return;
