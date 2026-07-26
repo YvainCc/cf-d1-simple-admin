@@ -383,7 +383,6 @@
         <a href="team.html">我的战队</a>
         <a href="#">比赛回放</a>
         <a href="#">赞助公示</a>
-        <!-- 后台管理入口：默认隐藏，由 JS 控制显示 -->
         <a href="admin.html" id="adminLink" class="admin-link" style="display:none;">⚙️ 后台管理</a>
     </nav>
     <div class="logout" onclick="logout()">退出登录</div>
@@ -397,7 +396,6 @@
         </select>
     </div>
 
-    <!-- 小黑盒风格玩家信息头部 -->
     <div class="profile-header">
         <div class="profile-avatar">
             <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
@@ -476,16 +474,12 @@
                 </tr>
             </thead>
             <tbody id="matchTableBody">
-                <tr>
-                    <td colspan="6" class="empty">加载对局数据...</td>
-                </tr>
+                <tr><td colspan="6" class="empty">加载对局数据...</td></tr>
             </tbody>
             <tfoot>
-                <tr>
-                    <td colspan="6">
-                        <a href="matchAll.html" class="full-match-btn">查看全部比赛</a>
-                    </td>
-                </tr>
+                <tr><td colspan="6">
+                    <a href="matchAll.html" class="full-match-btn">查看全部比赛</a>
+                </td></tr>
             </tfoot>
         </table>
     </div>
@@ -494,18 +488,10 @@
     <div class="panel">
         <table>
             <thead>
-                <tr>
-                    <th>武器</th>
-                    <th>熟练度等级</th>
-                    <th>总击杀 / 单场最高</th>
-                    <th>最远击杀(m)</th>
-                    <th>详情</th>
-                </tr>
+                <tr><th>武器</th><th>熟练度等级</th><th>总击杀 / 单场最高</th><th>最远击杀(m)</th><th>详情</th></tr>
             </thead>
             <tbody id="weaponTableBody">
-                <tr>
-                    <td colspan="5" class="empty">暂无武器数据</td>
-                </tr>
+                <tr><td colspan="5" class="empty">暂无武器数据</td></tr>
             </tbody>
         </table>
     </div>
@@ -515,7 +501,33 @@
 let radarChartInstance = null;
 let radarRendered = false;
 const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
-let seasonStat = {};
+let allMatchData = [];
+let currentSeason = "all";
+
+// ---------- 工具函数 ----------
+function calcRadarData(matches) {
+    if (!matches || matches.length === 0) return [0,0,0,0,0];
+    const total = matches.length;
+    const totalKill = matches.reduce((s,m) => s + (m.击杀数||0), 0);
+    const totalDamage = matches.reduce((s,m) => s + (m.总伤害量||0), 0);
+    const totalAssist = matches.reduce((s,m) => s + (m.助攻数||0), 0);
+    const totalSurvive = matches.reduce((s,m) => s + (m.存活时间||0), 0);
+    const winCount = matches.filter(m => (m.队伍排名||0) === 1).length;
+    const top10Count = matches.filter(m => (m.队伍排名||0) <= 10).length;
+    const avgSurvive = totalSurvive / total / 60;
+    const deathCount = matches.filter(m => m.死亡类型 !== 'alive').length;
+    const avgKD = deathCount === 0 ? totalKill : totalKill / deathCount;
+    const avgDmg = totalDamage / total;
+    const winRate = (winCount / total) * 100;
+    const top10Rate = (top10Count / total) * 100;
+
+    let survive = Math.min((avgSurvive / 25) * 100, 100);
+    let rating = Math.min((avgKD / 3) * 100 + (avgDmg / 300) * 20, 100);
+    let fight = Math.min((avgKD * 25) + (avgDmg / 20), 100);
+    let assist = Math.min((totalAssist / total) * 10, 100);
+    let win = Math.min(winRate * 2, 100);
+    return [Math.round(survive), Math.round(rating), Math.round(fight), Math.round(assist), Math.round(win)];
+}
 
 function calcSingleScore(kill, dmg, rank, win, top10Rate) {
     let rankScore = rank === 1 ? 100 : rank <= 10 ? 70 : Math.max(0, 100 - rank * 4);
@@ -525,19 +537,114 @@ function calcSingleScore(kill, dmg, rank, win, top10Rate) {
     return Math.round((rankScore * 0.35 + killScore * 0.35 + dmgScore * 0.2 + winBonus * 0.1) * 10) / 10;
 }
 
-function calcRadarData(data) {
-    const {avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate} = data;
-    let survive = Math.min(avgSurvive / 22 * 100, top10Rate || 0);
-    survive = Math.round(survive);
-    let rating = Math.min(maxRating / 2400 * 100 || 0, 100);
-    rating = Math.round(rating);
-    let fight = Math.min(avgKD * 28 + avgDmg / 15 || 0, 100);
-    fight = Math.round(fight);
-    let assist = Math.min(totalAssist / ((avgSurvive||0.1) * 0.8) * 100 || 0, 100);
-    assist = Math.round(assist);
-    let win = Math.min(winRate * 2.2 || 0, 100);
-    win = Math.round(win);
-    return [survive, rating, fight, assist, win];
+// ---------- 主加载 ----------
+async function loadPlayerStats() {
+    // 清空
+    document.querySelectorAll('.card-value, #headerKD').forEach(el => el.innerText = '--');
+    document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
+    document.getElementById('weaponTableBody').innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+    allMatchData = [];
+
+    try {
+        const userName = localStorage.getItem("loginUser");
+        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
+        const json = await res.json();
+        if (!json.ok || !json.data) {
+            document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">暂无数据</td>`;
+            return;
+        }
+        const matches = json.data;
+        allMatchData = matches;
+        if (matches.length === 0) {
+            document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">该赛季暂无对局</td>`;
+            return;
+        }
+
+        // 基本统计
+        const total = matches.length;
+        const totalKill = matches.reduce((s,m) => s + (m.击杀数||0), 0);
+        const totalDeath = matches.filter(m => m.死亡类型 !== 'alive').length;
+        const totalAssist = matches.reduce((s,m) => s + (m.助攻数||0), 0);
+        const totalDamage = matches.reduce((s,m) => s + (m.总伤害量||0), 0);
+        const totalSurvive = matches.reduce((s,m) => s + (m.存活时间||0), 0);
+        const winCount = matches.filter(m => (m.队伍排名||0) === 1).length;
+        const top10Count = matches.filter(m => (m.队伍排名||0) <= 10).length;
+        const headshotCount = matches.reduce((s,m) => s + (m.爆头击杀数||0), 0);
+        const bestRank = Math.min(...matches.map(m => m.队伍排名||999));
+        const maxSurvive = Math.max(...matches.map(m => m.存活时间||0));
+
+        const avgSurviveMin = totalSurvive / total / 60;
+        const kd = totalDeath === 0 ? totalKill : totalKill / totalDeath;
+        const winRate = (winCount / total) * 100;
+        const top10Rate = (top10Count / total) * 100;
+        const headRate = totalKill === 0 ? 0 : (headshotCount / totalKill) * 100;
+        const avgDmg = totalDamage / total;
+
+        // 填充卡片
+        document.getElementById("rankVal").innerText = "-";
+        document.getElementById("matchVal").innerText = total;
+        document.getElementById("winVal").innerText = winCount;
+        document.getElementById("kdVal").innerText = kd.toFixed(2);
+        document.getElementById("headerKD").innerText = kd.toFixed(2);
+        document.getElementById("deathVal").innerText = totalDeath;
+        document.getElementById("assistVal").innerText = totalAssist;
+        document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
+        document.getElementById("avgSurviveVal").innerText = avgSurviveMin.toFixed(1);
+        document.getElementById("winRateVal").innerText = winRate.toFixed(1) + '%';
+        document.getElementById("top10Val").innerText = top10Count;
+        document.getElementById("top10RateVal").innerText = top10Rate.toFixed(1) + '%';
+        document.getElementById("headRateVal").innerText = headRate.toFixed(1) + '%';
+        document.getElementById("bestRankVal").innerText = bestRank === 999 ? '-' : bestRank;
+        document.getElementById("avgDmgVal").innerText = Math.round(avgDmg);
+        document.getElementById("maxSurviveVal").innerText = (maxSurvive / 60).toFixed(1) + 'min';
+
+        // 雷达图数据
+        seasonStat = {
+            avgSurvive: avgSurviveMin,
+            top10Rate: top10Rate,
+            maxRating: kd * 200 + avgDmg * 0.5,
+            avgKD: kd,
+            avgDmg: avgDmg,
+            totalAssist: totalAssist,
+            winRate: winRate
+        };
+        if (radarRendered && radarChartInstance) {
+            const radarData = calcRadarData(matches);
+            radarChartInstance.data.datasets[0].data = radarData;
+            radarChartInstance.update();
+        }
+
+        // 近期10场（按赛季降序，同赛季按数组顺序）
+        const sorted = [...matches].sort((a,b) => {
+            const sa = a.赛季 || '';
+            const sb = b.赛季 || '';
+            const numA = parseInt(sa.replace('S','')) || 0;
+            const numB = parseInt(sb.replace('S','')) || 0;
+            return numB - numA;
+        });
+        const recent = sorted.slice(0, 10);
+        const tbody = document.getElementById('matchTableBody');
+        tbody.innerHTML = '';
+        if (recent.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局</td>`;
+        } else {
+            recent.forEach(m => {
+                const rank = m.队伍排名 || '-';
+                const kills = m.击杀数 || 0;
+                const damage = Math.round(m.总伤害量 || 0);
+                const score = calcSingleScore(kills, damage, rank, rank === 1, 0);
+                const mode = 'TPP';
+                const tier = '钻石';
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${rank}</td><td>${mode}</td><td>${tier}</td><td>${kills}</td><td>${damage}</td><td>${score}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+    } catch (err) {
+        console.error('加载数据异常', err);
+        document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">加载失败</td>`;
+    }
 }
 
 function initRadarChart(dataArr) {
@@ -563,25 +670,18 @@ function initRadarChart(dataArr) {
             responsive: true,
             maintainAspectRatio: true,
             scales: {
-                r: {
-                    min:0,max:100,
-                    ticks:{display:false},
-                    grid:{color:"#2a3342"},
-                    angleLines:{color:"#2a3342"}
-                }
+                r: { min:0, max:100, ticks:{display:false}, grid:{color:"#2a3342"}, angleLines:{color:"#2a3342"} }
             },
-            plugins:{
-                legend:{labels:{color:"#ddd"}},
-                datalabels:{
-                    color:"#fff",
-                    font:{size:12,weight:"bold"}
-                }
+            plugins: {
+                legend: { labels: { color:"#ddd" } },
+                datalabels: { color:"#fff", font:{size:12,weight:"bold"} }
             }
         },
         plugins: [ChartDataLabels]
-    })
+    });
 }
 
+// 展开/收起
 const toggleBtn = document.getElementById('toggleMore');
 const collapseWrap = document.getElementById('collapseWrap');
 toggleBtn.addEventListener('click', ()=>{
@@ -589,18 +689,17 @@ toggleBtn.addEventListener('click', ()=>{
     const show = collapseWrap.classList.contains('show');
     toggleBtn.innerText = show ? '收起摘要 ▲' : '更多摘要 ▼';
     if(show && !radarRendered){
-        const radarScore = calcRadarData(seasonStat);
-        initRadarChart(radarScore);
+        const radarData = calcRadarData(allMatchData);
+        initRadarChart(radarData);
         radarRendered = true;
     }
-})
+});
 
 function logout() {
     localStorage.removeItem("loginUser");
     localStorage.removeItem("userRole");
     window.location.href = "index.html";
 }
-let currentSeason = "all";
 
 document.addEventListener('DOMContentLoaded', function(){
     const userName = localStorage.getItem("loginUser");
@@ -608,10 +707,8 @@ document.addEventListener('DOMContentLoaded', function(){
         window.location.href = "index.html";
         return;
     }
-    // 显示登录用户名
     document.getElementById("profileUserName").innerText = userName;
 
-    // ===== 超级管理员后台入口控制 =====
     const userRole = localStorage.getItem("userRole");
     const adminLink = document.getElementById("adminLink");
     if (userRole === "admin") {
@@ -625,81 +722,8 @@ document.addEventListener('DOMContentLoaded', function(){
         collapseWrap.classList.remove('show');
         toggleBtn.innerText = '更多摘要 ▼';
         loadPlayerStats();
-    })
-})
-
-async function loadPlayerStats() {
-    document.getElementById("rankVal").innerText = "--";
-    document.getElementById("matchVal").innerText = "--";
-    document.getElementById("winVal").innerText = "--";
-    document.getElementById("kdVal").innerText = "--";
-    document.getElementById("headerKD").innerText = "--";
-    document.getElementById("deathVal").innerText = "--";
-    document.getElementById("assistVal").innerText = "--";
-    document.getElementById("dmgTotalVal").innerText = "--";
-    document.getElementById("avgSurviveVal").innerText = "--";
-    document.getElementById("winRateVal").innerText = "--%";
-    document.getElementById("top10Val").innerText = "--";
-    document.getElementById("top10RateVal").innerText = "--%";
-    document.getElementById("headRateVal").innerText = "0.0";
-    document.getElementById("bestRankVal").innerText = "--";
-    document.getElementById("avgDmgVal").innerText = "--";
-    document.getElementById("maxSurviveVal").innerText = "--";
-    document.getElementById("matchTableBody").innerHTML = `<tr><td colspan="6" class="empty">加载对局数据...</td>`;
-    document.getElementById("weaponTableBody").innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
-    seasonStat = {};
-    try {
-        const userName = localStorage.getItem("loginUser");
-        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
-        const json = await res.json();
-        if (!json.ok || !json.data) {
-            return;
-        }
-        const d = json.data;
-        const totalMatch = Number(d.total_match || 0);
-        const totalWin = Number(d.total_win || 0);
-        const totalKill = Number(d.total_kill || 0);
-        const totalDeath = Number(d.total_death || 0);
-        const totalDamage = Number(d.total_damage || 0);
-        const kdVal = Number(d.historical_total_kd || 0);
-
-        document.getElementById("rankVal").innerText = "-";
-        document.getElementById("matchVal").innerText = totalMatch;
-        document.getElementById("winVal").innerText = totalWin;
-        document.getElementById("kdVal").innerText = kdVal.toFixed(2);
-        document.getElementById("headerKD").innerText = kdVal.toFixed(2);
-        document.getElementById("deathVal").innerText = totalDeath;
-        document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
-
-        const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
-        document.getElementById("winRateVal").innerText = winRate;
-
-        document.getElementById("assistVal").innerText = 0;
-        document.getElementById("avgSurviveVal").innerText = "0.0";
-        document.getElementById("top10Val").innerText = 0;
-        document.getElementById("top10RateVal").innerText = "0.0";
-        document.getElementById("bestRankVal").innerText = "-";
-        document.getElementById("avgDmgVal").innerText = totalMatch > 0 ? Math.round(totalDamage / totalMatch) : 0;
-        document.getElementById("maxSurviveVal").innerText = "0.0";
-
-        seasonStat = {
-            avgSurvive: 0,
-            top10Rate: Number(winRate),
-            maxRating: 1000,
-            avgKD: kdVal,
-            avgDmg: totalMatch > 0 ? totalDamage / totalMatch : 0,
-            totalAssist: 0,
-            winRate: Number(winRate)
-        };
-
-        const matchTbody = document.getElementById("matchTableBody");
-        matchTbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局记录</td>`;
-        const weaponTbody = document.getElementById("weaponTableBody");
-        weaponTbody.innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
-    } catch (err) {
-        console.error("加载数据异常", err);
-    }
-}
+    });
+});
 </script>
 </body>
 </html>
