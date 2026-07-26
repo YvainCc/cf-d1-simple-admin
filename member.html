@@ -166,8 +166,10 @@ async function apiFetch(url, opt={}){
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
   const contentType = res.headers.get("content-type") || "";
+  // 如果返回html，判定为未登录，跳转登录页
   if(contentType.includes("text/html")){
-      throw new Error("路由命中静态页面");
+      window.location.href="index.html";
+      throw new Error("登录身份失效");
   }
   const json = await res.json();
   if(res.status === 401){
@@ -201,9 +203,9 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // 追加时间戳 _t 破除308永久重定向缓存
+        // 固定使用带.js后缀稳定路由地址
         const ts = Date.now();
-        const data = await apiFetch(`/api/playerData?username=${username}&_t=${ts}`,{
+        const data = await apiFetch(`/api/playerData.js?username=${username}&_t=${ts}`,{
             method:"GET"
         });
         if(data.ok){
