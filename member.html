@@ -152,6 +152,7 @@
 </div>
 
 <script>
+// 封装请求：增加html拦截判断，防止接口返回页面代码解析报错
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -160,6 +161,11 @@ async function apiFetch(url, opt={}){
   };
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
+
+  const contentType = res.headers.get("content-type") || "";
+  if(contentType.includes("text/html")){
+      throw new Error("路由异常：接口返回HTML页面");
+  }
   const json = await res.json();
   if(res.status === 401){
     localStorage.removeItem("loginToken");
@@ -171,6 +177,7 @@ async function apiFetch(url, opt={}){
   return json;
 }
 
+// 退出登录
 function logout(){
     localStorage.removeItem("loginToken");
     localStorage.removeItem("loginUser");
@@ -178,6 +185,7 @@ function logout(){
     window.location.href="index.html";
 }
 
+// 页面载入鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
     if(!token){
@@ -192,7 +200,7 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // 标准原始接口地址，不带.js
+        // 标准接口地址，不带.js，和全站保持统一
         const data = await apiFetch(`/api/playerData?username=${username}`,{
             method:"GET"
         });
@@ -204,7 +212,7 @@ window.onload = async function(){
             document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
         }
     } catch(e){
-        console.log("数据加载失败",e);
+        console.log("数据加载异常：",e);
     }
 }
 </script>
