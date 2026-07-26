@@ -194,30 +194,28 @@ function logout(){
     }
 })();
 
-// 延迟启动请求，避开页面初始化瞬间路由缓存冲突
 window.onload = async function(){
     const username = localStorage.getItem("loginUser");
     const role = localStorage.getItem("userRole");
     document.getElementById("showUsername").innerText = username;
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
-    setTimeout(async ()=>{
-        try {
-            // 原始标准接口，不添加任何后缀，保持全站路由统一
-            const data = await apiFetch(`/api/playerData?username=${username}`,{
-                method:"GET"
-            });
-            if(data.ok){
-                const d = data.data;
-                document.getElementById("matchCount").innerText = d.total_match || 0;
-                document.getElementById("winCount").innerText = d.total_win || 0;
-                document.getElementById("kdText").innerText = d.historical_total_kd || "0.00";
-                document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
-            }
-        } catch(e){
-            console.log("数据加载异常：",e);
+    try {
+        // 追加时间戳 _t 破除308永久重定向缓存
+        const ts = Date.now();
+        const data = await apiFetch(`/api/playerData?username=${username}&_t=${ts}`,{
+            method:"GET"
+        });
+        if(data.ok){
+            const d = data.data;
+            document.getElementById("matchCount").innerText = d.total_match || 0;
+            document.getElementById("winCount").innerText = d.total_win || 0;
+            document.getElementById("kdText").innerText = d.historical_total_kd || "0.00";
+            document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
         }
-    }, 400);
+    } catch(e){
+        console.log("数据加载异常：",e);
+    }
 }
 </script>
 </body>
