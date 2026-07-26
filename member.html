@@ -195,7 +195,7 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // ✅ 修复关键点：拼接 ?username 参数，解决后端【缺少username参数】报错
+        // 恢复原始标准接口地址 /api/playerData
         const data = await apiFetch(`/api/playerData?username=${username}`,{
             method:"GET"
         });
