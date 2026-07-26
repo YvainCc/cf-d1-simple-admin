@@ -83,7 +83,7 @@
             background:#1f2836;
             color:#b8c2cc;
             cursor:pointer;
-            font-size:14px;
+            font-size:14;
             transition:0.2s;
         }
         .tab-group button.active {
@@ -91,7 +91,6 @@
             color:#0c1117;
             font-weight:bold;
         }
-        /* 前三名金银铜卡片 顺序：亚军 - 冠军 - 季军 */
         .top3-wrap {
             display: grid;
             grid-template-columns: repeat(3,1fr);
@@ -133,7 +132,6 @@
             font-size:13px;
             color:#dddddd;
         }
-        /* 表格区域 */
         .table-wrap {
             background:#161d28;
             border:1px solid #2a3342;
@@ -162,7 +160,6 @@
             text-align:center;
             color:#828c9c;
         }
-        /* 移动端适配 */
         @media(max-width:768px){
             .top3-wrap {
                 grid-template-columns:1fr;
@@ -214,8 +211,6 @@
             <option value="S6">S6赛季</option>
         </select>
     </div>
-
-    <!-- 金银铜前三名 顺序：亚军 - 冠军 - 季军 -->
     <div class="top3-wrap" id="top3Box">
         <div class="rank-card rank-2" id="card2">
             <div class="rank-medal">🥈</div>
@@ -236,7 +231,6 @@
             <div class="rank-desc">总击杀 -- | KD --</div>
         </div>
     </div>
-
     <div class="table-wrap">
         <table>
             <thead>
@@ -259,13 +253,33 @@
         </table>
     </div>
 </div>
-
 <script>
+async function apiFetch(url, opt={}){
+  const token = localStorage.getItem("loginToken");
+  const headers = {
+    "Content-Type":"application/json",
+    ...opt.headers
+  };
+  if(token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(url, {...opt, headers});
+  const json = await res.json();
+  if(res.status === 401 || String(json.msg).includes("登录")){
+    localStorage.clear();
+    window.location.href="index.html";
+    throw new Error("登录失效");
+  }
+  return json;
+}
+function logout(){
+  localStorage.removeItem("loginToken");
+  localStorage.removeItem("loginUser");
+  localStorage.removeItem("userRole");
+  window.location.href="index.html";
+}
 let currentType = "kill";
 let currentSeason = "all";
 const tabBtns = document.querySelectorAll(".tab-group button");
 const seasonSel = document.getElementById("seasonSelect");
-
 tabBtns.forEach(btn=>{
     btn.addEventListener("click",()=>{
         tabBtns.forEach(b=>b.classList.remove("active"));
@@ -278,41 +292,28 @@ seasonSel.addEventListener("change",()=>{
     currentSeason = seasonSel.value;
     loadRankData();
 })
-
-function logout() {
-    localStorage.removeItem("loginUser");
-    window.location.href = "index.html";
-}
-
 function fillEmptyCard(el){
     el.querySelector(".rank-name").innerText = "--";
     el.querySelector(".rank-value-line").innerText = "--";
     el.querySelector(".rank-desc").innerText = "总击杀 -- | KD --";
 }
-
 async function loadRankData(){
-    const res = await fetch(`/api/rank?season=${currentSeason}&type=${currentType}`);
-    const json = await res.json();
-    // 修复：后端数组键名为 list，不是 data
+    const json = await apiFetch(`/api/rank?season=${currentSeason}&type=${currentType}`);
     const list = Array.isArray(json) ? json : (json.list || []);
-    
     const tbody = document.getElementById("rankTbody");
     const card1 = document.getElementById("card1");
     const card2 = document.getElementById("card2");
     const card3 = document.getElementById("card3");
-
     if(list.length === 0){
-        tbody.innerHTML = `<tr><td colspan="8" class="empty-tip">暂无榜单数据</td>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="empty-tip">暂无榜单数据</tr>`;
         fillEmptyCard(card1);
         fillEmptyCard(card2);
         fillEmptyCard(card3);
         return;
     }
-    // 填充前三名卡片
     const first = list[0];
     const second = list[1] || {};
     const third = list[2] || {};
-
     function fillCard(el, item){
         let showVal;
         switch(currentType){
@@ -329,8 +330,6 @@ async function loadRankData(){
     fillCard(card1, first);
     fillCard(card2, second);
     fillCard(card3, third);
-
-    // 表格渲染
     let html = "";
     list.forEach((row,idx)=>{
         html += `
@@ -347,14 +346,14 @@ async function loadRankData(){
     })
     tbody.innerHTML = html;
 }
-
-document.addEventListener("DOMContentLoaded",()=>{
+document.addEventListener("DOMContentLoaded",async ()=>{
     const uname = localStorage.getItem("loginUser");
-    if(!uname){
+    const token = localStorage.getItem("loginToken");
+    if(!uname || !token){
         window.location.href="index.html";
         return;
     }
-    loadRankData();
+    await loadRankData();
 })
 </script>
 </body>
