@@ -1,10 +1,8 @@
-# 接口跨域配置
 /api/*
   Access-Control-Allow-Origin: *
   Access-Control-Allow-Methods: GET,POST,OPTIONS
   Access-Control-Allow-Headers: Content-Type,Authorization
   Cache-Control: no-cache, no-store, must-revalidate
 
-# 静态页面关闭缓存，避免308跳转缓存
 *.html
   Cache-Control: no-cache, must-revalidate
