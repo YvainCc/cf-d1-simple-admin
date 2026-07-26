@@ -105,11 +105,12 @@ async function loginSubmit() {
                 username: username,
                 password: password
             })
-        })
+        });
         const data = await res.json();
         if (data.ok) {
-            // 存储登录账号，用于页面鉴权、超管按钮判断
+            // ✅ 存储登录账号和角色
             localStorage.setItem("loginUser", username);
+            localStorage.setItem("userRole", data.role);   // 关键修复
             window.location.href = 'member.html';
         } else {
             showErr(data.msg);
