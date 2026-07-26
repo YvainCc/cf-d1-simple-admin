@@ -81,7 +81,7 @@ const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
 const errorMsg = document.getElementById('errorMsg');
 
-submitBtn.addEventListener('click', loginSubmit);
+submit.addEventListener('click', loginSubmit);
 document.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') loginSubmit();
 })
@@ -95,7 +95,6 @@ async function loginSubmit() {
         return;
     }
     try {
-        // 接口地址更正为 /api/login.js
         const res = await fetch('/api/login.js', {
             method: 'POST',
             headers: {
@@ -109,11 +108,9 @@ async function loginSubmit() {
         })
         const data = await res.json();
         if (data.ok) {
-            // 三个存储键名和member.html完全对齐
             localStorage.setItem("loginToken", data.token);
             localStorage.setItem("loginUser", username);
             localStorage.setItem("loginRole", data.role);
-            // 携带随机时间戳跳转，防止308缓存
             window.location.assign('member.html?_t=' + Date.now());
         } else {
             showErr(data.msg);
