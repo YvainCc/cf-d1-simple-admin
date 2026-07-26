@@ -1,81 +1,73 @@
-// 全新重建
+// /functions/api/playerData.js
 export async function onRequest({ request, env }) {
-  try {
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type"
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET,OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type"
     };
 
     if (request.method === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
+        return new Response(null, { headers: corsHeaders });
     }
     if (request.method !== "GET") {
-      return Response.json({ ok: false, msg: "仅支持GET请求" }, { status: 405, headers: corsHeaders });
+        return Response.json({ ok: false, msg: "仅支持GET请求" }, { status: 405, headers: corsHeaders });
     }
 
-    const url = new URL(request.url);
-    const username = url.searchParams.get("username");
-    const season = url.searchParams.get("season") || "all";
+    try {
+        const url = new URL(request.url);
+        const username = url.searchParams.get("username");
+        const season = url.searchParams.get("season") || "all";
 
-    if (!username) {
-      return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
+        if (!username) {
+            return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
+        }
+
+        // 1. 根据用户名获取玩家ID（仅查当前有效名称）
+        const userSql = `SELECT id FROM 人员表 WHERE 游戏名称 = ? AND 是否当前 = 1 AND 状态 = 'active'`;
+        const userResult = await env.DB.prepare(userSql).bind(username).first();
+        if (!userResult) {
+            return Response.json({ ok: false, msg: "用户不存在或已禁用" }, { headers: corsHeaders });
+        }
+        const playerId = userResult.id;
+
+        // 2. 构建战绩查询
+        let sql, params;
+        if (season === "all") {
+            sql = `
+                SELECT 
+                    赛季, 队伍排名, 击杀数, 死亡类型, 总伤害量, 
+                    助攻数, 存活时间, 爆头击杀数
+                FROM 战绩表
+                WHERE 玩家账号ID = ?
+                ORDER BY 赛季 DESC
+            `;
+            params = [playerId];
+        } else {
+            sql = `
+                SELECT 
+                    赛季, 队伍排名, 击杀数, 死亡类型, 总伤害量, 
+                    助攻数, 存活时间, 爆头击杀数
+                FROM 战绩表
+                WHERE 玩家账号ID = ? AND 赛季 = ?
+                ORDER BY 赛季 DESC
+            `;
+            params = [playerId, season];
+        }
+
+        const { results } = await env.DB.prepare(sql).bind(...params).all();
+
+        return Response.json({
+            ok: true,
+            data: results || []
+        }, { headers: corsHeaders });
+
+    } catch (err) {
+        console.error('playerData error:', err);
+        return Response.json({
+            ok: false,
+            msg: "服务异常",
+            error: err.message,
+            stack: err.stack
+        }, { status: 500, headers: corsHeaders });
     }
-
-    let sql, params;
-    if (season === "all") {
-      sql = `
-        SELECT 
-          IFNULL(SUM(s.total_kill),0) AS total_kill,
-          IFNULL(SUM(s.total_match),0) AS total_match,
-          IFNULL(SUM(s.total_win),0) AS total_win,
-          IFNULL(SUM(s.total_damage),0) AS total_damage,
-          IFNULL(SUM(s.total_death),0) AS total_death
-        FROM admin a
-        LEFT JOIN player_stats s ON a.id = s.player_id
-        WHERE a.username = ? AND a.active = 1
-      `;
-      params = [username];
-    } else {
-      sql = `
-        SELECT 
-          IFNULL(s.total_kill,0) AS total_kill,
-          IFNULL(s.total_match,0) AS total_match,
-          IFNULL(s.total_win,0) AS total_win,
-          IFNULL(s.total_damage,0) AS total_damage,
-          IFNULL(s.total_death,0) AS total_death,
-          IFNULL(s.historical_total_kd,0) AS historical_total_kd
-        FROM admin a
-        LEFT JOIN player_stats s ON a.id = s.player_id
-        WHERE a.username = ? AND a.active = 1 AND s.season = ?
-      `;
-      params = [username, season];
-    }
-
-    const row = await env.DB.prepare(sql).bind(...params).first();
-    const data = row || {
-      total_kill:0,
-      total_match:0,
-      total_win:0,
-      total_damage:0,
-      total_death:0,
-      historical_total_kd:0
-    };
-    data.username = username;
-
-    if (season === "all") {
-      const death = Number(data.total_death) || 0;
-      const kill = Number(data.total_kill) || 0;
-      data.historical_total_kd = death > 0 ? parseFloat((kill/death).toFixed(2)) : 0;
-    }
-
-    return Response.json({ ok:true, data }, { headers:corsHeaders });
-  } catch (err) {
-    return Response.json({
-      ok: false,
-      msg: "服务异常",
-      error: err.message,
-      stack: err.stack
-    });
-  }
 }
