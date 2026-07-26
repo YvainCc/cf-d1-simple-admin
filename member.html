@@ -158,6 +158,13 @@
 </div>
 
 <script>
+let isRedirecting = false;
+function safeGoLogin(){
+    if(isRedirecting) return;
+    isRedirecting = true;
+    location.href = "index.html";
+}
+
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -167,18 +174,18 @@ async function apiFetch(url, opt={}){
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
   const contentType = res.headers.get("content-type") || "";
-  // 如果返回html，判定为未登录，跳转登录页
+
   if(contentType.includes("text/html")){
-      window.location.href="index.html";
-      throw new Error("登录身份失效");
+      safeGoLogin();
+      throw new Error("返回页面，鉴权失效");
   }
   const json = await res.json();
-  if(res.status === 401){
-    localStorage.removeItem("loginToken");
-    localStorage.removeItem("loginUser");
-    localStorage.removeItem("userRole");
-    window.location.href="index.html";
-    throw new Error("登录失效");
+  if(res.status === 401 || json.ok === false){
+      localStorage.removeItem("loginToken");
+      localStorage.removeItem("loginUser");
+      localStorage.removeItem("loginRole");
+      safeGoLogin();
+      throw new Error("登录凭证无效");
   }
   return json;
 }
@@ -186,25 +193,26 @@ async function apiFetch(url, opt={}){
 function logout(){
     localStorage.removeItem("loginToken");
     localStorage.removeItem("loginUser");
-    localStorage.removeItem("userRole");
-    window.location.href="index.html";
+    localStorage.removeItem("loginRole");
+    safeGoLogin();
 }
 
+// 页面最优先鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
-    if(!token){
-        window.location.href="index.html";
+    const username = localStorage.getItem("loginUser");
+    if(!token || !username){
+        safeGoLogin();
     }
 })();
 
 window.onload = async function(){
     const username = localStorage.getItem("loginUser");
-    const role = localStorage.getItem("userRole");
+    const role = localStorage.getItem("loginRole");
     document.getElementById("showUsername").innerText = username;
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // 固定使用带.js后缀稳定路由地址
         const ts = Date.now();
         const data = await apiFetch(`/api/playerData.js?username=${username}&_t=${ts}`,{
             method:"GET"
