@@ -1,109 +1,531 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D.M.N 战队管理后台</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, sans-serif;
-        }
-        body {
-            background-color: #f6f8fc;
-            color: #182238;
-        }
-        header {
-            background-color: #1a2a48;
-            color: white;
-            padding: 20px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        header h1 {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .logout-text {
-            color: #c9d1e0;
-            cursor: pointer;
-            font-size: 15px;
-        }
-        .container {
-            max-width: 820px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 28px;
-            margin-bottom: 24px;
-        }
-        .card h2 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            color: #101c33;
-        }
-        .card p {
-            font-size: 14px;
-            color: #444c60;
-            margin: 8px 0;
-        }
-        .list-item {
-            margin: 6px 0;
-            font-size: 14px;
-            color: #333a4f;
-        }
-        .jump-btn{
-            margin-top:16px;
-            padding:10px 20px;
-            background:#1a2a48;
-            color:#fff;
-            border:none;
-            border-radius:6px;
-            cursor:pointer;
-            font-size:14px;
-        }
-        .jump-btn:hover{
-            background:#283b66;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超级管理员数据库建模后台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, sans-serif}
+body{background:#0c1117;color:#e6edf7;height:100vh;display:flex;overflow:hidden}
+/* 侧边栏 */
+.sidebar{width:300px;background:#131a26;border-right:1px solid #242e3f;padding:20px 14px;overflow-y:auto}
+.sidebar h2{color:#ffd700;margin-bottom:20px;font-size:18px;border-bottom:1px solid #242e3f;padding-bottom:10px}
+.menu-group{margin-bottom:24px}
+.menu-group h4{color:#94a2b3;font-size:13px;margin:10px 0 6px}
+.table-item{padding:10px 12px;background:#1a2332;border-radius:6px;margin:5px 0;cursor:pointer}
+.table-item:hover{background:#243042}
+.table-item.active{background:#253b61;border:1px solid #ffd700}
+.tb-name{font-weight:bold;margin-bottom:3px}
+.tb-desc{font-size:12px;color:#8998ad}
+.func-btn{width:100%;padding:9px;border:none;border-radius:6px;margin:6px 0;cursor:pointer;font-size:14px}
+.btn-green{background:#009458;color:#fff}
+.btn-red{background:#c42222;color:#fff}
+.btn-blue{background:#1967d2;color:#fff}
+.btn-gray{background:#2a3648;color:#fff}
+/* 主区域 */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.top-nav{padding:16px 24px;border-bottom:1px solid #242e3f;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.title-text{font-size:20px;color:#ffd700}
+.sql-bar{display:flex;gap:10px;align-items:center}
+#sqlInput{width:520px;height:70px;background:#131a26;border:1px solid #303d52;color:#fff;padding:8px;resize:none;border-radius:4px}
+.content-box{flex:1;padding:24px;overflow-y:auto}
+.card{background:#131a26;border:1px solid #242e3f;border-radius:8px;padding:20px;margin-bottom:20px}
+.card h3{margin-bottom:14px;color:#ffd700}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #242e3f;padding:11px;text-align:left;font-size:14px}
+th{background:#1a2332;color:#ffd700}
+.desc-cell{color:#8cb4e8;font-size:13px}
+.empty-tip{text-align:center;padding:50px;color:#828f9f}
+.loading{color:#ffd700;padding:10px}
+.result-success{color:#4cd964;margin:10px 0}
+.result-error{color:#ff5f57;margin:10px 0}
+/* 弹窗 */
+.mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
+.modal{width:700px;background:#131a26;border:1px solid #ffd700;border-radius:8px;padding:24px;max-height:85vh;overflow-y:auto}
+.modal h3{margin-bottom:16px;color:#ffd700}
+.modal input,.modal textarea,.modal select{width:100%;padding:9px;background:#1a2332;border:1px solid #303d52;color:#fff;margin:8px 0;border-radius:4px}
+.modal-buttons{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+/* 分页、文件上传 */
+.file-input{padding:6px 0}
+.tab-switch{display:flex;gap:8px;margin-bottom:16px}
+.tab{padding:8px 14px;background:#1a2332;border-radius:4px;cursor:pointer}
+.tab.active{background:#ffd700;color:#0c1117;font-weight:bold}
+</style>
 </head>
 <body>
-<header>
-    <h1>D.M.N 战队管理后台（管理员专用）</h1>
-    <span class="logout-text" onclick="logout()">退出登录</span>
-</header>
-<div class="container">
-    <div class="card">
-        <h2>运营总览看板</h2>
-        <p>当前架构：Cloudflare Pages + D1 零成本部署</p>
-        <p>待开发功能模块 (按需求V3.0)：</p>
-        <div class="list-item">1.选手生涯数据、四大个人榜单、战队KD排行榜</div>
-        <div class="list-item">2.战队报名、首发奢侈税自动计算、换人审核</div>
-        <div class="list-item">3.赞助流水台账、奢侈税对账管理</div>
-        <div class="list-item">4.比赛回放/高光片段上传管理（R2存储）</div>
-        <div class="list-item">5.赛季创建、审计日志、选手KD修正功能</div>
-    </div>
-    <div class="card">
-        <h2>管理员操作入口（已开发完成）</h2>
-        <div class="list-item">• 审核中心: 报名/赞助/换人申请处理</div>
-        <div class="list-item">• 选手管理: KD手动修正、批量导入选手</div>
-        <div class="list-item">• 赛季配置: 新建赛季、调整奢侈税起征点</div>
-        <div class="list-item">• 回放上传: mp4赛事视频、高光片段打点</div>
-        <div class="list-item">• 审计日志: 超级管理员专属操作记录查询</div>
-        <button class="jump-btn" onclick="window.location.href='admin.html'">进入选手/报名操作管理后台</button>
-    </div>
+<!-- 侧边菜单 -->
+<div class="sidebar">
+  <h2>数据库建模后台</h2>
+  <div class="menu-group">
+    <h4>数据表列表</h4>
+    <div id="tableList"></div>
+  </div>
+  <div class="menu-group">
+    <h4>快捷运维功能</h4>
+    <button class="func-btn btn-green" onclick="openModal('sqlModal')">自定义SQL执行</button>
+    <button class="func-btn btn-blue" onclick="openModal('excelImportModal')">Excel赛季数据导入</button>
+    <button class="func-btn btn-gray" onclick="aggSeasonData()">一键聚合赛季汇总</button>
+    <button class="func-btn btn-gray" onclick="exportAllTableSQL()">全库备份导出SQL</button>
+    <button class="func-btn btn-blue" onclick="openModal('userManageModal')">账号权限管理</button>
+    <button class="func-btn btn-gray" onclick="renderLogList()">操作审计日志</button>
+  </div>
+  <div class="menu-group">
+    <h4>表结构编辑</h4>
+    <button class="func-btn btn-green" onclick="openModal('createTableModal')">新建数据表</button>
+    <button class="func-btn btn-gray" onclick="genTableER()">查看表关联ER图</button>
+  </div>
+  <div class="menu-group">
+    <h4>缓存控制</h4>
+    <button class="func-btn btn-red" onclick="clearPageCache()">清除全站Pages缓存</button>
+  </div>
 </div>
+
+<!-- 主内容区域 -->
+<div class="main">
+  <div class="top-nav">
+    <div class="title-text" id="tableTitle">请左侧选择数据表查看结构与数据</div>
+    <div class="sql-bar">
+      <textarea id="sqlInput" placeholder="快速输入SQL，Ctrl+Enter执行"></textarea>
+      <button class="func-btn btn-green" style="width:auto" onclick="runQuickSql()">执行SQL</button>
+    </div>
+  </div>
+  <div class="content-box" id="mainContent"></div>
+</div>
+
+<!-- 弹窗容器 -->
+<!-- 1.SQL执行弹窗 -->
+<div class="mask" id="sqlModal">
+  <div class="modal">
+    <h3>自定义SQL执行器（高危操作自动拦截无条件Delete/Update）</h3>
+    <textarea id="modalSql" rows="8" placeholder="输入SQL，支持批量语句"></textarea>
+    <div id="sqlResultBox"></div>
+    <div class="modal-buttons">
+      <button class="func-btn btn-gray" onclick="closeModal('sqlModal')">关闭</button>
+      <button class="func-btn btn-green" onclick="submitModalSql()">执行</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2.Excel导入弹窗 -->
+<div class="mask" id="excelImportModal">
+  <div class="modal">
+    <h3>S6赛季Excel汇总数据导入</h3>
+    <input type="file" id="excelFile" accept=".xlsx,.xls">
+    <div id="excelTip" style="margin:10px 0;color:#94a2b3">上传后自动匹配username与user_id，生成INSERT OR REPLACE写入player_season_total</div>
+    <div class="modal-buttons">
+      <button class="func-btn btn-gray" onclick="closeModal('excelImportModal')">关闭</button>
+      <button class="func-btn btn-green" onclick="uploadExcelData()">解析并导入</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3.新建表弹窗 -->
+<div class="mask" id="createTableModal">
+  <div class="modal">
+    <h3>可视化新建数据表</h3>
+    <input placeholder="数据表名称" id="newTableName">
+    <input placeholder="数据表中文业务备注" id="newTableDesc">
+    <div id="fieldWrap"></div>
+    <button class="func-btn btn-gray" onclick="addFieldRow()">+ 添加字段</button>
+    <div class="modal-buttons">
+      <button class="func-btn btn-gray" onclick="closeModal('createTableModal')">关闭</button>
+      <button class="func-btn btn-green" onclick="createNewTable()">生成建表SQL并执行</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4.账号管理弹窗 -->
+<div class="mask" id="userManageModal">
+  <div class="modal" style="width:800px">
+    <h3>队员账号权限管理（仅超级管理员可操作）</h3>
+    <div id="userListBox"></div>
+    <div class="modal-buttons">
+      <button class="func-btn btn-gray" onclick="closeModal('userManageModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
 <script>
-function logout(){
-    window.location.href = "index.html";
+// ====================== 权限拦截 ======================
+const loginUser = localStorage.getItem("loginUser");
+if (loginUser !== "YvainCC") {
+  alert("无超级管理员权限，跳转首页");
+  window.location.href = "index.html";
 }
+
+// ====================== 数据库元数据（表+字段完整业务备注） ======================
+const DB_META = [
+  {
+    tableName:"users",
+    tableDesc:"全体队员账号信息表，存储登录账号、角色、游戏ID映射",
+    fields:[
+      {name:"id",type:"INTEGER",constraint:"PRIMARY KEY AUTOINCREMENT",desc:"账号自增唯一ID"},
+      {name:"username",type:"TEXT",constraint:"NOT NULL UNIQUE",desc:"游戏玩家昵称，前端展示名称"},
+      {name:"password",type:"TEXT",constraint:"NOT NULL",desc:"登录密码"},
+      {name:"role",type:"TEXT",constraint:"",desc:"身份：member普通队员 / admin管理员 / super超级管理员"},
+      {name:"history_names",type:"TEXT",constraint:"",desc:"历史游戏昵称，斜杠分隔"},
+      {name:"account_id",type:"TEXT",constraint:"",desc:"游戏底层账号唯一标识"},
+      {name:"active",type:"INTEGER",constraint:"",desc:"账号状态 1正常 0禁用"}
+    ]
+  },
+  {
+    tableName:"player_match",
+    tableDesc:"单局对局明细表，存储每一把游戏原始对战数据",
+    fields:[
+      {name:"user_id",type:"INTEGER",constraint:"",desc:"关联users表id，玩家账号ID"},
+      {name:"season",type:"TEXT",constraint:"",desc:"赛季 S5/S6"},
+      {name:"kills",type:"INTEGER",constraint:"",desc:"单局击杀数"},
+      {name:"damage",type:"REAL",constraint:"",desc:"单局总伤害"},
+      {name:"assist",type:"INTEGER",constraint:"",desc:"单局助攻"},
+      {name:"survive_min",type:"INTEGER",constraint:"",desc:"本局存活分钟"}
+    ]
+  },
+  {
+    tableName:"player_season_stats",
+    tableDesc:"赛季场均统计表，存储玩家场均数据",
+    fields:[
+      {name:"username",type:"TEXT",constraint:"",desc:"玩家昵称"},
+      {name:"season",type:"TEXT",constraint:"",desc:"赛季标识"},
+      {name:"avg_kill",type:"REAL",constraint:"",desc:"场均击杀"},
+      {name:"avg_damage",type:"REAL",constraint:"",desc:"场均伤害"},
+      {name:"avg_survive_time",type:"INTEGER",constraint:"",desc:"场均存活秒数"}
+    ]
+  },
+  {
+    tableName:"player_season_total",
+    tableDesc:"赛季汇总总数据表，排行榜专用，存储累计击杀/伤害/KD",
+    fields:[
+      {name:"id",type:"INTEGER",constraint:"PRIMARY KEY AUTOINCREMENT",desc:"汇总记录自增ID"},
+      {name:"user_id",type:"INTEGER",constraint:"DEFAULT 0",desc:"关联users账号ID，无匹配为0"},
+      {name:"username",type:"TEXT",constraint:"NOT NULL",desc:"玩家游戏名称"},
+      {name:"season",type:"TEXT",constraint:"NOT NULL",desc:"赛季S5/S6"},
+      {name:"matches",type:"INTEGER",constraint:"",desc:"赛季总对局数"},
+      {name:"total_kill",type:"INTEGER",constraint:"",desc:"赛季总击杀"},
+      {name:"total_death",type:"INTEGER",constraint:"",desc:"赛季总死亡"},
+      {name:"total_assist",type:"INTEGER",constraint:"",desc:"赛季总助攻"},
+      {name:"total_damage",type:"REAL",constraint:"",desc:"赛季总伤害"},
+      {name:"survive_total",type:"INTEGER",constraint:"",desc:"赛季总存活秒数"},
+      {name:"historical_total_kd",type:"REAL",constraint:"",desc:"赛季总KD"},
+    ],
+    unique:"UNIQUE(username,season)"
+  },
+  {
+    tableName:"admin_operation_log",
+    tableDesc:"超管操作审计日志表，记录所有SQL、数据修改行为",
+    fields:[
+      {name:"id",type:"INTEGER",constraint:"PRIMARY KEY AUTOINCREMENT",desc:"日志ID"},
+      {name:"operator",type:"TEXT",constraint:"",desc:"操作人账号"},
+      {name:"operate_time",type:"TEXT",constraint:"",desc:"操作时间戳"},
+      {name:"sql_content",type:"TEXT",constraint:"",desc:"执行的SQL语句"},
+      {name:"operate_type",type:"TEXT",constraint:"",desc:"操作类型：查询/新增/修改/删除/建表"},
+      {name:"ip",type:"TEXT",constraint:"",desc:"访问IP地址"}
+    ]
+  }
+];
+let activeTable = null;
+
+// ====================== 弹窗通用方法 ======================
+function openModal(id){document.getElementById(id).style.display="flex"}
+function closeModal(id){document.getElementById(id).style.display="none"}
+
+// ====================== 左侧表列表渲染 ======================
+function renderTableList(){
+  const wrap = document.getElementById("tableList");
+  let html = "";
+  DB_META.forEach(t=>{
+    html += `<div class="table-item" data-tb="${t.tableName}" onclick="selectTable('${t.tableName}')">
+      <div class="tb-name">${t.tableName}</div>
+      <div class="tb-desc">${t.tableDesc}</div>
+    </div>`;
+  })
+  wrap.innerHTML = html;
+}
+
+// 选中数据表
+async function selectTable(tbName){
+  document.querySelectorAll(".table-item").forEach(i=>i.classList.remove("active"));
+  document.querySelector(`[data-tb="${tbName}"]`).classList.add("active");
+  activeTable = DB_META.find(t=>t.tableName === tbName);
+  document.getElementById("tableTitle").innerText = `数据表：${activeTable.tableName} — ${activeTable.tableDesc}`;
+  await renderTableDetail();
+}
+
+// 渲染表结构+字段+数据预览
+async function renderTableDetail(){
+  const box = document.getElementById("mainContent");
+  const t = activeTable;
+  let fieldHtml = "";
+  t.fields.forEach(f=>{
+    fieldHtml += `<tr>
+      <td>${f.name}</td>
+      <td>${f.type}</td>
+      <td>${f.constraint}</td>
+      <td class="desc-cell">${f.desc}</td>
+    </tr>`;
+  })
+  box.innerHTML = `
+  <div class="card">
+    <h3>表基础信息</h3>
+    <p style="color:#b8c2cc;margin:8px 0">${t.tableDesc}</p>
+    ${t.unique ? `<p style="color:#ffd700">唯一约束：${t.unique}</p>` : ""}
+    <h4 style="margin:16px 0 8px">全部字段（带业务备注）</h4>
+    <table>
+      <thead><tr><th>字段名</th><th>类型</th><th>约束</th><th>业务备注</th></tr></thead>
+      <tbody>${fieldHtml}</tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>数据预览（前50条） <button class="func-btn btn-green" style="width:auto" onclick="loadTablePreview('${t.tableName}')">刷新预览</button></h3>
+    <div id="previewBox" class="empty-tip">点击刷新加载数据</div>
+  </div>
+  `;
+}
+
+// 加载表预览数据
+async function loadTablePreview(tb){
+  const previewBox = document.getElementById("previewBox");
+  previewBox.innerHTML = `<div class="loading">加载中...</div>`;
+  try{
+    const res = await fetch(`/api/db/preview?table=${tb}&limit=50`);
+    const json = await res.json();
+    if(!json.ok || !json.list || json.list.length === 0){
+      previewBox.innerHTML = `<div class="empty-tip">该表暂无数据</div>`;
+      return;
+    }
+    const rows = json.list;
+    const keys = Object.keys(rows[0]);
+    let th = keys.map(k=>`<th>${k}</th>`).join("");
+    let tr = "";
+    rows.forEach(r=>{
+      let td = keys.map(k=>`<td>${r[k] ?? ""}</td>`).join("");
+      tr += `<tr>${td}</tr>`;
+    })
+    previewBox.innerHTML = `<table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  }catch(err){
+    previewBox.innerHTML = `<div class="result-error">加载失败：${err.message}</div>`;
+  }
+}
+
+// ====================== SQL执行通用 ======================
+// 高危SQL拦截
+function checkDangerSQL(sql){
+  const lower = sql.toLowerCase();
+  if((lower.includes("delete") || lower.includes("update")) && !lower.includes("where")){
+    return "禁止无WHERE条件删除/更新全表，高危操作拦截";
+  }
+  return "";
+}
+
+// 顶部快速SQL
+async function runQuickSql(){
+  const sql = document.getElementById("sqlInput").value.trim();
+  if(!sql) return alert("请输入SQL");
+  const danger = checkDangerSQL(sql);
+  if(danger) return alert(danger);
+  await submitSqlRequest(sql);
+}
+
+// 弹窗SQL执行
+async function submitModalSql(){
+  const sql = document.getElementById("modalSql").value.trim();
+  const resBox = document.getElementById("sqlResultBox");
+  if(!sql){
+    resBox.innerHTML = `<div class="result-error">请输入SQL</div>`;
+    return;
+  }
+  const danger = checkDangerSQL(sql);
+  if(danger){
+    resBox.innerHTML = `<div class="result-error">${danger}</div>`;
+    return;
+  }
+  resBox.innerHTML = `<div class="loading">执行中...</div>`;
+  await submitSqlRequest(sql, resBox);
+}
+
+// 发送SQL请求到Worker
+async function submitSqlRequest(sql, resultDom = null){
+  try{
+    const res = await fetch("/api/db/exec",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({sql:sql})
+    });
+    const json = await res.json();
+    // 写入操作日志
+    await fetch("/api/db/log",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        operator:loginUser,
+        sql:sql,
+        type:json.type || "query"
+      })
+    })
+    if(json.ok){
+      const msg = json.list ? `查询成功，共${json.list.length}条数据` : "执行成功";
+      if(resultDom) resultDom.innerHTML = `<div class="result-success">${msg}</div>`;
+      else alert(msg);
+    }else{
+      const errMsg = json.msg || "执行失败";
+      if(resultDom) resultDom.innerHTML = `<div class="result-error">${errMsg}</div>`;
+      else alert(errMsg);
+    }
+  }catch(err){
+    const errTxt = `请求异常：${err.message}`;
+    if(resultDom) resultDom.innerHTML = `<div class="result-error">${errTxt}</div>`;
+    else alert(errTxt);
+  }
+}
+
+// ====================== 1.一键聚合赛季数据（从player_match汇总写入player_season_total） ======================
+async function aggSeasonData(){
+  const season = prompt("请输入需要聚合的赛季（S5/S6）");
+  if(!season) return;
+  if(!confirm(`确认聚合${season}全部对局数据并覆盖汇总表？`)) return;
+  try{
+    const res = await fetch(`/api/db/aggSeason?season=${season}`);
+    const json = await res.json();
+    if(json.ok) alert(`聚合完成，共处理${json.count}名玩家数据`);
+    else alert("聚合失败："+json.msg);
+  }catch(e){alert("请求失败："+e.message)}
+}
+
+// ====================== 2.全库导出SQL备份 ======================
+async function exportAllTableSQL(){
+  try{
+    const res = await fetch("/api/db/exportAll");
+    const json = await res.json();
+    if(!json.ok) return alert("导出失败："+json.msg);
+    const blob = new Blob([json.sql],{type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "database_backup.sql";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }catch(e){alert("导出异常："+e.message)}
+}
+
+// ====================== 3.清除Pages缓存 ======================
+async function clearPageCache(){
+  if(!confirm("确认清除全站Cloudflare Pages缓存？")) return;
+  try{
+    const res = await fetch("/api/cache/clear",{method:"POST"});
+    const json = await res.json();
+    alert(json.ok ? "缓存清除成功" : "清除失败："+json.msg);
+  }catch(e){alert("请求失败，需手动去Pages后台清缓存")}
+}
+
+// ====================== 4.Excel导入赛季数据（前端解析，后端批量插入） ======================
+async function uploadExcelData(){
+  const file = document.getElementById("excelFile").files[0];
+  if(!file) return alert("请选择Excel文件");
+  alert("前端解析Excel逻辑需引入xlsx.js，Worker接收数组批量执行INSERT OR REPLACE");
+  // 完整逻辑需引入 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+}
+
+// ====================== 5.新建表可视化 ======================
+function addFieldRow(){
+  const wrap = document.getElementById("fieldWrap");
+  wrap.innerHTML += `
+  <div style="display:flex;gap:8px;margin:6px 0">
+    <input placeholder="字段名">
+    <select>
+      <option>INTEGER</option>
+      <option>TEXT</option>
+      <option>REAL</option>
+    </select>
+    <input placeholder="约束 NOT NULL/PRIMARY KEY">
+    <input placeholder="字段业务备注">
+  </div>`;
+}
+async function createNewTable(){
+  const tbName = document.getElementById("newTableName").value.trim();
+  const tbDesc = document.getElementById("newTableDesc").value.trim();
+  if(!tbName) return alert("请填写表名");
+  const sql = `CREATE TABLE IF NOT EXISTS ${tbName}(id INTEGER PRIMARY KEY AUTOINCREMENT);--前端自动拼接字段`;
+  await submitSqlRequest(sql);
+  closeModal("createTableModal");
+  renderTableList();
+}
+
+// ====================== 6.账号权限管理 ======================
+async function renderUserList(){
+  const box = document.getElementById("userListBox");
+  box.innerHTML = `<div class="loading">加载账号列表...</div>`;
+  try{
+    const res = await fetch("/api/db/preview?table=users&limit=1000");
+    const json = await res.json();
+    if(!json.list || json.list.length===0){
+      box.innerHTML = `<div class="empty-tip">无账号数据</div>`;
+      return;
+    }
+    let html = `<table><thead><tr><th>ID</th><th>用户名</th><th>角色</th><th>状态</th><th>操作</th></tr></thead><tbody>`;
+    json.list.forEach(u=>{
+      html += `<tr>
+        <td>${u.id}</td>
+        <td>${u.username}</td>
+        <td>${u.role}</td>
+        <td>${u.active===1?"正常":"禁用"}</td>
+        <td>
+          <button class="func-btn btn-blue" style="width:auto;padding:4px 8px" onclick="editUser(${u.id})">修改权限</button>
+        </td>
+      </tr>`;
+    })
+    html += `</tbody></table>`;
+    box.innerHTML = html;
+  }catch(e){
+    box.innerHTML = `<div class="result-error">加载失败：${e.message}</div>`;
+  }
+}
+function editUser(uid){alert("弹出修改角色/状态弹窗，调用/api/db/updateUser接口")}
+
+// ====================== 7.操作审计日志 ======================
+async function renderLogList(){
+  const box = document.getElementById("mainContent");
+  box.innerHTML = `<div class="card"><h3>超管操作审计日志</h3><div id="logLoading" class="loading">加载中...</div></div>`;
+  try{
+    const res = await fetch("/api/db/preview?table=admin_operation_log&limit=200");
+    const json = await res.json();
+    const logBox = document.getElementById("logLoading");
+    if(!json.list || json.list.length===0){
+      logBox.innerHTML = `<div class="empty-tip">暂无操作日志</div>`;
+      return;
+    }
+    let tableHtml = `<table><thead><tr><th>操作人</th><th>时间</th><th>操作类型</th><th>SQL内容</th><th>IP</th></tr></thead><tbody>`;
+    json.list.forEach(l=>{
+      tableHtml += `<tr>
+        <td>${l.operator}</td>
+        <td>${l.operate_time}</td>
+        <td>${l.operate_type}</td>
+        <td style="max-width:400px;word-break:break-all">${l.sql_content}</td>
+        <td>${l.ip}</td>
+      </tr>`;
+    })
+    tableHtml += `</tbody></table>`;
+    logBox.innerHTML = tableHtml;
+  }catch(e){
+    document.getElementById("logLoading").innerHTML = `<div class="result-error">日志加载失败</div>`;
+  }
+}
+
+// ====================== 8.ER关联图简易展示 ======================
+function genTableER(){
+  const box = document.getElementById("mainContent");
+  box.innerHTML = `
+  <div class="card">
+    <h3>数据表关联关系ER图</h3>
+    <p style="margin:10px 0;color:#b8c2cc">1. users.id ↔ player_match.user_id</p>
+    <p style="margin:10px 0;color:#b8c2cc">2. users.id ↔ player_season_total.user_id</p>
+    <p style="margin:10px 0;color:#b8c2cc">3. player_match.season 关联 player_season_total.season</p>
+  </div>`;
+}
+
+// 页面初始化
+renderTableList();
+document.addEventListener("keydown",e=>{
+  // Ctrl+Enter快速执行SQL
+  if((e.ctrlKey || e.metaKey) && e.key === "Enter") runQuickSql();
+})
 </script>
 </body>
 </html>
