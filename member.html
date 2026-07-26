@@ -75,6 +75,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
             gap:16px;
+            margin-bottom:24px;
         }
         .stat-item {
             background:#22252c;
@@ -90,10 +91,11 @@
             font-size:26px;
             font-weight:bold;
         }
-        .empty {
-            color:#888;
-            text-align:center;
-            padding:30px;
+        .radar-wrap{
+            background:#22252c;
+            border-radius:10px;
+            padding:20px;
+            min-height:320px;
         }
     </style>
 </head>
@@ -149,6 +151,9 @@
             <div style="font-size:12px;color:#aaa;margin-top:4px">击杀/死亡比值</div>
         </div>
     </div>
+    <div class="radar-wrap">
+        <div id="radarChart"></div>
+    </div>
 </div>
 
 <script>
@@ -162,7 +167,7 @@ async function apiFetch(url, opt={}){
   const res = await fetch(url, {...opt, headers});
   const contentType = res.headers.get("content-type") || "";
   if(contentType.includes("text/html")){
-      throw new Error("路由命中静态页面，重试");
+      throw new Error("路由命中静态页面");
   }
   const json = await res.json();
   if(res.status === 401){
@@ -173,21 +178,6 @@ async function apiFetch(url, opt={}){
     throw new Error("登录失效");
   }
   return json;
-}
-
-// 自动重试函数，最多尝试5次
-async function fetchWithRetry(url, opt={}, maxRetry=5){
-    let retry = 0;
-    while(retry < maxRetry){
-        try{
-            return await apiFetch(url, opt);
-        }catch(e){
-            retry++;
-            console.log(`请求失败，重试 ${retry}/${maxRetry}`, e.message);
-            await new Promise(r => setTimeout(r, 300));
-        }
-    }
-    throw new Error("多次重试依然失败");
 }
 
 function logout(){
@@ -204,27 +194,30 @@ function logout(){
     }
 })();
 
+// 延迟启动请求，避开页面初始化瞬间路由缓存冲突
 window.onload = async function(){
     const username = localStorage.getItem("loginUser");
     const role = localStorage.getItem("userRole");
     document.getElementById("showUsername").innerText = username;
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
-    try {
-        // 使用带自动重试的请求
-        const data = await fetchWithRetry(`/api/playerData?username=${username}`,{
-            method:"GET"
-        });
-        if(data.ok){
-            const d = data.data;
-            document.getElementById("matchCount").innerText = d.total_match || 0;
-            document.getElementById("winCount").innerText = d.total_win || 0;
-            document.getElementById("kdText").innerText = d.historical_total_kd || "0.00";
-            document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
+    setTimeout(async ()=>{
+        try {
+            // 原始标准接口，不添加任何后缀，保持全站路由统一
+            const data = await apiFetch(`/api/playerData?username=${username}`,{
+                method:"GET"
+            });
+            if(data.ok){
+                const d = data.data;
+                document.getElementById("matchCount").innerText = d.total_match || 0;
+                document.getElementById("winCount").innerText = d.total_win || 0;
+                document.getElementById("kdText").innerText = d.historical_total_kd || "0.00";
+                document.getElementById("showKD").innerText = d.historical_total_kd || "0.00";
+            }
+        } catch(e){
+            console.log("数据加载异常：",e);
         }
-    } catch(e){
-        console.log("最终加载失败：",e);
-    }
+    }, 400);
 }
 </script>
 </body>
