@@ -76,24 +76,6 @@
     <div class="err-text" id="errorMsg"></div>
 </div>
 <script>
-// 全局带Token请求封装（供后续页面使用）
-async function apiFetch(url, opt={}){
-  const token = localStorage.getItem("loginToken");
-  const headers = {
-    "Content-Type":"application/json",
-    ...opt.headers
-  };
-  if(token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(url, {...opt, headers});
-  const json = await res.json();
-  if(res.status === 401 || String(json.msg).includes("登录")){
-    localStorage.clear();
-    window.location.href="index.html";
-    throw new Error("登录失效");
-  }
-  return json;
-}
-
 function showErr(text) {
     errorMsg.innerText = text;
     errorMsg.style.display = 'block';
@@ -118,7 +100,6 @@ async function loginSubmit() {
         return;
     }
     try {
-        // 登录接口直接原生fetch，避免登录阶段携带无效token干扰
         const res = await fetch("/api/login", {
             method: "POST",
             headers: {
