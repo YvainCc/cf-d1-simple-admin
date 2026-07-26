@@ -1,41 +1,4 @@
-const JWT_SECRET_RAW = "DMN2026_SecretKey_99887766";
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET,OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type,Authorization"
-};
-
-async function getSecretKey() {
-  const encoder = new TextEncoder();
-  const rawKey = encoder.encode(JWT_SECRET_RAW);
-  return crypto.subtle.importKey("raw", rawKey, { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
-}
-
-async function verifyJWT(token) {
-  const key = await getSecretKey();
-  const parts = token.split(".");
-  if (parts.length !== 3) throw new Error("未登录或Token格式错误");
-  const [header, body, sig] = parts;
-  const payload = JSON.parse(atob(body));
-  const data = `${header}.${body}`;
-  const sigBytes = Uint8Array.from(atob(sig), c => c.charCodeAt(0));
-  const valid = await crypto.subtle.verify("HMAC", key, sigBytes, new TextEncoder().encode(data));
-  if (!valid) throw new Error("登录凭证无效");
-  const now = Math.floor(Date.now() / 1000);
-  if (payload.exp < now) throw new Error("登录已过期，请重新登录");
-  return payload;
-}
-
-function getBearerToken(req) {
-  const auth = req.headers.get("Authorization") || "";
-  return auth.startsWith("Bearer ") ? auth.slice(7) : null;
-}
-
-async function verifyLogin(req) {
-  const token = getBearerToken(req);
-  if (!token) throw new Error("未登录，请重新登录");
-  return await verifyJWT(token);
-}
+import { verifyToken, getAuthToken, corsHeaders } from "./auth.js";
 
 export async function onRequest({ request, env }) {
   if (request.method === "OPTIONS") {
@@ -46,22 +9,20 @@ export async function onRequest({ request, env }) {
   }
   let loginInfo;
   try {
-    loginInfo = await verifyLogin(request);
+    const token = getAuth(request);
+    loginInfo = await verifyToken(token);
   } catch (e) {
     return Response.json({ ok: false, msg: e.message }, { status: 401, headers: corsHeaders });
   }
-
   const url = new URL(request.url);
   const username = url.searchParams.get("username");
   const season = url.searchParams.get("season") || "all";
   if (!username) {
     return Response.json({ ok: false, msg: "缺少username参数" }, { headers: corsHeaders });
   }
-  // 普通队员只能查看自己
   if (loginInfo.role === "member" && username !== loginInfo.username) {
     return Response.json({ ok: false, msg: "无权查看他人数据" }, { headers: corsHeaders });
   }
-
   let sql, params;
   if (season === "all") {
     sql = `
@@ -107,4 +68,7 @@ export async function onRequest({ request, env }) {
     data.historical_total_kd = death > 0 ? parseFloat((kill/death).toFixed(2)) : 0;
   }
   return Response.json({ ok:true, data }, { headers:corsHeaders });
+}
+function getAuth(req) {
+  return getAuthToken(req);
 }
