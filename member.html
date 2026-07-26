@@ -147,7 +147,6 @@
             max-width: 480px;
             margin: 0 auto;
         }
-        /* 详细赛季数据 - 紧凑卡片 */
         .stat-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -262,7 +261,6 @@
             font-size: 12px;
             color: #8b95a5;
         }
-
         .radar-footer {
             display: flex;
             flex-wrap: wrap;
@@ -354,9 +352,8 @@
 <div class="container">
     <div class="season-select-wrap">
         <select id="seasonSelect">
+            <!-- 初始只有“全部”，后续由 JS 动态添加 -->
             <option value="all">全部比赛（生涯汇总）</option>
-            <option value="S5">S5赛季</option>
-            <option value="S6">S6赛季</option>
         </select>
     </div>
 
@@ -418,7 +415,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>排名</th>
+                    <th>队伍排名</th>
                     <th>击杀</th>
                     <th>伤害</th>
                     <th>助攻</th>
@@ -456,6 +453,7 @@ let radarRendered = false;
 const radarLabels = ["生存", "Rating", "战斗", "支援", "吃鸡率"];
 let allMatchData = [];
 let currentSeason = "all";
+let seasonSelect = document.getElementById('seasonSelect');
 
 // ---------- 工具函数 ----------
 function calcRadarData(matches) {
@@ -496,6 +494,39 @@ function calcSingleScore(kill, dmg, rank, win) {
     return Math.round((rankScore * 0.35 + killScore * 0.35 + dmgScore * 0.2 + winBonus * 0.1) * 10) / 10;
 }
 
+// ---------- 更新赛季下拉选项 ----------
+function updateSeasonOptions(matches) {
+    // 提取所有赛季
+    const seasonSet = new Set();
+    matches.forEach(m => {
+        if (m.赛季) seasonSet.add(m.赛季);
+    });
+    // 按数字排序（S7 > S6 > S5...）
+    const seasons = Array.from(seasonSet).sort((a, b) => {
+        const numA = parseInt(a.replace('S','')) || 0;
+        const numB = parseInt(b.replace('S','')) || 0;
+        return numB - numA;
+    });
+
+    // 保留第一个 "全部" 选项
+    const currentVal = seasonSelect.value;
+    seasonSelect.innerHTML = '<option value="all">全部比赛（生涯汇总）</option>';
+    seasons.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s;
+        opt.textContent = s + '赛季';
+        seasonSelect.appendChild(opt);
+    });
+    // 恢复之前选中的值（如果存在）
+    if ([...seasonSelect.options].some(o => o.value === currentVal)) {
+        seasonSelect.value = currentVal;
+    } else {
+        seasonSelect.value = 'all';
+    }
+    // 更新当前赛季变量
+    currentSeason = seasonSelect.value;
+}
+
 // ---------- 主加载 ----------
 async function loadPlayerStats() {
     document.getElementById('rankVal').innerText = '--';
@@ -517,6 +548,9 @@ async function loadPlayerStats() {
             document.getElementById('matchTableBody').innerHTML = `<tr><td colspan="6" class="empty">暂无数据</td>`;
             return;
         }
+
+        // 更新赛季下拉（从数据中提取）
+        updateSeasonOptions(json.data);
 
         // 显示排名
         if (json.rank) {
@@ -719,8 +753,11 @@ document.addEventListener('DOMContentLoaded', function(){
         adminLink.style.display = "inline";
     }
 
+    // 首次加载数据（会触发下拉动态更新）
     loadPlayerStats();
-    document.getElementById('seasonSelect').addEventListener("change", function () {
+
+    // 监听下拉变化
+    seasonSelect.addEventListener('change', function () {
         currentSeason = this.value;
         radarRendered = false;
         collapseWrap.classList.remove('show');
