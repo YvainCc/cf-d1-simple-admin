@@ -152,7 +152,6 @@
 </div>
 
 <script>
-// 请求封装（修复：移除模糊匹配msg，仅401判定登录失效）
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -172,7 +171,6 @@ async function apiFetch(url, opt={}){
   return json;
 }
 
-// 退出登录
 function logout(){
     localStorage.removeItem("loginToken");
     localStorage.removeItem("loginUser");
@@ -180,7 +178,6 @@ function logout(){
     window.location.href="index.html";
 }
 
-// 页面载入鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
     if(!token){
@@ -195,7 +192,7 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        // 恢复原始标准接口地址 /api/playerData
+        // 标准原始接口地址，不带.js
         const data = await apiFetch(`/api/playerData?username=${username}`,{
             method:"GET"
         });
