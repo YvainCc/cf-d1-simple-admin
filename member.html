@@ -152,7 +152,7 @@
 </div>
 
 <script>
-// ======================【修复后的请求封装】======================
+// 请求封装（修复：移除模糊匹配msg，仅401判定登录失效）
 async function apiFetch(url, opt={}){
   const token = localStorage.getItem("loginToken");
   const headers = {
@@ -162,7 +162,6 @@ async function apiFetch(url, opt={}){
   if(token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(url, {...opt, headers});
   const json = await res.json();
-  // ❗核心修复：只依靠401状态码判定登录失效，移除模糊匹配msg
   if(res.status === 401){
     localStorage.removeItem("loginToken");
     localStorage.removeItem("loginUser");
@@ -181,7 +180,7 @@ function logout(){
     window.location.href="index.html";
 }
 
-// 页面初始化鉴权
+// 页面载入鉴权
 (function initCheck(){
     const token = localStorage.getItem("loginToken");
     if(!token){
@@ -189,7 +188,6 @@ function logout(){
     }
 })();
 
-// 页面加载执行数据请求
 window.onload = async function(){
     const username = localStorage.getItem("loginUser");
     const role = localStorage.getItem("userRole");
@@ -197,7 +195,8 @@ window.onload = async function(){
     document.getElementById("showRole").innerText = role === "admin" ? "管理员" : "D.M.N 战队队员";
 
     try {
-        const data = await apiFetch("/api/playerData",{
+        // ✅ 修复关键点：拼接 ?username 参数，解决后端【缺少username参数】报错
+        const data = await apiFetch(`/api/playerData?username=${username}`,{
             method:"GET"
         });
         if(data.ok){
