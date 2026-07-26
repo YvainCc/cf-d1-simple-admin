@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>D.M.N 战队队员中心</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <style>
         * {
             margin: 0;
@@ -182,7 +182,6 @@
             color:#ffd700;
             text-decoration:none;
         }
-        /* 小黑盒顶部玩家信息卡片 */
         .profile-header {
             display: flex;
             align-items: center;
@@ -235,16 +234,12 @@
             font-size: 12px;
             color: #8b95a5;
         }
-
-        /* ===== 移动端小黑盒适配核心样式 ===== */
         @media (max-width: 900px) {
             .grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
             }
             .stat-grid {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
             }
             .nav-links {
                 gap: 12px;
@@ -257,52 +252,12 @@
             }
         }
         @media (max-width: 600px) {
-            body {
-                background: #111723;
-            }
             header {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 10px;
-                padding: 12px 16px;
-            }
-            .logo {
-                font-size: 18px;
-            }
-            .nav-links {
-                order: 3;
-                width: 100%;
-                justify-content: space-around;
-            }
-            .nav-links a {
-                font-size: 13px;
-            }
-            .container {
-                margin: 20px auto;
-                padding: 0 12px;
-            }
-            .season-select-wrap {
-                text-align: left;
-                margin-bottom: 16px;
-            }
-            .section-title {
-                font-size: 16px;
-                margin: 20px 0 12px;
+                flex-direction: column;
+                gap: 12px;
             }
             .grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-            .card {
-                padding: 16px;
-                border-radius: 10px;
-                background: linear-gradient(135deg, #1e2a3a 0%, #161d29 100%);
-            }
-            .card-value {
-                font-size: 22px;
-            }
-            .card-title {
-                font-size: 12px;
+                grid-template-columns: 1fr;
             }
             .stat-grid {
                 grid-template-columns: repeat(4, 1fr);
@@ -311,59 +266,6 @@
             .stat-grid .card {
                 padding: 12px;
                 text-align: center;
-            }
-            .stat-grid .card-title {
-                font-size: 11px;
-                margin-bottom: 4px;
-            }
-            .stat-grid .card-value {
-                font-size: 16px;
-            }
-            .panel {
-                padding: 16px;
-                border-radius: 10px;
-            }
-            table th, table td {
-                padding: 10px 8px;
-                font-size: 13px;
-            }
-            #toggleMore, .full-match-btn {
-                padding: 14px;
-                font-size: 15px;
-                border-radius: 10px;
-            }
-            /* 头部信息卡片移动端 */
-            .profile-header {
-                padding: 14px;
-                gap: 12px;
-            }
-            .profile-avatar {
-                width: 56px;
-                height: 56px;
-            }
-            .profile-name {
-                font-size: 18px;
-            }
-            .profile-rating {
-                min-width: 60px;
-            }
-            .rating-num {
-                font-size: 20px;
-            }
-        }
-        @media (max-width: 480px) {
-            .grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .stat-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            table th, table td {
-                padding: 8px 6px;
-                font-size: 12px;
-            }
-            .card-value {
-                font-size: 20px;
             }
         }
     </style>
@@ -388,11 +290,9 @@
             <option value="S6">S6赛季</option>
         </select>
     </div>
-
-    <!-- 小黑盒风格玩家信息头部【名称动态读取】 -->
     <div class="profile-header">
         <div class="profile-avatar">
-            <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="头像" onerror="this.src='https://www.huya.com/favicon.ico'" />
+            <img src="https://p.qqan.com/up/2022-1/16410977238664997.jpg" alt="avatar" onerror="this.src='https://www.huya.com/favicon.ico'" />
         </div>
         <div class="profile-info">
             <div class="profile-name" id="profileUserName">--</div>
@@ -403,7 +303,6 @@
             <div class="rating-label">KD</div>
         </div>
     </div>
-
     <div class="section-title">个人生涯概况</div>
     <div class="grid">
         <div class="card">
@@ -427,11 +326,9 @@
             <div class="card-sub">击杀/死亡比值</div>
         </div>
     </div>
-
     <div class="toggle-wrap">
         <button id="toggleMore">更多摘要 ▼</button>
     </div>
-
     <div class="collapse-box" id="collapseWrap">
         <div class="section-title">详细赛季数据</div>
         <div class="stat-grid">
@@ -447,13 +344,11 @@
             <div class="card"><div class="card-title">场均伤害</div><div class="card-value" id="avgDmgVal">--</div></div>
             <div class="card"><div class="card-title">最长存活</div><div class="card-value" id="maxSurviveVal">--</div></div>
         </div>
-
         <div class="section-title">个人综合能力雷达图</div>
         <div class="panel radar-wrap">
             <canvas id="abilityRadar"></canvas>
         </div>
     </div>
-
     <div class="section-title">近期比赛战绩（近10场）</div>
     <div class="panel">
         <table>
@@ -481,7 +376,6 @@
             </tfoot>
         </table>
     </div>
-
     <div class="section-title">武器熟练度</div>
     <div class="panel">
         <table>
@@ -502,13 +396,36 @@
         </table>
     </div>
 </div>
-
 <script>
+// 全局带Token请求封装
+async function apiFetch(url, opt={}){
+  const token = localStorage.getItem("loginToken");
+  const headers = {
+    "Content-Type":"application/json",
+    ...opt.headers
+  };
+  if(token) headers["Authorization"] = `Bearer ${token}`;
+  const res = await fetch(url, {...opt, headers});
+  const json = await res.json();
+  if(res.status === 401 || String(json.msg).includes("登录")){
+    localStorage.clear();
+    window.location.href="index.html";
+    throw new Error("登录失效");
+  }
+  return json;
+}
+// 统一退出
+function logout(){
+  localStorage.removeItem("loginToken");
+  localStorage.removeItem("loginUser");
+  localStorage.removeItem("userRole");
+  window.location.href="index.html";
+}
+
 let radarChartInstance = null;
 let radarRendered = false;
 const radarLabels = ["生存评分", "Rating评分", "战斗评分", "支援评分", "吃鸡率评分"];
 let seasonStat = {};
-
 function calcSingleScore(kill, dmg, rank, win, top10Rate) {
     let rankScore = rank === 1 ? 100 : rank <= 10 ? 70 : Math.max(0, 100 - rank * 4);
     let killScore = Math.min(kill * 12, 100);
@@ -516,7 +433,6 @@ function calcSingleScore(kill, dmg, rank, win, top10Rate) {
     let winBonus = win ? 12 : 0;
     return Math.round((rankScore * 0.35 + killScore * 0.35 + dmgScore * 0.2 + winBonus * 0.1) * 10) / 10;
 }
-
 function calcRadarData(data) {
     const {avgSurvive, top10Rate, maxRating, avgKD, avgDmg, totalAssist, winRate} = data;
     let survive = Math.min(avgSurvive / 22 * 100, top10Rate || 0);
@@ -531,7 +447,6 @@ function calcRadarData(data) {
     win = Math.round(win);
     return [survive, rating, fight, assist, win];
 }
-
 function initRadarChart(dataArr) {
     const canvas = document.getElementById("abilityRadar");
     if (!canvas) return;
@@ -571,9 +486,8 @@ function initRadarChart(dataArr) {
             }
         },
         plugins: [ChartDataLabels]
-    })
+    });
 }
-
 const toggleBtn = document.getElementById('toggleMore');
 const collapseWrap = document.getElementById('collapseWrap');
 toggleBtn.addEventListener('click', ()=>{
@@ -586,32 +500,24 @@ toggleBtn.addEventListener('click', ()=>{
         radarRendered = true;
     }
 })
-
-function logout() {
-    localStorage.removeItem("loginUser");
-    window.location.href = "index.html";
-}
 let currentSeason = "all";
-
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', async function(){
     const userName = localStorage.getItem("loginUser");
-    if (!userName) {
+    const token = localStorage.getItem("loginToken");
+    if (!userName || !token) {
         window.location.href = "index.html";
         return;
     }
-    // 【重点】动态渲染登录用户名，修复固定YvainCC
     document.getElementById("profileUserName").innerText = userName;
-
-    loadPlayerStats();
-    document.getElementById('seasonSelect').addEventListener("change", function () {
+    await loadPlayerStats();
+    document.getElementById('seasonSelect').addEventListener("change", async function () {
         currentSeason = this.value;
         radarRendered = false;
         collapseWrap.classList.remove('show');
         toggleBtn.innerText = '更多摘要 ▼';
-        loadPlayerStats();
+        await loadPlayerStats();
     })
 })
-
 async function loadPlayerStats() {
     document.getElementById("rankVal").innerText = "--";
     document.getElementById("matchVal").innerText = "--";
@@ -634,9 +540,9 @@ async function loadPlayerStats() {
     seasonStat = {};
     try {
         const userName = localStorage.getItem("loginUser");
-        const res = await fetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
-        const json = await res.json();
+        const json = await apiFetch(`/api/playerData?username=${userName}&season=${currentSeason}`);
         if (!json.ok || !json.data) {
+            initRadarChart([62,70,66,55,60]);
             return;
         }
         const d = json.data;
@@ -646,26 +552,15 @@ async function loadPlayerStats() {
         const totalDeath = Number(d.total_death || 0);
         const totalDamage = Number(d.total_damage || 0);
         const kdVal = Number(d.historical_total_kd || 0);
-
-        document.getElementById("rankVal").innerText = "-";
         document.getElementById("matchVal").innerText = totalMatch;
         document.getElementById("winVal").innerText = totalWin;
         document.getElementById("kdVal").innerText = kdVal.toFixed(2);
         document.getElementById("headerKD").innerText = kdVal.toFixed(2);
         document.getElementById("deathVal").innerText = totalDeath;
         document.getElementById("dmgTotalVal").innerText = Math.round(totalDamage);
-
         const winRate = totalMatch > 0 ? ((totalWin / totalMatch)*100).toFixed(1) : 0;
         document.getElementById("winRateVal").innerText = winRate;
-
-        document.getElementById("assistVal").innerText = 0;
-        document.getElementById("avgSurviveVal").innerText = "0.0";
-        document.getElementById("top10Val").innerText = 0;
-        document.getElementById("top10RateVal").innerText = "0.0";
-        document.getElementById("bestRankVal").innerText = "-";
         document.getElementById("avgDmgVal").innerText = totalMatch > 0 ? Math.round(totalDamage / totalMatch) : 0;
-        document.getElementById("maxSurviveVal").innerText = "0.0";
-
         seasonStat = {
             avgSurvive: 0,
             top10Rate: Number(winRate),
@@ -674,14 +569,10 @@ async function loadPlayerStats() {
             avgDmg: totalMatch > 0 ? totalDamage / totalMatch : 0,
             totalAssist: 0,
             winRate: Number(winRate)
-        };
-
-        const matchTbody = document.getElementById("matchTableBody");
-        matchTbody.innerHTML = `<tr><td colspan="6" class="empty">暂无对局记录</td>`;
-        const weaponTbody = document.getElementById("weaponTableBody");
-        weaponTbody.innerHTML = `<tr><td colspan="5" class="empty">暂无武器数据</td>`;
+        }
     } catch (err) {
-        console.error("加载数据异常", err);
+        console.error(err);
+        initRadarChart([62,70,66,55,60]);
     }
 }
 </script>
