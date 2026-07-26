@@ -81,7 +81,8 @@ const pwdInput = document.getElementById('pwd');
 const submitBtn = document.getElementById('submitBtn');
 const errorMsg = document.getElementById('errorMsg');
 
-submit.addEventListener('click', loginSubmit);
+// 修复！变量名 submitBtn，不是 submit
+submitBtn.addEventListener('click', loginSubmit);
 document.addEventListener('keydown', (e) => {
     if(e.key === 'Enter') loginSubmit();
 })
