@@ -1,7 +1,6 @@
 import { SignJWT } from 'jose';
-// 【务必自行修改为随机长密钥，不要泄露】
 const JWT_SECRET = new TextEncoder("DMN2026_SecretKey_99887766");
-const TOKEN_EXPIRE_HOUR = 168; // 7天有效期
+const TOKEN_EXPIRE_HOUR = 168; //7天免登
 
 export async function onRequest({ request, env }) {
   const corsHeaders = {
@@ -23,33 +22,28 @@ export async function onRequest({ request, env }) {
     const { action, username, password } = reqBody;
 
     if (action === "login") {
-      // 查询账号+角色
+      // 查询admin账号表
       const sqlRes = await env.DB.prepare(`SELECT id, role FROM admin WHERE username = ? AND password = ?`)
         .bind(username, password)
         .all();
 
       if (sqlRes.results.length > 0) {
-        const userInfo = sqlRes.results[0];
-        // 生成JWT Token
-        const token = await new SignJWT({
-          username: username,
-          role: user.role
-        })
+        const user = sqlRes.results[0];
+        // 生成JWT
+        const token = await new SignJWT({ username, role: user.role })
           .setIssuedAt()
           .setExpiration(`${TOKEN_EXPIRE_HOUR}h`)
           .sign(JWT_SECRET);
-        
-        // 计算过期时间存入数据库
-        const expireTime = new Date(Date.now() + TOKEN_EXPIRE_HOUR * 3600 * 1000).toISOString();
-        await env.DB.prepare(`
-          INSERT INTO login_token(username,token,expire_at) VALUES (?,?,?)
-        `).bind(username, token, expireTime).run();
+        // 存入token表
+        const expireISO = new Date(Date.now() + TOKEN_EXPIRE_HOUR * 3600 * 1000).toISOString();
+        await env.DB.prepare(`INSERT INTO login_token(username,token,expire_at) VALUES (?,?,?)`)
+          .bind(username, token, expireISO).run();
 
         return Response.json({
           ok: true,
           msg: "登录成功",
           role: user.role,
-          token, // 新增令牌返回前端
+          token,
           username
         }, { headers: corsHeaders });
       } else {
