@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>赞助公示 | D.M.N</title>
+    <title>我的战队 | D.M.N</title>
     <style>
         * {
             margin: 0;
@@ -66,40 +66,89 @@
             margin-bottom: 18px;
             color: #fff;
         }
-        .sponsor-card-wrap{
-            display:grid;
-            grid-template-columns: repeat(3,1fr);
-            gap:16px;
+        .btn {
+            display: inline-block;
+            background: #ffd700;
+            color: #0f1419;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 14px;
+            margin-right: 12px;
+            margin-bottom: 12px;
+            border:0;
+            cursor:pointer;
         }
-        .sponsor-card{
+        .btn:hover {
+            background: #ffed4e;
+        }
+        .btn-secondary {
+            background: #2a3342;
+            color: #f0f2f5;
+        }
+        .btn-secondary:hover {
+            background: #353f52;
+        }
+        .btn-small{
+            padding:6px 10px;
+            font-size:12px;
+            margin:0 4px;
+        }
+        .empty {
+            color: #7d8898;
+            padding: 30px 0;
+            text-align: center;
+            font-size: 14px;
+        }
+        .input-box{
+            width:100%;
+            max-width:320px;
+            height:46px;
+            padding:0 14px;
             background:#222d3b;
-            border-radius:10px;
-            padding:20px;
             border:1px solid #353f52;
-        }
-        .sponsor-card h4{
-            color:#ffd700;
-            margin-bottom:8px;
+            border-radius:8px;
+            color:#fff;
             font-size:16px;
+            margin:12px 0;
         }
-        .sponsor-card p{
-            color:#b8c2cc;
-            font-size:14px;
-            line-height:1.6;
-            margin:4px 0;
+        .team-slot-wrap{
+            display:grid;
+            grid-template-columns: repeat(4,1fr);
+            gap:12px;
+            margin:20px 0;
         }
-        .tip-text{
-            color:#7d8898;
-            font-size:13px;
-            margin-top:12px;
+        .slot{
+            background:#222d3b;
+            border:1px dashed #6e7888;
+            border-radius:8px;
+            padding:20px 10px;
+            text-align:center;
+            color:#8b95a5;
         }
-        @media (max-width:768px){
-            .sponsor-card-wrap{grid-template-columns: 1fr 1fr;}
+        .slot.starter{
+            border-color:#ffd700;
+        }
+        .tax-tip{
+            padding:12px;
+            border-radius:8px;
+            margin:16px 0;
+        }
+        .tax-yes{
+            background:#602828;
+            border:1px solid #ff5555;
+            color:#ffbbbb;
+        }
+        .tax-no{
+            background:#204030;
+            border:1px solid #4cd988;
+            color:#b8ffd0;
+        }
+        @media (max-width:600px){
             header{flex-direction:column;gap:12px}
-            .nav-links{flex-wrap:wrap;justify-content:center}
-        }
-        @media (max-width:480px){
-            .sponsor-card-wrap{grid-template-columns: 1fr;}
+            .nav-links{gap:10px;flex-wrap:wrap;justify-content:center}
+            .team-slot-wrap{grid-template-columns: repeat(2,1fr)}
         }
     </style>
 </head>
@@ -109,43 +158,217 @@
     <nav class="nav-links">
         <a href="member.html">队员中心</a>
         <a href="ranks.html">排行榜</a>
-        <a href="team.html">我的战队</a>
-        <a href="adminIndex.html">后台总览</a>
-        <a href="admin.html">操作管理</a>
-        <a href="sponsor.html" class="active">赞助公示</a>
+        <a href="team.html" class="active">我的战队</a>
+        <a href="#">比赛回放</a>
+        <a href="#">赞助公示</a>
     </nav>
     <div class="logout" onclick="logout()">退出登录</div>
 </header>
 <div class="container">
+    <div class="panel" id="joinPanel">
+        <h3>暂无战队</h3>
+        <p style="color:#b8c2cc;margin-bottom:16px;">你当前未加入任何DMN赛事战队，可创建新战队或输入邀请码加入已有战队</p>
+        <input class="input-box" id="inviteCode" placeholder="输入战队6位邀请码">
+        <button class="btn" id="joinBtn">加入战队</button>
+        <button class="btn btn-secondary" id="createTeamBtn">创建新战队</button>
+    </div>
+    <div class="panel" id="teamMainPanel" style="display:none;">
+        <h3 id="teamTitle"></h3>
+        <div id="taxTipBox" class="tax-tip"></div>
+        <h4 style="margin:16px 0 8px;color:#ffd700;">首发阵容（最多4人，计入奢侈税计算）</h4>
+        <div class="team-slot-wrap" id="starterWrap"></div>
+        <h4 style="margin:24px 0 8px;color:#ffd700;">替补阵容</h4>
+        <div class="team-slot-wrap" id="subWrap"></div>
+    </div>
     <div class="panel">
-        <h3>2026 S1赛季 合作赞助商公示</h3>
-        <div class="sponsor-card-wrap">
-            <div class="sponsor-card">
-                <h4>金牌赞助商</h4>
-                <p>品牌：XX电竞外设</p>
-                <p>赞助内容：赛事奖金池、参赛外设礼品</p>
-                <p>赞助周期：2026.01 - 2026.06</p>
-            </div>
-            <div class="sponsor-card">
-                <h4>银牌赞助商</h4>
-                <p>品牌：XX电竞网咖</p>
-                <p>赞助内容：线下赛事场地、观赛福利</p>
-                <p>赞助周期：2026.01 - 2026.06</p>
-            </div>
-            <div class="sponsor-card">
-                <h4>合作伙伴</h4>
-                <p>品牌：XX游戏媒体</p>
-                <p>赞助内容：赛事直播、赛事宣传推广</p>
-                <p>赞助周期：2026.01 - 2026.06</p>
-            </div>
+        <h3>战队编制说明</h3>
+        <p style="color:#b8c2cc;line-height:1.7;">单战队最多9人：1队长 + 4首发（计算奢侈税）+ 4替补</p>
+        <p style="color:#b8c2cc;line-height:1.7;margin-top:8px;">首发四人KD总和超过4.5，自动计算奢侈税，提交报名后方可参赛</p>
+        <div class="team-slot-wrap">
+            <div class="slot starter">首发位1</div>
+            <div class="slot starter">首发位2</div>
+            <div class="slot starter">首发位3</div>
+            <div class="slot starter">首发位4</div>
         </div>
-        <p class="tip-text">后续管理员后台将新增赞助流水台账管理功能，可记录每笔赞助收支与对账信息</p>
+        <div class="team-slot-wrap">
+            <div class="slot">替补1</div>
+            <div class="slot">替补2</div>
+            <div class="slot">替补3</div>
+            <div class="slot">替补4</div>
+        </div>
+    </div>
+    <div class="panel">
+        <h3>赛季报名进度</h3>
+        <div class="empty">当前赛季报名通道未开启/你未提交战队报名</div>
     </div>
 </div>
 <script>
+// 全局变量定义
+const loginUserName = "player01";
+let currentTeamId = "";
+let isCaptain = false;
+// 退出登录
 function logout(){
-    window.location.href="index.html";
+    window.location.href="index.html"
 }
+// 页面加载初始化数据
+window.onload = async function(){
+  try{
+    const res = await fetch(`/api/team?username=${loginUserName}`);
+    const data = await res.json();
+    if(data.ok && data.hasTeam){
+        document.getElementById("joinPanel").style.display = "none";
+        document.getElementById("teamMainPanel").style.display = "block";
+        // 赋值战队ID，后续接口调用依赖
+        currentTeamId = data.teamInfo.id;
+        isCaptain = data.selfRole === "captain";
+        document.querySelector("#teamMainPanel h3").innerText = `战队：${data.teamInfo.name} | 邀请码：${data.teamInfo.inviteCode}`;
+        loadTeamLineup();
+        loadRegisterInfo();
+    }
+  }catch(e){
+    console.log("战队数据加载失败",e);
+  }
+}
+// 加载首发、替补阵容，计算奢侈税提示
+async function loadTeamLineup(){
+    const res = await fetch(`/api/teamManage?teamId=${currentTeamId}`);
+    const json = await res.json();
+    if(!json.ok) return;
+    const tData = json.teamData;
+    const tipBox = document.getElementById("taxTipBox");
+    if(tData.needLuxuryTax){
+        tipBox.className = "tax-tip tax-yes";
+        tipBox.innerText = `警告：当前首发总KD ${tData.sumStarterKD}，超过4.5阈值，参赛需缴纳奢侈税`;
+    }else{
+        tipBox.className = "tax-tip tax-no";
+        tipBox.innerText = `当前首发总KD ${tData.sumStarterKD}，低于4.5阈值，无需缴纳奢侈税`;
+    }
+    // 渲染首发区域
+    const starterWrap = document.getElementById("starterWrap");
+    starterWrap.innerHTML = "";
+    tData.starters.forEach(item=>{
+        let btnHtml = "";
+        if(isCaptain){
+            btnHtml = `<button class="btn btn-small btn-secondary" onclick="switchRole(${item.playerId},'substitute')">下调替补</button>`;
+        }
+        starterWrap.innerHTML += `
+            <div class="slot starter">
+                <div>${item.username}</div>
+                <div style="margin:4px 0;color:#ffd700;">KD:${item.historical_total_kd}</div>
+                ${btnHtml}
+            </div>
+        `
+    })
+    // 渲染替补区域
+    const subWrap = document.getElementById("subWrap");
+    subWrap.innerHTML = "";
+    tData.substitute.forEach(item=>{
+        let btnHtml = "";
+        if(isCaptain){
+            btnHtml = `<button class="btn btn-small" onclick="switchRole(${item.playerId},'starter')">上调首发</button>`;
+        }
+        subWrap.innerHTML += `
+            <div class="slot">
+                <div>${item.username}</div>
+                <div style="margin:4px 0;color:#8b95a5;">KD:${item.historical_total_kd}</div>
+                ${btnHtml}
+            </div>
+        `
+    })
+}
+// 加载赛季报名状态、奢侈税金额
+async function loadRegisterInfo(){
+    const res = await fetch(`/api/register?teamId=${currentTeamId}&seasonId=1`);
+    const json = await res.json();
+    if(!json.ok) return;
+    const regBox = document.querySelector(".panel:last-child .empty");
+    const regBtnBox = document.querySelector(".panel:last-child");
+    const regData = json.data;
+    let statusText = "";
+    if(regData.hasRegister){
+        if(regData.registerStatus === "pending") statusText = "已提交报名，等待管理员审核";
+        if(regData.registerStatus === "pass") statusText = "报名审核通过";
+        if(regData.registerStatus === "reject") statusText = "报名被驳回";
+    }else{
+        statusText = "未提交本赛季战队报名";
+    }
+    regBox.innerText = `首发总KD：${regData.sumStarterKD}，奢侈税扣除：${regData.luxuryTaxCost} | 当前状态：${statusText}`;
+    // 仅队长显示报名按钮
+    if(isCaptain && !regData.hasRegister){
+        regBtnBox.innerHTML += `<button class="btn" style="margin-top:16px" onclick="submitRegister()">提交本赛季报名</button>`;
+    }
+}
+// 队长切换队员首发/替补身份
+async function switchRole(playerId, newRole){
+    const res = await fetch("/api/teamManage",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            teamId: currentTeamId,
+            operatePlayerId: playerId,
+            newRole: newRole,
+            operateUsername: loginUserName
+        })
+    })
+    const ret = await res.json();
+    alert(ret.msg);
+    if(ret.ok) loadTeamLineup();
+}
+// 队长提交赛季报名
+async function submitRegister(){
+    const confirm = confirm("确认提交本赛季战队报名？提交后不可重复提交");
+    if(!confirm) return;
+    const res = await fetch("/api/register",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            teamId: currentTeamId,
+            seasonId: 1,
+            captainUsername: loginUserName
+        })
+    })
+    const ret = await res.json();
+    alert(ret.msg);
+    if(ret.ok) location.reload();
+}
+// 加入战队按钮
+document.getElementById("joinBtn").addEventListener("click", async function(){
+    const code = document.getElementById("inviteCode").value.trim();
+    if(!code){
+        alert("请填写6位战队邀请码");
+        return;
+    }
+    const res = await fetch("/api/team",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            type:"join",
+            username: loginUserName,
+            inviteCode: code
+        })
+    })
+    const ret = await res.json();
+    alert(ret.msg);
+    if(ret.ok) location.reload();
+})
+// 创建战队按钮
+document.getElementById("createTeamBtn").addEventListener("click", async function(){
+    const teamName = prompt("请输入你的战队名称：");
+    if(!teamName || teamName.trim() === "") return;
+    const res = await fetch("/api/team",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            type:"create",
+            username: loginUserName,
+            teamName: teamName.trim()
+        })
+    })
+    const ret = await res.json();
+    alert(ret.msg + (ret.ok ? " 你的战队邀请码："+ret.inviteCode : ""));
+    if(ret.ok) location.reload();
+})
 </script>
 </body>
 </html>
