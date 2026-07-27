@@ -31,12 +31,12 @@
 <body>
 <div class="admin-container">
     <h1>D<span style="color:#c9a84c;">M</span>N · 后台管理</h1>
-    <p>导入人员数据（Excel .xlsx 格式）</p>
+    <p>导入人员数据（CSV 格式，UTF-8 编码）</p>
 
     <div class="upload-area" id="dropZone">
-        <input type="file" id="fileInput" accept=".xlsx,.xls">
-        <div class="label">📁 点击选择 Excel 文件</div>
-        <div class="hint">支持 .xlsx / .xls，表头需包含：玩家账号ID、玩家名称、历史名称</div>
+        <input type="file" id="fileInput" accept=".csv">
+        <div class="label">📁 点击选择 CSV 文件</div>
+        <div class="hint">表头必须包含：玩家账号ID, 玩家名称, 历史名称（可选）</div>
     </div>
 
     <button class="btn-upload" id="uploadBtn" disabled>上传并导入</button>
