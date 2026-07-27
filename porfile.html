@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>我的 - D.M.N 战队队员中心</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a2a48">
+    <style>
+        /* 与 member.html 完全一致，此处省略 */
+        :root {
+            --primary: #1a2a48;
+            --gold: #c9a84c;
+            --gold-light: #f0e3c8;
+            --bg: #f2f4f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a2e;
+            --text-secondary: #4a4a5a;
+            --text-muted: #8e98a3;
+            --border-light: #eef0f4;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --radius-card: 20px;
+            --radius-sm: 12px;
+            --safe-bottom: env(safe-area-inset-bottom, 12px);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding-bottom: calc(72px + var(--safe-bottom));
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            background: var(--card-bg);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.88);
+        }
+        .logo { font-size:20px; font-weight:700; color:var(--primary); }
+        .logo span { color:var(--gold); }
+        .nav-actions { display:flex; align-items:center; gap:16px; }
+        .nav-actions .icon-btn { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-secondary); padding:4px; position:relative; }
+        .nav-actions .icon-btn:active { transform:scale(0.92); }
+        .badge-dot { position:absolute; top:0; right:0; width:8px; height:8px; background:#ea4335; border-radius:50%; border:2px solid #fff; }
+        .container { max-width:480px; margin:0 auto; padding:16px 16px 0; }
+        .profile-card {
+            background:var(--card-bg); border-radius:var(--radius-card); padding:20px;
+            box-shadow:var(--shadow-sm); margin-bottom:14px; display:flex; align-items:center; gap:14px;
+        }
+        .profile-card .avatar {
+            width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,var(--gold-light),var(--gold));
+            display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:#fff; flex-shrink:0;
+            box-shadow:0 2px 8px rgba(201,168,76,0.3);
+        }
+        .profile-card .info { flex:1; min-width:0; }
+        .profile-card .info .name { font-size:17px; font-weight:600; color:var(--text-main); }
+        .profile-card .info .sub { font-size:13px; color:var(--text-muted); margin-top:2px; }
+        .profile-card .info .sub .tag { background:var(--gold-light); color:var(--gold); font-size:10px; font-weight:600; padding:2px 10px; border-radius:20px; }
+        .menu-list { display:flex; flex-direction:column; gap:4px; margin-bottom:14px; }
+        .menu-item {
+            background:var(--card-bg); border-radius:var(--radius-sm); padding:14px 16px;
+            display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm);
+            cursor:pointer; transition:0.2s;
+        }
+        .menu-item:active { transform:scale(0.98); }
+        .menu-item .left { display:flex; align-items:center; gap:12px; }
+        .menu-item .left .icon { font-size:18px; }
+        .menu-item .left .text { font-size:14px; font-weight:500; color:var(--text-main); }
+        .menu-item .arrow { color:var(--text-muted); font-size:16px; }
+        .menu-item .badge { background:var(--gold); color:#fff; font-size:10px; font-weight:600; padding:2px 10px; border-radius:20px; }
+        .menu-item.danger .left .text { color:#ea4335; }
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light);
+            display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:100;
+            box-shadow:0 -2px 12px rgba(0,0,0,0.03);
+        }
+        .bottom-nav a {
+            text-decoration:none; text-align:center; font-size:10px; color:var(--text-muted);
+            padding:4px 12px; border-radius:8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:48px;
+        }
+        .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
+        .bottom-nav a.active { color:var(--gold); font-weight:600; }
+        .bottom-nav a:active { transform:scale(0.92); }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg:#0f1419; --card-bg:#1a2430; --text-main:#f0f2f5; --text-secondary:#b8c2cc; --text-muted:#6e7a8a; --border-light:#2a3342; --shadow-sm:0 2px 8px rgba(0,0,0,0.4); }
+            .navbar { background:rgba(26,36,48,0.92); border-bottom-color:var(--border-light); }
+            .bottom-nav { background:var(--card-bg); border-top-color:var(--border-light); }
+            .bottom-nav a { color:#6e7a8a; }
+            .bottom-nav a.active { color:var(--gold); }
+            .menu-item { background:var(--card-bg); }
+            .menu-item .left .text { color:#f0f2f5; }
+            .menu-item.danger .left .text { color:#ea4335; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="logo">D.<span>M</span>.N</div>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="alert('暂无新通知')">🔔<span class="badge-dot"></span></button>
+            <button class="logout-btn" style="font-size:14px; color:var(--text-muted); background:none; border:none; cursor:pointer;" id="logoutBtn">退出</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="profile-card">
+            <div class="avatar">🎮</div>
+            <div class="info">
+                <div class="name" id="profileName">加载中...</div>
+                <div class="sub">
+                    <span id="profileTeam">加载中...</span>
+                    <span class="tag" id="profileRole">队员</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-list">
+            <div class="menu-item" onclick="alert('个人战绩详情')">
+                <div class="left"><span class="icon">📊</span><span class="text">我的战绩</span></div>
+                <span class="arrow">›</span>
+            </div>
+            <div class="menu-item" onclick="alert('战队管理功能')">
+                <div class="left"><span class="icon">👥</span><span class="text">我的战队</span></div>
+                <span class="arrow">›</span>
+            </div>
+            <div class="menu-item" onclick="alert('报名记录')">
+                <div class="left"><span class="icon">📝</span><span class="text">报名记录</span></div>
+                <span class="badge" id="applyBadge">未报名</span>
+            </div>
+            <div class="menu-item" onclick="alert('赞助账单')">
+                <div class="left"><span class="icon">💰</span><span class="text">赞助账单</span></div>
+                <span class="arrow">›</span>
+            </div>
+            <div class="menu-item" onclick="alert('系统设置')">
+                <div class="left"><span class="icon">⚙️</span><span class="text">系统设置</span></div>
+                <span class="arrow">›</span>
+            </div>
+            <div class="menu-item danger" id="logoutMenuItem">
+                <div class="left"><span class="icon">🚪</span><span class="text">退出登录</span></div>
+                <span class="arrow">›</span>
+            </div>
+        </div>
+
+        <div style="text-align:center; font-size:11px; color:var(--text-muted); padding:10px 0 20px;">
+            D.M.N 战队管理系统 v2.0 · Cloudflare Pages
+        </div>
+    </main>
+
+    <nav class="bottom-nav">
+        <a href="member.html"><span class="nav-icon">🏠</span>首页</a>
+        <a href="leaderboard.html"><span class="nav-icon">📊</span>榜单</a>
+        <a href="registration.html"><span class="nav-icon">📝</span>报名</a>
+        <a href="news.html"><span class="nav-icon">📰</span>资讯</a>
+        <a href="profile.html" class="active"><span class="nav-icon">👤</span>我的</a>
+    </nav>
+
+    <script>
+        // =============================================================
+        // 页面初始化
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = localStorage.getItem('token');
+            const loginUser = localStorage.getItem('loginUser');
+
+            if (!token || !loginUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 加载用户信息
+            await loadUserInfo(token);
+
+            // 加载报名状态
+            await loadRegistrationStatus(token);
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('logoutMenuItem').addEventListener('click', logout);
+        });
+
+        // =============================================================
+        // 加载用户信息
+        // =============================================================
+        async function loadUserInfo(token) {
+            try {
+                const res = await fetch('/api/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    document.getElementById('profileName').textContent = data.data.username;
+                    document.getElementById('profileTeam').textContent = data.data.team || '暂无战队';
+                    document.getElementById('profileRole').textContent = data.data.role || '队员';
+                }
+            } catch (err) {
+                console.error('加载用户信息失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 加载报名状态
+        // =============================================================
+        async function loadRegistrationStatus(token) {
+            try {
+                const res = await fetch('/api/registration/status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const badge = document.getElementById('applyBadge');
+                if (data.ok && data.hasTeam && data.registration) {
+                    if (data.registration.status === 'approved') {
+                        badge.textContent = '已报名 ✅';
+                        badge.style.background = '#0f9d58';
+                    } else if (data.registration.status === 'pending') {
+                        badge.textContent = '待审核 ⏳';
+                        badge.style.background = '#fbad39';
+                    } else if (data.registration.status === 'rejected') {
+                        badge.textContent = '已驳回 ❌';
+                        badge.style.background = '#ea4335';
+                    } else {
+                        badge.textContent = '未报名';
+                        badge.style.background = 'var(--gold)';
+                    }
+                } else {
+                    badge.textContent = '未报名';
+                    badge.style.background = 'var(--gold)';
+                }
+            } catch (err) {
+                console.error('加载报名状态失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 退出登录
+        // =============================================================
+        function logout() {
+            if (confirm('确认退出登录吗？')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('loginUser');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('savedUsername');
+                localStorage.removeItem('savedPassword');
+                localStorage.removeItem('rememberMe');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // =============================================================
+        // PWA
+        // =============================================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
+    </script>
+</body>
+</html>
