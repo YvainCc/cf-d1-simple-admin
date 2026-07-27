@@ -2,128 +2,229 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D.M.N 战队管理系统-登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>D.M.N 战队管理系统</title>
+    
+    <!-- PWA 配置 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a2a48">
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
         }
         body {
-            background-color: #f5f7fa;
+            background: #f5f7fa;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            padding: 20px;
         }
         .login-box {
-            background: #fff;
-            width: 420px;
-            padding: 40px 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 12px #e0e4ec;
+            background: #ffffff;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 28px 36px;
+            border-radius: 24px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
+            transition: box-shadow 0.3s;
+        }
+        .login-box:active {
+            box-shadow: 0 8px 48px rgba(0, 0, 0, 0.10);
         }
         .login-title {
             text-align: center;
-            font-size: 24px;
-            color: #222;
-            margin-bottom: 30px;
+            font-size: 26px;
+            font-weight: 700;
+            color: #1a2a48;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .login-title span {
+            color: #c9a84c;
+        }
+        .login-sub {
+            text-align: center;
+            font-size: 14px;
+            color: #8e98a3;
+            margin-bottom: 32px;
+            font-weight: 400;
         }
         .item {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .item input {
             width: 100%;
-            height: 46px;
-            padding: 0 14px;
-            border: 1px solid #dcdfe6;
-            border-radius: 6px;
+            height: 50px;
+            padding: 0 16px;
+            border: 1.5px solid #eef0f4;
+            border-radius: 14px;
             font-size: 16px;
+            background: #fafbfc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            color: #1a1a2e;
+        }
+        .item input:focus {
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.12);
+            background: #ffffff;
+        }
+        .item input::placeholder {
+            color: #b0b8c4;
         }
         .login-btn {
             width: 100%;
-            height: 48px;
-            background: #3b88f7;
+            height: 52px;
+            background: #1a2a48;
             border: none;
-            border-radius: 6px;
+            border-radius: 14px;
             color: white;
             font-size: 17px;
+            font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
+            margin-top: 6px;
+            box-shadow: 0 4px 14px rgba(26, 42, 72, 0.20);
         }
         .login-btn:active {
-            background: #2e77dd;
+            transform: scale(0.97);
+            opacity: 0.85;
         }
         .err-text {
-            color: #f53f3f;
+            color: #ea4335;
             text-align: center;
-            margin-top: 12px;
+            margin-top: 16px;
+            font-size: 14px;
             display: none;
+            padding: 8px 12px;
+            background: #fef0ef;
+            border-radius: 10px;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #b0b8c4;
+        }
+        /* 暗色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: #0f1419;
+            }
+            .login-box {
+                background: #1a2430;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            }
+            .login-title {
+                color: #f0f2f5;
+            }
+            .login-sub {
+                color: #8e98a3;
+            }
+            .item input {
+                background: #111a24;
+                border-color: #2a3342;
+                color: #f0f2f5;
+            }
+            .item input:focus {
+                border-color: #c9a84c;
+                background: #1a2430;
+            }
+            .login-btn {
+                background: #c9a84c;
+                color: #1a1a2e;
+                box-shadow: 0 4px 14px rgba(201, 168, 76, 0.30);
+            }
+            .err-text {
+                background: #3d1a1a;
+                color: #f5a0a0;
+            }
+            .footer-note {
+                color: #6e7a8a;
+            }
         }
     </style>
 </head>
 <body>
+
 <div class="login-box">
-    <h2 class="login-title">D.M.N 战队管理系统登录</h2>
+    <div class="login-title">D.<span>M</span>.N</div>
+    <div class="login-sub">战队管理系统 · 队员登录</div>
+
     <div class="item">
-        <input type="text" id="username" placeholder="请输入账号">
+        <input type="text" id="username" placeholder="请输入账号" autocomplete="username">
     </div>
     <div class="item">
-        <input type="password" id="pwd" placeholder="请输入密码">
+        <input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password">
     </div>
     <button class="login-btn" id="submitBtn">立即登录</button>
     <div class="err-text" id="errorMsg"></div>
+    <div class="footer-note">使用 Cloudflare Pages 安全托管</div>
 </div>
+
 <script>
-const usernameInput = document.getElementById('username');
-const pwdInput = document.getElementById('pwd');
-const submitBtn = document.getElementById('submitBtn');
-const errorMsg = document.getElementById('errorMsg');
+    // ========== 登录逻辑（完全保留原有功能） ==========
+    const usernameInput = document.getElementById('username');
+    const pwdInput = document.getElementById('pwd');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
 
-submitBtn.addEventListener('click', loginSubmit);
-document.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter') loginSubmit();
-})
+    submitBtn.addEventListener('click', loginSubmit);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') loginSubmit();
+    });
 
-async function loginSubmit() {
-    const username = usernameInput.value.trim();
-    const password = pwdInput.value.trim();
-    errorMsg.style.display = 'none';
-    if (!username || !password) {
-        showErr('账号密码不能为空');
-        return;
-    }
-    try {
-        const res = await fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                action: "login",
-                username: username,
-                password: password
-            })
-        });
-        const data = await res.json();
-        if (data.ok) {
-            // ✅ 存储登录账号和角色
-            localStorage.setItem("loginUser", username);
-            localStorage.setItem("userRole", data.role);   // 关键修复
-            window.location.href = 'member.html';
-        } else {
-            showErr(data.msg);
+    async function loginSubmit() {
+        const username = usernameInput.value.trim();
+        const password = pwdInput.value.trim();
+        errorMsg.style.display = 'none';
+        if (!username || !password) {
+            showErr('账号密码不能为空');
+            return;
         }
-    } catch (err) {
-        showErr('网络请求失败，请稍后重试');
-        console.error(err);
+        try {
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: "login",
+                    username: username,
+                    password: password
+                })
+            });
+            const data = await res.json();
+            if (data.ok) {
+                localStorage.setItem("loginUser", username);
+                localStorage.setItem("userRole", data.role);
+                window.location.href = 'member.html';
+            } else {
+                showErr(data.msg || '登录失败');
+            }
+        } catch (err) {
+            showErr('网络请求失败，请稍后重试');
+            console.error(err);
+        }
     }
-}
-function showErr(text) {
-    errorMsg.innerText = '服务异常：' + text;
-    errorMsg.style.display = 'block';
-}
+    function showErr(text) {
+        errorMsg.innerText = text;
+        errorMsg.style.display = 'block';
+    }
+
+    // ========== PWA 注册 Service Worker（不影响登录逻辑） ==========
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log('✅ Service Worker 注册成功'))
+            .catch(err => console.warn('⚠️ Service Worker 注册失败', err));
+    }
 </script>
 </body>
 </html>
