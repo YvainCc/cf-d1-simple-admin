@@ -1,10 +1,6 @@
-// functions/api/auth.js
-// 这个文件处理所有 /api/auth/* 请求，不需要创建子文件夹
-
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // 只允许 POST
     if (request.method !== 'POST') {
         return new Response(JSON.stringify({ error: 'Method not allowed' }), {
             status: 405,
@@ -12,11 +8,9 @@ export async function onRequest(context) {
         });
     }
 
-    // 从 URL 获取 action（如 /api/auth/login → login）
     const url = new URL(request.url);
     const action = url.pathname.split('/').pop();
 
-    // 解析请求体
     let body;
     try {
         body = await request.json();
@@ -43,7 +37,6 @@ export async function onRequest(context) {
         });
     }
 
-    // ============ 登录 ============
     if (action === 'login') {
         const user = await db.prepare(
             'SELECT id, "游戏名称" as username, "密码" as password FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
@@ -74,7 +67,6 @@ export async function onRequest(context) {
         });
     }
 
-    // ============ 注册 ============
     if (action === 'register') {
         const existing = await db.prepare(
             'SELECT id FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
@@ -101,7 +93,6 @@ export async function onRequest(context) {
         });
     }
 
-    // action 不对
     return new Response(JSON.stringify({ error: 'Invalid action' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
