@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
     <style>
-        /* ===== 全局重置 & 基础 ===== */
+        /* ===== 全局重置 ===== */
         * {
             margin: 0;
             padding: 0;
@@ -19,7 +19,7 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
             background: #f2f4f8;
             color: #1c1c1e;
-            padding-bottom: 80px; /* 底部导航占位 */
+            padding-bottom: 80px;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
         }
@@ -47,6 +47,74 @@
         .nav-logo span {
             color: #c9a84c;
         }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        /* 用户信息 */
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #1a2a48;
+            color: #c9a84c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .user-detail {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .user-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1c1c1e;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .online-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34c759;
+            box-shadow: 0 0 6px rgba(52, 199, 89, 0.5);
+            flex-shrink: 0;
+        }
+        .user-role {
+            font-size: 11px;
+            color: #8e8e93;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        /* 退出按钮 */
+        .logout-btn {
+            background: transparent;
+            border: none;
+            font-size: 14px;
+            color: #8e8e93;
+            padding: 6px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-weight: 500;
+        }
+        .logout-btn:active {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        /* 登录按钮（未登录时显示） */
         .nav-btn {
             background: transparent;
             border: none;
@@ -85,8 +153,6 @@
             font-style: normal;
             font-size: 22px;
         }
-
-        /* ===== 卡片通用 ===== */
         .card-list {
             display: flex;
             flex-direction: column;
@@ -139,8 +205,6 @@
             margin-top: 8px;
             flex-wrap: wrap;
         }
-
-        /* 选手卡片 */
         .player-card {
             display: flex;
             align-items: center;
@@ -172,8 +236,6 @@
             color: #6c6c70;
             margin-top: 1px;
         }
-
-        /* 公告卡片 */
         .notice-card {
             border-left: 4px solid #c9a84c;
             padding-left: 14px;
@@ -187,7 +249,7 @@
             margin-top: 3px;
         }
 
-        /* ===== 底部导航栏（iOS风格） ===== */
+        /* ===== 底部导航 ===== */
         .bottom-tab {
             position: fixed;
             bottom: 0;
@@ -227,9 +289,6 @@
         .tab-item.active {
             color: #1a2a48;
         }
-        .tab-item.active .tab-icon {
-            /* 可加微动效 */
-        }
         .tab-item:active {
             opacity: 0.6;
         }
@@ -242,7 +301,7 @@
             color: #8e8e93;
         }
 
-        /* ===== 登录弹窗 (自定义) ===== */
+        /* ===== 登录弹窗 ===== */
         .login-alert-overlay {
             position: fixed;
             top: 0;
@@ -334,6 +393,18 @@
             .nav-btn:active {
                 background: rgba(255, 255, 255, 0.08);
             }
+            .user-name {
+                color: #f0f2f5;
+            }
+            .user-role {
+                color: #b0b8c4;
+            }
+            .logout-btn {
+                color: #b0b8c4;
+            }
+            .logout-btn:active {
+                background: rgba(255, 255, 255, 0.08);
+            }
             .section-title {
                 color: #f0f2f5;
             }
@@ -388,8 +459,6 @@
                 color: #1a1a2e;
             }
         }
-
-        /* 小屏适配 */
         @media (max-width: 400px) {
             .container {
                 padding: 12px 16px;
@@ -411,14 +480,13 @@
     <!-- ===== 顶部导航栏 ===== -->
     <div class="navbar">
         <div class="nav-logo">DMN<span>电竞</span></div>
-        <button id="navLoginBtn" class="nav-btn">
-            👤 登录
-        </button>
+        <div class="nav-right" id="navRight">
+            <!-- 由 JavaScript 动态渲染 -->
+        </div>
     </div>
 
     <!-- ===== 主内容 ===== -->
     <div class="container">
-
         <!-- 近期赛事 -->
         <div class="section-title">
             <i>🏆</i> 近期赛事
@@ -514,7 +582,7 @@
         </div>
     </div>
 
-    <!-- ===== 底部导航栏（5个Tab） ===== -->
+    <!-- ===== 底部导航栏 ===== -->
     <div class="bottom-tab" role="tablist">
         <button class="tab-item active" data-tab="home" onclick="navigateTab(this)">
             <span class="tab-icon">🏠</span>
@@ -540,21 +608,54 @@
 
     <!-- ===== JavaScript ===== -->
     <script>
-        // ----- 登录检测 -----
+        // ----- 工具函数 -----
         function isLoggedIn() {
             return !!localStorage.getItem('dmn_token');
         }
 
-        // 更新顶部按钮
-        function updateNavButton() {
-            const btn = document.getElementById('navLoginBtn');
-            if (!btn) return;
+        function getUserInfo() {
+            return {
+                name: localStorage.getItem('dmn_user') || '用户',
+                role: localStorage.getItem('dmn_role') || '队员'
+            };
+        }
+
+        // ----- 渲染顶部导航栏 -----
+        function renderNavbar() {
+            const container = document.getElementById('navRight');
+            if (!container) return;
+
             if (isLoggedIn()) {
-                btn.textContent = '⚙️ 后台';
-                btn.onclick = () => window.location.href = '/admin.html';
+                const { name, role } = getUserInfo();
+                const avatar = name.charAt(0).toUpperCase();
+                container.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar">${avatar}</div>
+                        <div class="user-detail">
+                            <div class="user-name">
+                                ${name}
+                                <span class="online-dot"></span>
+                            </div>
+                            <div class="user-role">${role}</div>
+                        </div>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">退出</button>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', function() {
+                    if (confirm('确定要退出登录吗？')) {
+                        localStorage.removeItem('dmn_token');
+                        localStorage.removeItem('dmn_user');
+                        localStorage.removeItem('dmn_role');
+                        location.reload();
+                    }
+                });
             } else {
-                btn.textContent = '👤 登录';
-                btn.onclick = () => window.location.href = '/login.html';
+                container.innerHTML = `
+                    <button class="nav-btn" id="loginBtn">👤 登录</button>
+                `;
+                document.getElementById('loginBtn').addEventListener('click', function() {
+                    window.location.href = '/login.html';
+                });
             }
         }
 
@@ -610,7 +711,6 @@
             el.classList.add('active');
 
             const tab = el.getAttribute('data-tab');
-            // 映射页面路径（可根据实际调整）
             const pageMap = {
                 home: '/',
                 matches: '/matches.html',
@@ -619,15 +719,11 @@
                 profile: '/profile.html'
             };
             const url = pageMap[tab] || '/';
-            // 如果是首页，且当前已在首页，不跳转
             if (url === '/' && window.location.pathname === '/') {
                 return;
             }
-            // 其他页面跳转（若未创建，可提示）
-            // 简单检测是否已登录，若未登录且不是首页，也引导登录
             if (!isLoggedIn() && url !== '/') {
                 showLoginAlert('请先登录后访问此页面');
-                // 重置高亮到首页
                 document.querySelector('.tab-item[data-tab="home"]')?.classList.add('active');
                 el.classList.remove('active');
                 return;
@@ -637,7 +733,7 @@
 
         // ----- 初始化 -----
         document.addEventListener('DOMContentLoaded', function() {
-            updateNavButton();
+            renderNavbar();
 
             // 卡片点击绑定
             document.querySelectorAll('.card[data-protected="true"]').forEach(card => {
@@ -646,7 +742,7 @@
                 });
             });
 
-            // 底部导航高亮当前页面（根据路径）
+            // 底部导航高亮当前页面
             const currentPath = window.location.pathname;
             const tabMap = {
                 '/': 'home',
