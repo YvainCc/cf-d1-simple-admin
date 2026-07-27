@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
     <style>
+        /* 样式与原代码一致，未改动，略...（可直接复制原 style） */
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
         body { background:#f5f7fa; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
         .login-box { background:#ffffff; width:100%; max-width:400px; padding:40px 28px 36px; border-radius:24px; box-shadow:0 8px 40px rgba(0,0,0,0.06); }
@@ -91,16 +92,13 @@
         <div class="footer-note">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
     </div>
 
-    <!-- 注册模态框 -->
+    <!-- 注册模态框（已移除邮箱输入，因为后端不处理） -->
     <div class="modal-overlay" id="registerModal">
         <div class="modal-box">
             <div class="modal-title">创建<span>账号</span></div>
             <div class="modal-sub">加入 DMN 公会，参与赛事</div>
             <div class="item">
                 <input type="text" id="regUsername" placeholder="游戏名称">
-            </div>
-            <div class="item">
-                <input type="email" id="regEmail" placeholder="邮箱地址">
             </div>
             <div class="item">
                 <input type="password" id="regPassword" placeholder="密码（至少6位）">
@@ -135,17 +133,22 @@
             errorEl.style.display = 'none';
 
             try {
+                // 发送匹配后端解构的字段：action, username, password
                 const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // 发送中文键名，匹配数据库字段
-                    body: JSON.stringify({ "游戏名称": username, "密码": password })
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
                 });
 
                 const data = await response.json();
 
+                // 使用 data.msg（后端返回 msg）
                 if (!response.ok || !data.token) {
-                    throw new Error(data.message || '登录失败，请检查游戏名称和密码');
+                    throw new Error(data.msg || '登录失败，请检查游戏名称和密码');
                 }
 
                 // 存储 token
@@ -172,6 +175,10 @@
         function openRegisterModal() {
             document.getElementById('registerModal').classList.add('show');
             document.getElementById('registerError').style.display = 'none';
+            // 清空输入
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regPasswordConfirm').value = '';
         }
 
         function closeRegisterModal() {
@@ -180,13 +187,12 @@
 
         async function handleRegister() {
             const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
             const password = document.getElementById('regPassword').value;
             const passwordConfirm = document.getElementById('regPasswordConfirm').value;
             const errorEl = document.getElementById('registerError');
             const btn = document.getElementById('registerBtn');
 
-            if (!username || !email || !password) {
+            if (!username || !password) {
                 errorEl.style.display = 'block';
                 errorEl.textContent = '请填写所有字段';
                 return;
@@ -207,24 +213,30 @@
             errorEl.style.display = 'none';
 
             try {
-                const response = await fetch('/api/auth/register', {
+                // 统一使用 /api/auth，action='register'
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // 发送中文字段名，后端按此接收并填充其他默认值
-                    body: JSON.stringify({ "游戏名称": username, "邮箱": email, "密码": password })
+                    body: JSON.stringify({
+                        action: 'register',
+                        username: username,
+                        password: password
+                    })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.message || '注册失败，请稍后重试');
+                    throw new Error(data.msg || '注册失败，请稍后重试');
                 }
 
+                // 如果后端返回 token，则自动登录跳转
                 if (data.token) {
                     localStorage.setItem('dmn_token', data.token);
                     window.location.href = '/';
                 } else {
-                    alert('注册成功，请登录');
+                    // 否则提示成功并关闭弹窗
+                    alert(data.msg || '注册成功，请登录');
                     closeRegisterModal();
                 }
 
@@ -237,6 +249,7 @@
             }
         }
 
+        // 点击模态背景关闭
         document.getElementById('registerModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegisterModal();
         });
