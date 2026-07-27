@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>榜单 - D.M.N 战队队员中心</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a2a48">
+    <style>
+        /* ========== 与 member.html 完全一致的样式 ========== */
+        :root {
+            --primary: #1a2a48;
+            --gold: #c9a84c;
+            --gold-light: #f0e3c8;
+            --bg: #f2f4f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a2e;
+            --text-secondary: #4a4a5a;
+            --text-muted: #8e98a3;
+            --border-light: #eef0f4;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+            --radius-card: 20px;
+            --radius-sm: 12px;
+            --safe-bottom: env(safe-area-inset-bottom, 12px);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", Roboto, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding-bottom: calc(72px + var(--safe-bottom));
+            -webkit-font-smoothing: antialiased;
+        }
+        .navbar {
+            background: var(--card-bg);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.88);
+        }
+        .logo { font-size:20px; font-weight:700; color:var(--primary); }
+        .logo span { color:var(--gold); }
+        .nav-actions { display:flex; align-items:center; gap:16px; }
+        .nav-actions .icon-btn { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-secondary); padding:4px; position:relative; }
+        .nav-actions .icon-btn:active { transform:scale(0.92); }
+        .badge-dot { position:absolute; top:0; right:0; width:8px; height:8px; background:#ea4335; border-radius:50%; border:2px solid #fff; }
+        .container { max-width:480px; margin:0 auto; padding:16px 16px 0; }
+
+        /* ===== 通用组件 ===== */
+        .card { background:var(--card-bg); border-radius:var(--radius-card); padding:16px 18px; box-shadow:var(--shadow-sm); margin-bottom:14px; }
+        .card-title { font-size:13px; color:var(--text-muted); margin-bottom:4px; }
+        .card-value { font-size:22px; font-weight:700; color:var(--primary); }
+        .card-value.gold { color:var(--gold); }
+
+        /* ===== 赛季选择 ===== */
+        .season-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+        .season-bar .label { font-size:14px; font-weight:500; color:var(--text-secondary); }
+        .season-select {
+            padding:6px 16px 6px 12px; background:var(--card-bg); border:1px solid var(--border-light);
+            border-radius:var(--radius-sm); font-size:14px; font-weight:500; color:var(--text-main);
+            appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e98a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 10px center; cursor:pointer;
+        }
+
+        /* ===== 搜索框 ===== */
+        .search-input {
+            width:100%; padding:12px 16px; border:1px solid var(--border-light); border-radius:var(--radius-sm);
+            font-size:14px; background:var(--card-bg); color:var(--text-main); outline:none; margin-bottom:14px;
+        }
+        .search-input:focus { border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,168,76,0.15); }
+        .search-input::placeholder { color:var(--text-muted); }
+
+        /* ===== Tab 切换 ===== */
+        .tabs {
+            display:flex; gap:4px; background:var(--card-bg); border-radius:var(--radius-sm); padding:4px;
+            margin-bottom:14px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none;
+            box-shadow:var(--shadow-sm);
+        }
+        .tabs::-webkit-scrollbar { display:none; }
+        .tabs .tab {
+            flex:1; min-width:56px; padding:10px 0; text-align:center; font-size:12px; font-weight:500;
+            color:var(--text-muted); border:none; background:none; border-radius:10px; cursor:pointer;
+            transition:0.25s; white-space:nowrap;
+        }
+        .tabs .tab.active { background:var(--primary); color:#fff; box-shadow:0 4px 12px rgba(26,42,72,0.25); }
+        .tabs .tab:active { transform:scale(0.95); }
+
+        /* ===== 榜单列表 ===== */
+        .rank-list { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
+        .rank-item {
+            background:var(--card-bg); border-radius:var(--radius-sm); padding:12px 14px;
+            display:flex; align-items:center; gap:12px; box-shadow:var(--shadow-sm);
+        }
+        .rank-item:active { transform:scale(0.98); }
+        .rank-item .rank-num { width:28px; font-size:14px; font-weight:700; color:var(--text-muted); text-align:center; flex-shrink:0; }
+        .rank-item .rank-num.top1 { color:var(--gold); font-size:18px; }
+        .rank-item .rank-num.top2 { color:#b0b8c4; font-size:17px; }
+        .rank-item .rank-num.top3 { color:#d4a574; font-size:16px; }
+        .rank-item .avatar {
+            width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--gold-light),var(--gold));
+            display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; flex-shrink:0;
+        }
+        .rank-item .info { flex:1; min-width:0; }
+        .rank-item .info .name { font-size:14px; font-weight:600; color:var(--text-main); }
+        .rank-item .info .sub { font-size:11px; color:var(--text-muted); }
+        .rank-item .stat { font-size:15px; font-weight:700; color:var(--gold); flex-shrink:0; }
+        .rank-item .stat .unit { font-size:10px; font-weight:400; color:var(--text-muted); }
+        .rank-item.me { border:2px solid var(--gold); background:#fcf9f0; }
+        .rank-item.me .info .name::after { content:' 👈 你'; font-size:11px; color:var(--gold); }
+
+        .empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); }
+        .empty-state .icon { font-size:48px; margin-bottom:12px; }
+
+        /* ===== 底部导航 ===== */
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light);
+            display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:100;
+            box-shadow:0 -2px 12px rgba(0,0,0,0.03);
+        }
+        .bottom-nav a {
+            text-decoration:none; text-align:center; font-size:10px; color:var(--text-muted);
+            padding:4px 12px; border-radius:8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:48px;
+        }
+        .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
+        .bottom-nav a.active { color:var(--gold); font-weight:600; }
+        .bottom-nav a:active { transform:scale(0.92); }
+
+        /* ===== 暗色模式 ===== */
+        @media (prefers-color-scheme: dark) {
+            :root { --bg:#0f1419; --card-bg:#1a2430; --text-main:#f0f2f5; --text-secondary:#b8c2cc; --text-muted:#6e7a8a; --border-light:#2a3342; --shadow-sm:0 2px 8px rgba(0,0,0,0.4); }
+            .navbar { background:rgba(26,36,48,0.92); border-bottom-color:var(--border-light); }
+            .tabs { background:var(--card-bg); }
+            .tabs .tab.active { background:var(--gold); color:#1a1a2e; }
+            .rank-item { background:var(--card-bg); }
+            .rank-item .info .name { color:#f0f2f5; }
+            .rank-item.me { border-color:var(--gold); background:#2a2430; }
+            .bottom-nav { background:var(--card-bg); border-top-color:var(--border-light); }
+            .bottom-nav a { color:#6e7a8a; }
+            .bottom-nav a.active { color:var(--gold); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 顶部导航（与 member 一致） ===== -->
+    <header class="navbar">
+        <div class="logo">D.<span>M</span>.N</div>
+        <div class="nav-actions">
+            <button class="icon-btn" onclick="alert('暂无新通知')">🔔<span class="badge-dot"></span></button>
+            <a href="member.html" style="font-size:14px; color:var(--text-muted); text-decoration:none;">返回</a>
+        </div>
+    </header>
+
+    <!-- ===== 主内容 ===== -->
+    <main class="container">
+        <!-- 赛季切换 -->
+        <div class="season-bar">
+            <span class="label">📅 当前赛季</span>
+            <select class="season-select" id="seasonSelect">
+                <option value="2026-S1" selected>2026 S1</option>
+                <option value="2026-S2">2026 S2</option>
+                <option value="2025-S3">2025 S3</option>
+            </select>
+        </div>
+
+        <!-- 搜索框 -->
+        <input class="search-input" id="searchInput" placeholder="🔍 搜索选手或战队..." type="text">
+
+        <!-- Tab 切换 -->
+        <div class="tabs" id="tabContainer">
+            <button class="tab active" data-tab="kd">战神榜</button>
+            <button class="tab" data-tab="damage">伤害榜</button>
+            <button class="tab" data-tab="survival">生存榜</button>
+            <button class="tab" data-tab="win">吃鸡榜</button>
+            <button class="tab" data-tab="team">战队榜</button>
+        </div>
+
+        <!-- 榜单列表 -->
+        <div class="rank-list" id="rankList"></div>
+    </main>
+
+    <!-- ===== 底部导航 ===== -->
+    <nav class="bottom-nav">
+        <a href="member.html"><span class="nav-icon">🏠</span>首页</a>
+        <a href="leaderboard.html" class="active"><span class="nav-icon">📊</span>榜单</a>
+        <a href="registration.html"><span class="nav-icon">📝</span>报名</a>
+        <a href="news.html"><span class="nav-icon">📰</span>资讯</a>
+        <a href="profile.html"><span class="nav-icon">👤</span>我的</a>
+    </nav>
+
+    <script>
+        // =============================================================
+        // 模拟数据
+        // =============================================================
+        const mockPlayers = [
+            { name: 'DMN丨战神', kd: 4.2, damage: 345, survival: 22.5, wins: 18, team: '战神队' },
+            { name: 'DMN丨虎王', kd: 3.8, damage: 298, survival: 19.2, wins: 14, team: '虎王队' },
+            { name: 'DMN丨神枪', kd: 3.5, damage: 312, survival: 16.8, wins: 12, team: '神枪队' },
+            { name: 'DMN丨猎手', kd: 3.2, damage: 267, survival: 20.1, wins: 10, team: '猎手队' },
+            { name: 'DMN丨孤狼', kd: 2.9, damage: 234, survival: 14.3, wins: 8, team: '孤狼队' },
+            { name: 'DMN丨影刃', kd: 2.6, damage: 289, survival: 17.7, wins: 7, team: '影刃队' },
+            { name: 'DMN丨风暴', kd: 2.3, damage: 198, survival: 12.4, wins: 5, team: '风暴队' },
+            { name: 'DMN丨雷霆', kd: 2.0, damage: 176, survival: 15.2, wins: 4, team: '雷霆队' },
+        ];
+
+        const loginUser = localStorage.getItem('loginUser') || 'DMN丨战神';
+        let currentTab = 'kd';
+        let searchKeyword = '';
+
+        function renderRankList(tab, keyword) {
+            const container = document.getElementById('rankList');
+            let data = [...mockPlayers];
+            let sortKey, label, unit;
+
+            switch(tab) {
+                case 'kd': data.sort((a,b) => b.kd - a.kd); sortKey='kd'; label='KD'; unit=''; break;
+                case 'damage': data.sort((a,b) => b.damage - a.damage); sortKey='damage'; label='伤害'; unit=''; break;
+                case 'survival': data.sort((a,b) => b.survival - a.survival); sortKey='survival'; label='生存'; unit='min'; break;
+                case 'win': data.sort((a,b) => b.wins - a.wins); sortKey='wins'; label='吃鸡'; unit=''; break;
+                case 'team':
+                    const teamMap = {};
+                    mockPlayers.forEach(p => {
+                        if (!teamMap[p.team]) teamMap[p.team] = { name: p.team, totalKd: 0, count: 0, wins: 0 };
+                        teamMap[p.team].totalKd += p.kd; teamMap[p.team].count += 1; teamMap[p.team].wins += p.wins;
+                    });
+                    data = Object.values(teamMap).map(t => ({ name: t.name, kd: (t.totalKd / t.count).toFixed(1), wins: t.wins, isTeam: true }));
+                    data.sort((a,b) => parseFloat(b.kd) - parseFloat(a.kd));
+                    sortKey='kd'; label='均KD'; unit=''; break;
+                default: data = [];
+            }
+
+            if (keyword.trim()) data = data.filter(item => item.name.includes(keyword.trim()));
+
+            if (data.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><p>未找到匹配的选手</p></div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach((item, index) => {
+                const rank = index + 1;
+                const isMe = item.name === loginUser && !item.isTeam;
+                let rankClass = 'rank-num';
+                if (rank === 1) rankClass += ' top1';
+                else if (rank === 2) rankClass += ' top2';
+                else if (rank === 3) rankClass += ' top3';
+
+                let statValue = item[sortKey];
+                if (tab === 'team') statValue = item.kd;
+                const topEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+
+                if (item.isTeam) {
+                    html += `<div class="rank-item ${isMe?'me':''}">
+                        <div class="${rankClass}">#${rank}</div>
+                        <div class="avatar">🏛️</div>
+                        <div class="info"><div class="name">${item.name}</div><div class="sub">${item.wins} 吃鸡 · ${item.count||0} 人</div></div>
+                        <div class="stat">${statValue} <span class="unit">${label}</span></div>
+                    </div>`;
+                } else {
+                    html += `<div class="rank-item ${isMe?'me':''}">
+                        <div class="${rankClass}">${topEmoji || '#' + rank}</div>
+                        <div class="avatar">🎮</div>
+                        <div class="info"><div class="name">${item.name}</div><div class="sub">${item.team||'自由人'}</div></div>
+                        <div class="stat">${statValue} <span class="unit">${unit}</span></div>
+                    </div>`;
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        // Tab 切换
+        document.querySelectorAll('.tabs .tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                currentTab = this.dataset.tab;
+                renderRankList(currentTab, searchKeyword);
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchKeyword = this.value;
+            renderRankList(currentTab, searchKeyword);
+        });
+
+        document.getElementById('seasonSelect').addEventListener('change', function() {
+            renderRankList(currentTab, searchKeyword);
+        });
+
+        renderRankList('kd', '');
+
+        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js'); }
+    </script>
+</body>
+</html>
