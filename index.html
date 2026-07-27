@@ -8,6 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1426">
+    <!-- Chart.js 依赖 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
         /* ===== 全局重置 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
@@ -55,8 +58,7 @@
             gap: 10px;
         }
         .user-avatar {
-            width: 38px;
-            height: 38px;
+            width: 38px; height: 38px;
             border-radius: 50%;
             background: linear-gradient(135deg, #0b1426, #2a3a5e);
             color: #D4AF37;
@@ -77,8 +79,7 @@
             gap: 6px;
         }
         .online-dot {
-            width: 8px;
-            height: 8px;
+            width: 8px; height: 8px;
             border-radius: 50%;
             background: #4cd964;
             box-shadow: 0 0 8px rgba(76, 217, 100, 0.5);
@@ -120,16 +121,11 @@
             margin: 0 auto;
             padding: 18px 20px 30px;
         }
-
-        /* 每个页面区块 */
         .page {
             display: none;
             animation: fadeIn 0.25s ease;
         }
-        .page.active {
-            display: block;
-        }
-
+        .page.active { display: block; }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(6px); }
             to { opacity: 1; transform: translateY(0); }
@@ -198,7 +194,6 @@
             flex-wrap: wrap;
         }
 
-        /* 选手卡片 */
         .player-card { display: flex; align-items: center; gap: 14px; }
         .player-avatar {
             width: 52px; height: 52px;
@@ -225,7 +220,6 @@
             margin-top: 2px;
         }
 
-        /* 公告 */
         .notice-card {
             border-left: 4px solid #D4AF37;
             padding-left: 16px;
@@ -350,6 +344,118 @@
             flex: 2;
         }
 
+        /* ===== 个人中心专用样式 ===== */
+        :root {
+            --gold-light: #f0e3c8;
+        }
+        .profile-card {
+            background: var(--card-bg, #ffffff);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .avatar {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold-light), var(--gold, #c9a84c));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(201,168,76,0.3);
+        }
+        .profile-info { flex:1; min-width:0; }
+        .profile-info .name { font-size:17px; font-weight:600; color:var(--text-main, #1a1a2e); }
+        .profile-info .sub {
+            font-size:13px; color:var(--text-muted, #8e98a3);
+            display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px;
+        }
+        .profile-info .sub .tag {
+            background:var(--gold-light); color:var(--gold, #c9a84c);
+            font-size:10px; font-weight:600; padding:2px 10px; border-radius:20px;
+        }
+        .status-badge {
+            font-size:12px; font-weight:500; padding:4px 14px; border-radius:20px;
+            flex-shrink:0; background:#f0f4ff; color:var(--primary, #1a2a48);
+        }
+        .status-badge.pending { background:#fff3cd; color:#856404; }
+        .status-badge.approved { background:#d4edda; color:#155724; }
+        .season-bar {
+            display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
+        }
+        .season-bar .label { font-size:14px; font-weight:500; color:var(--text-secondary, #4a4a5a); }
+        .season-select {
+            padding:6px 30px 6px 12px; background:var(--card-bg, #fff);
+            border:1px solid var(--border-light, #eef0f4); border-radius:12px;
+            font-size:14px; font-weight:500; color:var(--text-main, #1a1a2e);
+            appearance:none;
+            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e98a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat:no-repeat; background-position:right 10px center; cursor:pointer;
+        }
+        .grid-4 {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;
+        }
+        .grid-4 .stat-card {
+            background:var(--card-bg, #fff); border-radius:12px; padding:14px 10px 12px;
+            text-align:center; box-shadow:var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+        }
+        .grid-4 .stat-card .value { font-size:22px; font-weight:700; color:var(--primary, #1a2a48); line-height:1.2; }
+        .grid-4 .stat-card .value.gold { color:var(--gold, #c9a84c); }
+        .grid-4 .stat-card .label { font-size:11px; color:var(--text-muted, #8e98a3); margin-top:4px; }
+        .expand-btn {
+            width:100%; background:var(--card-bg, #fff); border:1px solid var(--border-light, #eef0f4);
+            border-radius:12px; padding:14px 16px; font-size:15px; font-weight:500;
+            color:var(--text-secondary, #4a4a5a);
+            display:flex; justify-content:space-between; align-items:center; cursor:pointer;
+            box-shadow:var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04));
+        }
+        .expand-btn:active { transform:scale(0.98); }
+        .expand-btn .arrow { transition:transform 0.35s ease; font-size:14px; }
+        .expand-btn .arrow.open { transform:rotate(180deg); }
+        .collapse-box {
+            max-height:0; overflow:hidden;
+            transition:max-height 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.4s ease;
+            opacity:0;
+        }
+        .collapse-box.open { max-height:1200px; opacity:1; }
+        .panel {
+            background:var(--card-bg, #fff); border-radius:20px; padding:20px 18px;
+            box-shadow:var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04)); margin-top:14px;
+        }
+        .radar-wrapper { max-width:340px; margin:0 auto 16px; }
+        .radar-wrapper canvas { width:100% !important; height:auto !important; aspect-ratio:1/1; }
+        .extra-stats {
+            display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;
+        }
+        .extra-stats .item {
+            background:var(--bg, #f2f4f8); border-radius:12px; padding:12px 14px;
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .extra-stats .item .lbl { font-size:13px; color:var(--text-muted, #8e98a3); }
+        .extra-stats .item .val { font-size:16px; font-weight:600; color:var(--text-main, #1a1a2e); }
+        .bottom-actions {
+            display:flex; gap:12px; margin-top:20px;
+        }
+        .btn-gold {
+            flex:1; background:var(--gold, #c9a84c); color:#fff; border:none;
+            border-radius:12px; padding:14px 0; font-size:16px; font-weight:600;
+            cursor:pointer; text-align:center; box-shadow:0 4px 14px rgba(201,168,76,0.35);
+        }
+        .btn-gold:active { transform:scale(0.97); opacity:0.85; }
+        .btn-outline {
+            flex:1; background:transparent; color:var(--primary, #1a2a48);
+            border:1.5px solid var(--primary, #1a2a48); border-radius:12px;
+            padding:14px 0; font-size:16px; font-weight:600; cursor:pointer; text-align:center;
+        }
+        .btn-outline:active { transform:scale(0.97); background:rgba(26,42,72,0.04); }
+
         /* ===== 暗色模式 ===== */
         @media (prefers-color-scheme: dark) {
             body {
@@ -395,12 +501,33 @@
                 color: #0b1426;
             }
             .footer { color: #6c7a8a; }
+            /* 个人中心暗色覆盖 */
+            .profile-card, .panel, .expand-btn, .grid-4 .stat-card {
+                background: #1a2430;
+            }
+            .profile-info .name { color: #f0f2f5; }
+            .profile-info .sub { color: #b0b8c4; }
+            .profile-info .sub .tag { background: #2a3342; color: #D4AF37; }
+            .status-badge { background: #2a3342; color: #f0f2f5; }
+            .status-badge.pending { background: #4a3a1a; color: #f0d080; }
+            .status-badge.approved { background: #1a3a2a; color: #80d0a0; }
+            .season-select { background-color: #1a2430; color: #f0f2f5; border-color: #2a3342; }
+            .grid-4 .stat-card .value { color: #D4AF37; }
+            .extra-stats .item { background: #111a24; }
+            .extra-stats .item .val { color: #f0f2f5; }
+            .btn-outline { color: #D4AF37; border-color: #D4AF37; }
+            .btn-gold { background: #D4AF37; color: #1a1a2e; }
+            .expand-btn { background: #1a2430; border-color: #2a3342; color: #b0b8c4; }
         }
         @media (max-width: 400px) {
             .page-container { padding: 12px 16px; }
             .card { padding: 14px 16px; }
             .tab-item .tab-icon { font-size: 22px; }
             .tab-item { font-size: 10px; }
+            .grid-4 { grid-template-columns: repeat(2,1fr); gap:8px; }
+            .grid-4 .stat-card .value { font-size:20px; }
+            .profile-card { padding:16px; }
+            .avatar { width:48px; height:48px; font-size:20px; }
         }
     </style>
 </head>
@@ -417,7 +544,7 @@
     <!-- ===== SPA 页面容器 ===== -->
     <div class="page-container" id="app">
 
-        <!-- 首页 -->
+        <!-- ===== 首页 ===== -->
         <div class="page active" id="page-home">
             <div class="section-title"><i>🏆</i> 近期赛事</div>
             <div class="card-list">
@@ -493,7 +620,7 @@
             <div class="footer">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
         </div>
 
-        <!-- 赛事页面（模拟） -->
+        <!-- ===== 赛事页面 ===== -->
         <div class="page" id="page-matches">
             <div class="section-title"><i>🏆</i> 赛事列表</div>
             <div class="card-list">
@@ -524,7 +651,7 @@
             </div>
         </div>
 
-        <!-- 战队页面（模拟） -->
+        <!-- ===== 战队页面 ===== -->
         <div class="page" id="page-team">
             <div class="section-title"><i>👥</i> 战队列表</div>
             <div class="card-list">
@@ -547,7 +674,7 @@
             </div>
         </div>
 
-        <!-- 排行页面（模拟） -->
+        <!-- ===== 排行页面 ===== -->
         <div class="page" id="page-rank">
             <div class="section-title"><i>📈</i> 排行榜</div>
             <div class="card-list">
@@ -575,22 +702,67 @@
             </div>
         </div>
 
-        <!-- 我的页面（模拟） -->
+        <!-- ===== 我的页面（个人中心） ===== -->
         <div class="page" id="page-profile">
-            <div class="section-title"><i>👤</i> 个人中心</div>
-            <div class="card" style="text-align:center; padding:30px;">
-                <div style="font-size:64px; margin-bottom:8px;" id="profileAvatar">👤</div>
-                <div style="font-size:20px; font-weight:600; color:#0b1426;" id="profileName">用户</div>
-                <div style="font-size:14px; color:#6c6c70; margin-top:4px;" id="profileRole">队员</div>
-                <div style="display:flex; justify-content:space-around; margin-top:20px;">
-                    <div><div style="font-weight:700; font-size:18px;">12</div><div style="font-size:12px; color:#8e8e93;">参赛</div></div>
-                    <div><div style="font-weight:700; font-size:18px;">68%</div><div style="font-size:12px; color:#8e8e93;">胜率</div></div>
-                    <div><div style="font-weight:700; font-size:18px;">#3</div><div style="font-size:12px; color:#8e8e93;">排名</div></div>
+            <div style="max-width:600px; margin:0 auto; padding:16px 20px 30px;">
+                <!-- 个人信息卡片 -->
+                <div class="profile-card">
+                    <div class="avatar" id="profileAvatar">🎮</div>
+                    <div class="profile-info">
+                        <div class="name" id="profileDisplayName">DMN丨战神</div>
+                        <div class="sub">
+                            <span id="profileDisplayTeam">DMN-战神队 · 队长</span>
+                            <span class="tag" id="profileTag">首发</span>
+                        </div>
+                    </div>
+                    <span class="status-badge pending" id="profileStatusBadge">待审核</span>
                 </div>
-                <div style="margin-top:24px; display:flex; flex-direction:column; gap:12px;">
-                    <button onclick="alert('编辑资料开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">✏️ 编辑资料</button>
-                    <button onclick="alert('战绩详情开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">📊 我的战绩</button>
-                    <button onclick="alert('设置开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">⚙️ 设置</button>
+
+                <!-- 赛季切换 -->
+                <div class="season-bar">
+                    <span class="label">📅 当前赛季</span>
+                    <select class="season-select" id="seasonSelect">
+                        <option value="2026-S1" selected>2026 S1</option>
+                        <option value="2026-S2">2026 S2</option>
+                        <option value="2025-S3">2025 S3</option>
+                    </select>
+                </div>
+
+                <!-- 四项核心数据 -->
+                <div class="grid-4" id="statsGrid">
+                    <div class="stat-card"><div class="value gold" id="statKd">3.6</div><div class="label">KD</div></div>
+                    <div class="stat-card"><div class="value" id="statGames">86</div><div class="label">场次</div></div>
+                    <div class="stat-card"><div class="value" id="statWins">12</div><div class="label">吃鸡</div></div>
+                    <div class="stat-card"><div class="value" id="statTop10">38%</div><div class="label">前十率</div></div>
+                </div>
+
+                <!-- 更多数据折叠 -->
+                <div style="margin-bottom:20px;">
+                    <button class="expand-btn" id="toggleMore">
+                        <span>📊 更多数据</span>
+                        <span class="arrow" id="arrowIcon">▾</span>
+                    </button>
+                    <div class="collapse-box" id="collapseBox">
+                        <div class="panel">
+                            <div class="radar-wrapper"><canvas id="radarChart"></canvas></div>
+                            <div class="extra-stats">
+                                <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">312</span></div>
+                                <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">28,450</span></div>
+                                <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">18.5min</span></div>
+                                <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">12</span></div>
+                            </div>
+                            <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-light, #eef0f4); display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted, #8e98a3);">
+                                <span>📌 数据来源：API 同步</span>
+                                <span id="updateTime">更新于 10分钟前</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 底部操作按钮 -->
+                <div class="bottom-actions">
+                    <button class="btn-outline" onclick="alert('跳转至战队管理')">👥 战队</button>
+                    <button class="btn-gold" onclick="alert('跳转至报名中心')">📝 报名管理</button>
                 </div>
             </div>
         </div>
@@ -653,10 +825,6 @@
                         location.reload();
                     }
                 });
-                // 更新个人中心信息
-                document.getElementById('profileName').textContent = name;
-                document.getElementById('profileRole').textContent = role;
-                document.getElementById('profileAvatar').textContent = avatar;
             } else {
                 container.innerHTML = `<button class="nav-btn" id="loginBtn">👤 登录</button>`;
                 document.getElementById('loginBtn').addEventListener('click', () => window.location.href = '/login.html');
@@ -698,7 +866,7 @@
             }
         }
 
-        // ===== SPA 页面切换（无刷新，瞬间切换） =====
+        // ===== SPA 页面切换 =====
         function switchPage(pageId) {
             // 隐藏所有页面
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -711,13 +879,147 @@
             const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
             if (activeTab) activeTab.classList.add('active');
 
-            // 如果点击的是"我的"且未登录，弹出登录提示（但页面已显示，可改为跳转）
-            if (pageId === 'profile' && !isLoggedIn()) {
-                showLoginAlert('请先登录查看个人中心');
-                // 可自动跳回首页（但此处保留用户操作，仅提示）
-                // 也可强制切换回首页，按需决定
-                // 我们选择仅提示，不强制切换，让用户自己操作
+            // 如果切换到个人中心，初始化图表
+            if (pageId === 'profile') {
+                // 延迟确保 DOM 渲染
+                setTimeout(() => {
+                    // 如果已有图表先销毁
+                    if (window.radarChartInstance) {
+                        window.radarChartInstance.destroy();
+                        window.radarChartInstance = null;
+                    }
+                    initProfile();
+                }, 100);
             }
+        }
+
+        // ===== 个人中心初始化 =====
+        function initProfile() {
+            // 读取用户信息
+            const user = localStorage.getItem('dmn_user') || 'DMN丨战神';
+            const role = localStorage.getItem('dmn_role') || '队长';
+            document.getElementById('profileDisplayName').textContent = user;
+            document.getElementById('profileDisplayTeam').textContent = 'DMN-战神队 · ' + role;
+            document.getElementById('profileAvatar').textContent = user.charAt(0).toUpperCase();
+
+            // 状态徽章
+            const badge = document.getElementById('profileStatusBadge');
+            if (role === '管理员' || role === 'admin') {
+                badge.textContent = '管理员';
+                badge.className = 'status-badge approved';
+                badge.style.background = '#d4edda';
+                badge.style.color = '#155724';
+            } else {
+                badge.textContent = '队员';
+                badge.className = 'status-badge pending';
+                badge.style.background = '#fff3cd';
+                badge.style.color = '#856404';
+            }
+
+            // 更多数据折叠
+            const toggleBtn = document.getElementById('toggleMore');
+            const collapseBox = document.getElementById('collapseBox');
+            const arrowIcon = document.getElementById('arrowIcon');
+            let isOpen = false;
+            // 移除旧监听
+            toggleBtn.replaceWith(toggleBtn.cloneNode(true));
+            const newToggle = document.getElementById('toggleMore');
+            const newArrow = document.getElementById('arrowIcon');
+            const newCollapse = document.getElementById('collapseBox');
+            newToggle.addEventListener('click', function() {
+                isOpen = !isOpen;
+                newCollapse.classList.toggle('open', isOpen);
+                newArrow.classList.toggle('open', isOpen);
+                newToggle.querySelector('span:first-child').textContent = isOpen ? '📊 收起数据' : '📊 更多数据';
+                setTimeout(() => {
+                    if (window.radarChartInstance) window.radarChartInstance.resize();
+                }, 400);
+            });
+
+            // 初始化雷达图
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['击杀', '伤害', '生存', '吃鸡', '前十', 'KD'],
+                    datasets: [{
+                        label: '当前赛季',
+                        data: [85, 72, 60, 45, 68, 78],
+                        backgroundColor: 'rgba(201, 168, 76, 0.15)',
+                        borderColor: '#c9a84c',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#c9a84c',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(26,42,72,0.9)',
+                            titleFont: { weight: '600' },
+                            bodyFont: { size: 13 },
+                            cornerRadius: 10,
+                            padding: 10
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20,
+                                color: '#8e98a3',
+                                backdropColor: 'transparent',
+                                font: { size: 9 }
+                            },
+                            grid: { color: 'rgba(142,152,163,0.15)', circular: true },
+                            angleLines: { color: 'rgba(142,152,163,0.12)' },
+                            pointLabels: {
+                                color: '#4a4a5a',
+                                font: { size: 11, weight: '500' }
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            window.radarChartInstance = chart;
+
+            // 暗色模式适配雷达图标签颜色
+            const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+            function updateRadarColors() {
+                const isDark = darkModeMedia.matches;
+                chart.options.scales.r.pointLabels.color = isDark ? '#b8c2cc' : '#4a4a5a';
+                chart.update();
+            }
+            darkModeMedia.addEventListener('change', updateRadarColors);
+            updateRadarColors();
+
+            // 赛季切换模拟数据更新
+            document.getElementById('seasonSelect').addEventListener('change', function() {
+                const cards = document.querySelectorAll('#statsGrid .stat-card .value');
+                if (cards.length >= 4) {
+                    cards[0].textContent = (Math.random() * 3 + 1.5).toFixed(1);
+                    cards[1].textContent = Math.floor(Math.random() * 80 + 20);
+                    cards[2].textContent = Math.floor(Math.random() * 15);
+                    cards[3].textContent = Math.floor(Math.random() * 30 + 20) + '%';
+                }
+                if (window.radarChartInstance) {
+                    window.radarChartInstance.data.datasets[0].data = [
+                        60 + Math.random() * 30, 50 + Math.random() * 35, 40 + Math.random() * 30,
+                        30 + Math.random() * 30, 50 + Math.random() * 30, 60 + Math.random() * 25
+                    ];
+                    window.radarChartInstance.update();
+                }
+                const now = new Date();
+                document.getElementById('updateTime').textContent = '更新于 ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+            });
         }
 
         // ===== 初始化 =====
@@ -729,10 +1031,12 @@
                 c.addEventListener('click', function() { handleProtectedCardClick(this); });
             });
 
-            // 如果未登录且当前页面不是首页，自动切回首页（但不要强制，让用户自由浏览公开内容）
-            // 我们仅对受保护的页面做拦截，已在卡片中处理
-
             // 默认高亮由 HTML 控制
+            // 如果当前页面是 profile，初始化图表
+            const activePage = document.querySelector('.page.active');
+            if (activePage && activePage.id === 'page-profile') {
+                setTimeout(initProfile, 200);
+            }
         });
     </script>
 </body>
