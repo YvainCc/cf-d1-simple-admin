@@ -2,10 +2,10 @@ const CACHE_NAME = 'dmn-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/member',           // 改为 /member（不带 .html）
+  '/member',
   '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/19f734a3d8000319d1fa98d12fab4ce1.png',
+  '/icons/b542b5d7dcafe6d6905e1d8bf5d7b8b3.png'
 ];
 
 self.addEventListener('install', event => {
