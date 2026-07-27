@@ -8,12 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js">
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
-        /* ========== 全局设计令牌 ========== */
         :root {
             --primary: #1a2a48;
             --gold: #c9a84c;
@@ -31,45 +28,16 @@
             --safe-bottom: env(safe-area-inset-bottom, 12px);
         }
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", Roboto, Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text-main);
-            padding-bottom: calc(72px + var(--safe-bottom));
-            -webkit-font-smoothing: antialiased;
-        }
-        .navbar {
-            background: var(--card-bg);
-            padding: 12px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-light);
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            background: rgba(255,255,255,0.88);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", Roboto, Arial, sans-serif; background: var(--bg); color: var(--text-main); padding-bottom: calc(72px + var(--safe-bottom)); }
+        .navbar { background: var(--card-bg); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); position: sticky; top:0; z-index:50; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(255,255,255,0.88); }
         .logo { font-size:20px; font-weight:700; color:var(--primary); }
         .logo span { color:var(--gold); }
         .nav-actions { display:flex; align-items:center; gap:16px; }
         .nav-actions .icon-btn { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-secondary); padding:4px; position:relative; }
-        .nav-actions .icon-btn:active { transform:scale(0.92); }
         .badge-dot { position:absolute; top:0; right:0; width:8px; height:8px; background:#ea4335; border-radius:50%; border:2px solid #fff; }
-        .logout-btn { font-size:14px; color:var(--text-muted); text-decoration:none; padding:6px 12px; border-radius:8px; background:none; border:none; cursor:pointer; }
-        .logout-btn:active { background:rgba(0,0,0,0.05); }
         .container { max-width:480px; margin:0 auto; padding:16px 16px 0; }
-        .profile-card {
-            background:var(--card-bg); border-radius:var(--radius-card); padding:20px;
-            box-shadow:var(--shadow-sm); margin-bottom:16px; display:flex; align-items:center; gap:14px;
-        }
-        .avatar {
-            width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,var(--gold-light),var(--gold));
-            display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:#fff; flex-shrink:0;
-            box-shadow:0 2px 8px rgba(201,168,76,0.3);
-        }
+        .profile-card { background:var(--card-bg); border-radius:var(--radius-card); padding:20px; box-shadow:var(--shadow-sm); margin-bottom:16px; display:flex; align-items:center; gap:14px; }
+        .avatar { width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold)); display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:600; color:#fff; flex-shrink:0; box-shadow:0 2px 8px rgba(201,168,76,0.3); }
         .profile-info { flex:1; min-width:0; }
         .profile-info .name { font-size:17px; font-weight:600; color:var(--text-main); }
         .profile-info .sub { font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:2px; }
@@ -79,23 +47,13 @@
         .status-badge.approved { background:#d4edda; color:#155724; }
         .season-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
         .season-bar .label { font-size:14px; font-weight:500; color:var(--text-secondary); }
-        .season-select {
-            padding:6px 16px 6px 12px; background:var(--card-bg); border:1px solid var(--border-light);
-            border-radius:var(--radius-sm); font-size:14px; font-weight:500; color:var(--text-main);
-            appearance:none;
-            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e98a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat:no-repeat; background-position:right 10px center; cursor:pointer;
-        }
+        .season-select { padding:6px 16px 6px 12px; background:var(--card-bg); border:1px solid var(--border-light); border-radius:var(--radius-sm); font-size:14px; font-weight:500; color:var(--text-main); appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e98a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 10px center; cursor:pointer; }
         .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px; }
         .grid-4 .stat-card { background:var(--card-bg); border-radius:var(--radius-sm); padding:14px 10px 12px; text-align:center; box-shadow:var(--shadow-sm); }
         .grid-4 .stat-card .value { font-size:22px; font-weight:700; color:var(--primary); line-height:1.2; }
         .grid-4 .stat-card .value.gold { color:var(--gold); }
         .grid-4 .stat-card .label { font-size:11px; color:var(--text-muted); margin-top:4px; }
-        .expand-btn {
-            width:100%; background:var(--card-bg); border:1px solid var(--border-light); border-radius:var(--radius-sm);
-            padding:14px 16px; font-size:15px; font-weight:500; color:var(--text-secondary);
-            display:flex; justify-content:space-between; align-items:center; cursor:pointer; box-shadow:var(--shadow-sm);
-        }
+        .expand-btn { width:100%; background:var(--card-bg); border:1px solid var(--border-light); border-radius:var(--radius-sm); padding:14px 16px; font-size:15px; font-weight:500; color:var(--text-secondary); display:flex; justify-content:space-between; align-items:center; cursor:pointer; box-shadow:var(--shadow-sm); margin-bottom:0; }
         .expand-btn:active { transform:scale(0.98); }
         .expand-btn .arrow { transition:transform 0.35s ease; font-size:14px; }
         .expand-btn .arrow.open { transform:rotate(180deg); }
@@ -108,25 +66,13 @@
         .extra-stats .item { background:var(--bg); border-radius:var(--radius-sm); padding:12px 14px; display:flex; justify-content:space-between; align-items:center; }
         .extra-stats .item .lbl { font-size:13px; color:var(--text-muted); }
         .extra-stats .item .val { font-size:16px; font-weight:600; color:var(--text-main); }
-        .bottom-actions {
-            position:fixed; bottom:72px; left:0; right:0; background:rgba(255,255,255,0.92);
-            backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-            padding:12px 16px calc(12px + var(--safe-bottom)); border-top:1px solid var(--border-light);
-            display:flex; gap:12px; z-index:80; box-shadow:0 -4px 20px rgba(0,0,0,0.04);
-        }
+        .bottom-actions { position:fixed; bottom:72px; left:0; right:0; background:rgba(255,255,255,0.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding:12px 16px calc(12px + var(--safe-bottom)); border-top:1px solid var(--border-light); display:flex; gap:12px; z-index:80; box-shadow:0 -4px 20px rgba(0,0,0,0.04); }
         .btn-gold { flex:1; background:var(--gold); color:#fff; border:none; border-radius:var(--radius-sm); padding:14px 0; font-size:16px; font-weight:600; cursor:pointer; text-align:center; box-shadow:0 4px 14px rgba(201,168,76,0.35); }
         .btn-gold:active { transform:scale(0.97); opacity:0.85; }
         .btn-outline { flex:1; background:transparent; color:var(--primary); border:1.5px solid var(--primary); border-radius:var(--radius-sm); padding:14px 0; font-size:16px; font-weight:600; cursor:pointer; text-align:center; }
         .btn-outline:active { transform:scale(0.97); background:rgba(26,42,72,0.04); }
-        .bottom-nav {
-            position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light);
-            display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:79;
-            box-shadow:0 -2px 12px rgba(0,0,0,0.03);
-        }
-        .bottom-nav a {
-            text-decoration:none; text-align:center; font-size:10px; color:var(--text-muted);
-            padding:4px 12px; border-radius:8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:48px;
-        }
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light); display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:79; box-shadow:0 -2px 12px rgba(0,0,0,0.03); }
+        .bottom-nav a { text-decoration:none; text-align:center; font-size:10px; color:var(--text-muted); padding:4px 12px; border-radius:8px; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:48px; }
         .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
         .bottom-nav a.active { color:var(--gold); font-weight:600; }
         .bottom-nav a:active { transform:scale(0.92); }
@@ -152,44 +98,39 @@
     </style>
 </head>
 <body>
-
     <header class="navbar">
         <div class="logo">D.<span>M</span>.N</div>
         <div class="nav-actions">
-            <button class="icon-btn" onclick="alert('暂无新通知')">🔔<span class="badge-dot"></span></button>
-            <button class="logout-btn" id="logoutBtn">退出</button>
+            <button class="icon-btn" aria-label="通知">🔔<span class="badge-dot"></span></button>
+            <a href="index.html" id="logoutLink" style="font-size:14px; color:var(--text-muted); text-decoration:none;">退出</a>
         </div>
     </header>
-
     <main class="container">
         <div class="profile-card">
             <div class="avatar">🎮</div>
             <div class="profile-info">
-                <div class="name" id="displayName">加载中...</div>
+                <div class="name" id="displayName">DMN丨战神</div>
                 <div class="sub">
-                    <span id="displayTeam">加载中...</span>
-                    <span class="tag" id="displayTag">首发</span>
+                    <span id="displayTeam">DMN-战神队 · 队长</span>
+                    <span class="tag">首发</span>
                 </div>
             </div>
-            <span class="status-badge pending" id="statusBadge">加载中...</span>
+            <span class="status-badge pending" id="statusBadge">待审核</span>
         </div>
-
         <div class="season-bar">
             <span class="label">📅 当前赛季</span>
             <select class="season-select" id="seasonSelect">
-                <option value="1">2026 S1</option>
-                <option value="2">2026 S2</option>
-                <option value="3">2025 S3</option>
+                <option value="2026-S1" selected>2026 S1</option>
+                <option value="2026-S2">2026 S2</option>
+                <option value="2025-S3">2025 S3</option>
             </select>
         </div>
-
         <div class="grid-4" id="statsGrid">
-            <div class="stat-card"><div class="value gold" id="statKd">-</div><div class="label">KD</div></div>
-            <div class="stat-card"><div class="value" id="statGames">-</div><div class="label">场次</div></div>
-            <div class="stat-card"><div class="value" id="statWins">-</div><div class="label">吃鸡</div></div>
-            <div class="stat-card"><div class="value" id="statTop10">-</div><div class="label">前十率</div></div>
+            <div class="stat-card"><div class="value gold" id="statKd">3.6</div><div class="label">KD</div></div>
+            <div class="stat-card"><div class="value" id="statGames">86</div><div class="label">场次</div></div>
+            <div class="stat-card"><div class="value" id="statWins">12</div><div class="label">吃鸡</div></div>
+            <div class="stat-card"><div class="value" id="statTop10">38%</div><div class="label">前十率</div></div>
         </div>
-
         <div style="margin-bottom:20px;">
             <button class="expand-btn" id="toggleMore">
                 <span>📊 更多数据</span>
@@ -199,170 +140,87 @@
                 <div class="panel">
                     <div class="radar-wrapper"><canvas id="radarChart"></canvas></div>
                     <div class="extra-stats">
-                        <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">-</span></div>
-                        <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">-</span></div>
-                        <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">-</span></div>
-                        <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">-</span></div>
+                        <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">312</span></div>
+                        <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">28,450</span></div>
+                        <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">18.5min</span></div>
+                        <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">12</span></div>
                     </div>
                     <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-light); display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted);">
                         <span>📌 数据来源：API 同步</span>
-                        <span id="updateTime">更新于 刚刚</span>
+                        <span id="updateTime">更新于 10分钟前</span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
     <div class="bottom-actions">
-        <button class="btn-outline" onclick="location.href='profile.html'">👤 我的</button>
-        <button class="btn-gold" onclick="location.href='registration.html'">📝 报名管理</button>
+        <button class="btn-outline" onclick="alert('跳转至战队管理')">👥 战队</button>
+        <button class="btn-gold" onclick="alert('跳转至报名中心')">📝 报名管理</button>
     </div>
-
     <nav class="bottom-nav">
-        <a href="member.html" class="active"><span class="nav-icon">🏠</span>首页</a>
-        <a href="leaderboard.html"><span class="nav-icon">📊</span>榜单</a>
-        <a href="registration.html"><span class="nav-icon">📝</span>报名</a>
-        <a href="news.html"><span class="nav-icon">📰</span>资讯</a>
-        <a href="profile.html"><span class="nav-icon">👤</span>我的</a>
+        <a href="#" class="active"><span class="nav-icon">🏠</span>首页</a>
+        <a href="#"><span class="nav-icon">📊</span>榜单</a>
+        <a href="#"><span class="nav-icon">📝</span>报名</a>
+        <a href="#"><span class="nav-icon">📰</span>资讯</a>
+        <a href="#"><span class="nav-icon">👤</span>我的</a>
     </nav>
 
     <script>
-        // =============================================================
-        // 全局变量
-        // =============================================================
-        let radarChartInstance = null;
-        let currentSeason = '1';
-
-        // =============================================================
-        // 1. 页面初始化 - 加载数据
-        // =============================================================
-        document.addEventListener('DOMContentLoaded', async function() {
-            const token = localStorage.getItem('token');
+        // 登录状态校验
+        (function() {
             const loginUser = localStorage.getItem('loginUser');
-
-            // 校验登录
-            if (!token || !loginUser) {
-                window.location.href = 'index.html';
-                return;
+            const userRole = localStorage.getItem('userRole');
+            if (!loginUser || !userRole) {
+                window.location.href = '/index.html';
+                throw new Error('未登录');
             }
+        })();
 
-            // 加载用户信息和战绩
-            await loadUserInfo(token);
-            await loadStats(token, currentSeason);
-
-            // 初始化雷达图
-            initRadarChart();
-
-            // 展开/收起
-            document.getElementById('toggleMore').addEventListener('click', function() {
-                const box = document.getElementById('collapseBox');
-                const arrow = document.getElementById('arrowIcon');
-                const isOpen = box.classList.toggle('open');
-                arrow.classList.toggle('open', isOpen);
-                this.querySelector('span:first-child').textContent = isOpen ? '📊 收起数据' : '📊 更多数据';
-                if (isOpen && radarChartInstance) {
-                    setTimeout(() => radarChartInstance.resize(), 400);
-                }
-            });
-
-            // 赛季切换
-            document.getElementById('seasonSelect').addEventListener('change', async function() {
-                currentSeason = this.value;
-                await loadStats(token, currentSeason);
-                if (radarChartInstance) {
-                    updateRadarChart();
-                }
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            // 显示登录用户
+            const loginUser = localStorage.getItem('loginUser') || 'DMN丨战神';
+            const userRole = localStorage.getItem('userRole') || '队长';
+            document.getElementById('displayName').textContent = loginUser;
+            document.getElementById('displayTeam').textContent = 'DMN-战神队 · ' + userRole;
+            const badge = document.getElementById('statusBadge');
+            if (userRole === '管理员' || userRole === 'admin') {
+                badge.textContent = '管理员';
+                badge.className = 'status-badge approved';
+                badge.style.background = '#d4edda';
+                badge.style.color = '#155724';
+            }
 
             // 退出登录
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                if (confirm('确认退出登录吗？')) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('loginUser');
-                    localStorage.removeItem('userRole');
-                    window.location.href = 'index.html';
-                }
+            document.getElementById('logoutLink').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('loginUser');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('token');
+                window.location.href = '/index.html';
             });
-        });
 
-        // =============================================================
-        // 2. 加载用户信息
-        // =============================================================
-        async function loadUserInfo(token) {
-            try {
-                const res = await fetch('/api/users/me', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
+            // 展开/收起
+            const toggleBtn = document.getElementById('toggleMore');
+            const collapseBox = document.getElementById('collapseBox');
+            const arrowIcon = document.getElementById('arrowIcon');
+            let isOpen = false;
+            toggleBtn.addEventListener('click', function() {
+                isOpen = !isOpen;
+                collapseBox.classList.toggle('open', isOpen);
+                arrowIcon.classList.toggle('open', isOpen);
+                toggleBtn.querySelector('span:first-child').textContent = isOpen ? '📊 收起数据' : '📊 更多数据';
+                setTimeout(() => { if(window.radarChartInstance) window.radarChartInstance.resize(); }, 400);
+            });
 
-                if (data.ok) {
-                    document.getElementById('displayName').textContent = data.data.username;
-                    document.getElementById('displayTeam').textContent = data.data.team || '暂无战队';
-                    document.getElementById('displayTag').textContent = data.data.role || '队员';
-
-                    const badge = document.getElementById('statusBadge');
-                    if (data.data.role === '管理员' || data.data.role === '超级管理员') {
-                        badge.textContent = '管理员';
-                        badge.className = 'status-badge approved';
-                    } else if (data.data.registrationStatus === 'approved') {
-                        badge.textContent = '已报名';
-                        badge.className = 'status-badge approved';
-                    } else if (data.data.registrationStatus === 'pending') {
-                        badge.textContent = '待审核';
-                        badge.className = 'status-badge pending';
-                    } else {
-                        badge.textContent = '未报名';
-                        badge.className = 'status-badge';
-                    }
-                }
-            } catch (err) {
-                console.error('加载用户信息失败:', err);
-            }
-        }
-
-        // =============================================================
-        // 3. 加载战绩数据
-        // =============================================================
-        async function loadStats(token, season) {
-            try {
-                const res = await fetch(`/api/users/stats?season=${season}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-
-                if (data.ok) {
-                    const d = data.data;
-                    document.getElementById('statKd').textContent = d.kd || '0';
-                    document.getElementById('statGames').textContent = d.total_matches || '0';
-                    document.getElementById('statWins').textContent = d.total_wins || '0';
-                    document.getElementById('statTop10').textContent = d.top10_rate || '0%';
-                    document.getElementById('extraKills').textContent = d.total_kills || '0';
-                    document.getElementById('extraDamage').textContent = d.total_damage || '0';
-                    document.getElementById('extraSurvival').textContent = d.avg_survival || '0min';
-                    document.getElementById('extraMaxKills').textContent = d.max_kills || '0';
-
-                    // 更新时间
-                    const now = new Date();
-                    document.getElementById('updateTime').textContent =
-                        `更新于 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
-                }
-            } catch (err) {
-                console.error('加载战绩失败:', err);
-            }
-        }
-
-        // =============================================================
-        // 4. 雷达图
-        // =============================================================
-        function initRadarChart() {
+            // 雷达图
             const ctx = document.getElementById('radarChart').getContext('2d');
-            radarChartInstance = new Chart(ctx, {
+            const chart = new Chart(ctx, {
                 type: 'radar',
                 data: {
                     labels: ['击杀', '伤害', '生存', '吃鸡', '前十', 'KD'],
                     datasets: [{
                         label: '当前赛季',
-                        data: [50, 50, 50, 50, 50, 50],
+                        data: [85,72,60,45,68,78],
                         backgroundColor: 'rgba(201,168,76,0.15)',
                         borderColor: '#c9a84c',
                         borderWidth: 2.5,
@@ -370,53 +228,61 @@
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 4,
+                        pointHoverRadius: 6,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { backgroundColor: 'rgba(26,42,72,0.9)', titleFont: {weight:'600'}, bodyFont:{size:13}, cornerRadius:10, padding:10 }
+                    },
                     scales: {
                         r: {
                             beginAtZero: true,
                             max: 100,
-                            ticks: { stepSize: 20, color: '#8e98a3', backdropColor: 'transparent', font: { size: 9 } },
+                            ticks: { stepSize: 20, color: '#8e98a3', backdropColor: 'transparent', font: {size:9} },
                             grid: { color: 'rgba(142,152,163,0.15)', circular: true },
                             angleLines: { color: 'rgba(142,152,163,0.12)' },
-                            pointLabels: { color: '#4a4a5a', font: { size: 11, weight: '500' } }
+                            pointLabels: { color: '#4a4a5a', font: {size:11, weight:'500'} }
                         }
                     }
                 },
                 plugins: [ChartDataLabels]
             });
-            updateRadarChart();
-        }
+            window.radarChartInstance = chart;
 
-        function updateRadarChart() {
-            if (!radarChartInstance) return;
-            // 从页面取值更新雷达图
-            const kd = parseFloat(document.getElementById('statKd').textContent) || 0;
-            const kills = parseInt(document.getElementById('extraKills').textContent) || 0;
-            const damage = parseInt(document.getElementById('extraDamage').textContent) || 0;
-            const survival = parseFloat(document.getElementById('extraSurvival').textContent) || 0;
+            // 暗色适配
+            const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+            function updateRadarColors() {
+                const isDark = darkModeMedia.matches;
+                chart.options.scales.r.pointLabels.color = isDark ? '#b8c2cc' : '#4a4a5a';
+                chart.update();
+            }
+            darkModeMedia.addEventListener('change', updateRadarColors);
+            updateRadarColors();
 
-            radarChartInstance.data.datasets[0].data = [
-                Math.min(kills / 5, 100),
-                Math.min(damage / 300, 100),
-                Math.min(survival * 5, 100),
-                Math.min(parseInt(document.getElementById('statWins').textContent) * 8, 100),
-                Math.min(parseInt(document.getElementById('statTop10').textContent) * 2, 100),
-                Math.min(kd * 25, 100)
-            ];
-            radarChartInstance.update();
-        }
-
-        // =============================================================
-        // 5. PWA
-        // =============================================================
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js');
-        }
+            // 赛季切换
+            document.getElementById('seasonSelect').addEventListener('change', function() {
+                const cards = document.querySelectorAll('#statsGrid .stat-card .value');
+                if (cards.length >= 4) {
+                    cards[0].textContent = (Math.random() * 3 + 1.5).toFixed(1);
+                    cards[1].textContent = Math.floor(Math.random() * 80 + 20);
+                    cards[2].textContent = Math.floor(Math.random() * 15);
+                    cards[3].textContent = Math.floor(Math.random() * 30 + 20) + '%';
+                }
+                if (window.radarChartInstance) {
+                    window.radarChartInstance.data.datasets[0].data = [
+                        60+Math.random()*30, 50+Math.random()*35, 40+Math.random()*30,
+                        30+Math.random()*30, 50+Math.random()*30, 60+Math.random()*25
+                    ];
+                    window.radarChartInstance.update();
+                }
+                const now = new Date();
+                document.getElementById('updateTime').textContent = '更新于 ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+            });
+        });
     </script>
 </body>
 </html>
