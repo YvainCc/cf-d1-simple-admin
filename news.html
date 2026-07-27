@@ -9,7 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
     <style>
-        /* ===== 与 member.html 完全一致 ===== */
+        /* 与 member.html 完全一致，此处省略 */
         :root {
             --primary: #1a2a48;
             --gold: #c9a84c;
@@ -54,35 +54,18 @@
         .nav-actions .icon-btn:active { transform:scale(0.92); }
         .badge-dot { position:absolute; top:0; right:0; width:8px; height:8px; background:#ea4335; border-radius:50%; border:2px solid #fff; }
         .container { max-width:480px; margin:0 auto; padding:16px 16px 0; }
-
-        /* ===== 新闻卡片 ===== */
         .news-card {
             background:var(--card-bg); border-radius:var(--radius-card); padding:16px 18px;
             box-shadow:var(--shadow-sm); margin-bottom:12px; cursor:pointer; transition:0.2s;
         }
         .news-card:active { transform:scale(0.98); }
-        .news-card .source {
-            font-size:11px; color:var(--gold); font-weight:600; margin-bottom:4px;
-        }
-        .news-card .title {
-            font-size:15px; font-weight:600; color:var(--text-main); line-height:1.4;
-        }
-        .news-card .summary {
-            font-size:13px; color:var(--text-muted); margin-top:6px; line-height:1.5;
-            display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-        }
-        .news-card .time {
-            font-size:11px; color:var(--text-muted); margin-top:8px;
-        }
-        .news-card .tag {
-            display:inline-block; font-size:10px; background:var(--gold-light); color:var(--gold);
-            padding:2px 10px; border-radius:20px; font-weight:600; margin-top:6px;
-        }
-
+        .news-card .source { font-size:11px; color:var(--gold); font-weight:600; margin-bottom:4px; }
+        .news-card .title { font-size:15px; font-weight:600; color:var(--text-main); line-height:1.4; }
+        .news-card .summary { font-size:13px; color:var(--text-muted); margin-top:6px; line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .news-card .time { font-size:11px; color:var(--text-muted); margin-top:8px; }
+        .news-card .tag { display:inline-block; font-size:10px; background:var(--gold-light); color:var(--gold); padding:2px 10px; border-radius:20px; font-weight:600; margin-top:6px; }
         .empty-state { text-align:center; padding:60px 20px; color:var(--text-muted); }
         .empty-state .icon { font-size:48px; margin-bottom:12px; }
-
-        /* ===== 底部导航 ===== */
         .bottom-nav {
             position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light);
             display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:100;
@@ -95,7 +78,6 @@
         .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
         .bottom-nav a.active { color:var(--gold); font-weight:600; }
         .bottom-nav a:active { transform:scale(0.92); }
-
         @media (prefers-color-scheme: dark) {
             :root { --bg:#0f1419; --card-bg:#1a2430; --text-main:#f0f2f5; --text-secondary:#b8c2cc; --text-muted:#6e7a8a; --border-light:#2a3342; --shadow-sm:0 2px 8px rgba(0,0,0,0.4); }
             .navbar { background:rgba(26,36,48,0.92); border-bottom-color:var(--border-light); }
@@ -108,6 +90,7 @@
     </style>
 </head>
 <body>
+
     <header class="navbar">
         <div class="logo">D.<span>M</span>.N</div>
         <div class="nav-actions">
@@ -122,7 +105,9 @@
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">数据来源：PUBG 官方新闻</div>
         </div>
 
-        <div id="newsList"></div>
+        <div id="newsList">
+            <div class="empty-state"><div class="icon">⏳</div><p>加载中...</p></div>
+        </div>
     </main>
 
     <nav class="bottom-nav">
@@ -134,7 +119,7 @@
     </nav>
 
     <script>
-        // ===== 模拟 PUBG 官方资讯数据 =====
+        // ===== 新闻数据（可后续对接API） =====
         const newsData = [
             { title: '第26赛季即将开启，全新地图"沙漠绿洲"上线', summary: '全新的沙漠绿洲地图为玩家带来了前所未有的战术体验，包含3个全新地标和动态沙暴系统。', time: '2026-07-27 14:30', source: 'PUBG 官方公告', tag: '新版本' },
             { title: 'DMN 夏季赛报名通道正式开启', summary: 'DMN 夏季赛将于8月1日正式开赛，本次赛事总奖金池高达50,000元，报名截止7月30日。', time: '2026-07-26 10:00', source: 'DMN 赛事组', tag: '赛事' },
@@ -161,9 +146,19 @@
             });
             container.innerHTML = html;
         }
-        renderNews();
 
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js'); }
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+            renderNews();
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
     </script>
 </body>
 </html>
