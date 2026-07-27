@@ -19,6 +19,7 @@
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.4) 0%, rgba(232,236,242,1) 80%);
+            overflow-x: hidden;
         }
 
         /* ===== 顶部导航 ===== */
@@ -32,7 +33,7 @@
             align-items: center;
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 60;
             border-bottom: 0.5px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 2px 20px rgba(0,0,0,0.02);
         }
@@ -66,9 +67,7 @@
             font-size: 16px;
             box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
         }
-        .user-detail {
-            line-height: 1.2;
-        }
+        .user-detail { line-height: 1.2; }
         .user-name {
             font-size: 15px;
             font-weight: 600;
@@ -115,12 +114,28 @@
         }
         .nav-btn:active { background: rgba(0,0,0,0.04); }
 
-        /* ===== 主容器 ===== */
-        .container {
+        /* ===== SPA 容器 ===== */
+        .page-container {
             max-width: 600px;
             margin: 0 auto;
             padding: 18px 20px 30px;
         }
+
+        /* 每个页面区块 */
+        .page {
+            display: none;
+            animation: fadeIn 0.25s ease;
+        }
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 通用卡片样式 ===== */
         .section-title {
             font-size: 20px;
             font-weight: 600;
@@ -133,7 +148,6 @@
         }
         .section-title i { font-style: normal; font-size: 22px; }
 
-        /* ===== 卡片 ===== */
         .card-list { display: flex; flex-direction: column; gap: 16px; }
         .card {
             background: rgba(255, 255, 255, 0.75);
@@ -383,7 +397,7 @@
             .footer { color: #6c7a8a; }
         }
         @media (max-width: 400px) {
-            .container { padding: 12px 16px; }
+            .page-container { padding: 12px 16px; }
             .card { padding: 14px 16px; }
             .tab-item .tab-icon { font-size: 22px; }
             .tab-item { font-size: 10px; }
@@ -400,100 +414,203 @@
         </div>
     </div>
 
-    <!-- ===== 内容 ===== -->
-    <div class="container">
-        <!-- 近期赛事 -->
-        <div class="section-title"><i>🏆</i> 近期赛事</div>
-        <div class="card-list">
-            <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看夏季联赛详情">
-                <div class="card-header">
-                    <div class="card-title">DMN 夏季联赛</div>
-                    <div class="card-badge">进行中</div>
+    <!-- ===== SPA 页面容器 ===== -->
+    <div class="page-container" id="app">
+
+        <!-- 首页 -->
+        <div class="page active" id="page-home">
+            <div class="section-title"><i>🏆</i> 近期赛事</div>
+            <div class="card-list">
+                <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看夏季联赛详情">
+                    <div class="card-header">
+                        <div class="card-title">DMN 夏季联赛</div>
+                        <div class="card-badge">进行中</div>
+                    </div>
+                    <div class="card-sub">战队报名截止：8月5日</div>
+                    <div class="card-info"><span>📅 2026.07.20 - 08.15</span><span>👥 12支战队</span></div>
                 </div>
-                <div class="card-sub">战队报名截止：8月5日</div>
-                <div class="card-info"><span>📅 2026.07.20 - 08.15</span><span>👥 12支战队</span></div>
+                <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看全明星邀请赛详情">
+                    <div class="card-header">
+                        <div class="card-title">全明星邀请赛</div>
+                        <div class="card-badge">报名中</div>
+                    </div>
+                    <div class="card-sub">个人赛，面向所有公会成员</div>
+                    <div class="card-info"><span>📅 2026.08.20</span><span>🏅 冠军奖励 5,000 金币</span></div>
+                </div>
+                <div class="card" data-protected="true" data-msg="登录后查看城市争霸赛详情">
+                    <div class="card-header">
+                        <div class="card-title">城市争霸赛 · 深圳站</div>
+                        <div class="card-badge">预告</div>
+                    </div>
+                    <div class="card-sub">线下决赛，具体场馆待公布</div>
+                    <div class="card-info"><span>📅 2026.09.01</span><span>📍 深圳</span></div>
+                </div>
             </div>
-            <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看全明星邀请赛详情">
-                <div class="card-header">
-                    <div class="card-title">全明星邀请赛</div>
-                    <div class="card-badge">报名中</div>
+
+            <div class="section-title"><i>⭐</i> 明星选手</div>
+            <div class="card-list">
+                <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
+                    <div class="player-avatar">YN</div>
+                    <div class="player-info">
+                        <div class="player-name">YvainCc</div>
+                        <div class="player-role">突击手 · 赛季击杀王</div>
+                    </div>
                 </div>
-                <div class="card-sub">个人赛，面向所有公会成员</div>
-                <div class="card-info"><span>📅 2026.08.20</span><span>🏅 冠军奖励 5,000 金币</span></div>
+                <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
+                    <div class="player-avatar">LS</div>
+                    <div class="player-info">
+                        <div class="player-name">凌霜</div>
+                        <div class="player-role">指挥 · 胜率 78%</div>
+                    </div>
+                </div>
+                <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
+                    <div class="player-avatar">HF</div>
+                    <div class="player-info">
+                        <div class="player-name">黑锋</div>
+                        <div class="player-role">狙击手 · 场均伤害 3200</div>
+                    </div>
+                </div>
             </div>
-            <div class="card" data-protected="true" data-msg="登录后查看城市争霸赛详情">
-                <div class="card-header">
-                    <div class="card-title">城市争霸赛 · 深圳站</div>
-                    <div class="card-badge">预告</div>
+
+            <div class="section-title"><i>📢</i> 公会公告</div>
+            <div class="card-list">
+                <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
+                    <div class="notice-title">新赛季奖励升级</div>
+                    <div class="card-sub">所有完成报名的战队可获专属头像框，冠军战队额外获得限定皮肤。</div>
+                    <div class="card-info">2026-07-25</div>
                 </div>
-                <div class="card-sub">线下决赛，具体场馆待公布</div>
-                <div class="card-info"><span>📅 2026.09.01</span><span>📍 深圳</span></div>
+                <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
+                    <div class="notice-title">招募管理员与裁判</div>
+                    <div class="card-sub">熟悉赛事规则、有责任心者请通过 Discord 或站内信联系会长。</div>
+                    <div class="card-info">2026-07-22</div>
+                </div>
+                <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
+                    <div class="notice-title">服务器维护通知</div>
+                    <div class="card-sub">8月1日凌晨2:00-4:00进行数据维护，届时排行榜暂不可用。</div>
+                    <div class="card-info">2026-07-20</div>
+                </div>
+            </div>
+            <div class="footer">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
+        </div>
+
+        <!-- 赛事页面（模拟） -->
+        <div class="page" id="page-matches">
+            <div class="section-title"><i>🏆</i> 赛事列表</div>
+            <div class="card-list">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">DMN 夏季联赛</div>
+                        <div class="card-badge">进行中</div>
+                    </div>
+                    <div class="card-sub">8月5日截止报名，8月10日开赛</div>
+                    <div class="card-info"><span>👥 12队</span><span>💰 奖金 ¥10,000</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">全明星邀请赛</div>
+                        <div class="card-badge">报名中</div>
+                    </div>
+                    <div class="card-sub">个人赛，8月20日开赛</div>
+                    <div class="card-info"><span>👤 个人赛</span><span>🏅 冠军 5,000金币</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">城市争霸赛 · 深圳站</div>
+                        <div class="card-badge">预告</div>
+                    </div>
+                    <div class="card-sub">线下决赛，具体场馆待公布</div>
+                    <div class="card-info"><span>📅 9月1日</span><span>📍 深圳</span></div>
+                </div>
             </div>
         </div>
 
-        <!-- 明星选手 -->
-        <div class="section-title"><i>⭐</i> 明星选手</div>
-        <div class="card-list">
-            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
-                <div class="player-avatar">YN</div>
-                <div class="player-info">
-                    <div class="player-name">YvainCc</div>
-                    <div class="player-role">突击手 · 赛季击杀王</div>
+        <!-- 战队页面（模拟） -->
+        <div class="page" id="page-team">
+            <div class="section-title"><i>👥</i> 战队列表</div>
+            <div class="card-list">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">DMN 主队</div>
+                        <div class="card-badge">活跃</div>
+                    </div>
+                    <div class="card-sub">队长：凌霜 · 胜率 78%</div>
+                    <div class="card-info"><span>👥 5人</span><span>🏆 2冠</span></div>
                 </div>
-            </div>
-            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
-                <div class="player-avatar">LS</div>
-                <div class="player-info">
-                    <div class="player-name">凌霜</div>
-                    <div class="player-role">指挥 · 胜率 78%</div>
-                </div>
-            </div>
-            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
-                <div class="player-avatar">HF</div>
-                <div class="player-info">
-                    <div class="player-name">黑锋</div>
-                    <div class="player-role">狙击手 · 场均伤害 3200</div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">DMN 二队</div>
+                        <div class="card-badge">发展中</div>
+                    </div>
+                    <div class="card-sub">队长：黑锋 · 胜率 62%</div>
+                    <div class="card-info"><span>👥 5人</span><span>🏆 1冠</span></div>
                 </div>
             </div>
         </div>
 
-        <!-- 公告 -->
-        <div class="section-title"><i>📢</i> 公会公告</div>
-        <div class="card-list">
-            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
-                <div class="notice-title">新赛季奖励升级</div>
-                <div class="card-sub">所有完成报名的战队可获专属头像框，冠军战队额外获得限定皮肤。</div>
-                <div class="card-info">2026-07-25</div>
-            </div>
-            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
-                <div class="notice-title">招募管理员与裁判</div>
-                <div class="card-sub">熟悉赛事规则、有责任心者请通过 Discord 或站内信联系会长。</div>
-                <div class="card-info">2026-07-22</div>
-            </div>
-            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
-                <div class="notice-title">服务器维护通知</div>
-                <div class="card-sub">8月1日凌晨2:00-4:00进行数据维护，届时排行榜暂不可用。</div>
-                <div class="card-info">2026-07-20</div>
+        <!-- 排行页面（模拟） -->
+        <div class="page" id="page-rank">
+            <div class="section-title"><i>📈</i> 排行榜</div>
+            <div class="card-list">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🥇 YvainCc</div>
+                        <div class="card-badge">击杀 156</div>
+                    </div>
+                    <div class="card-sub">突击手 · 赛季击杀王</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🥈 凌霜</div>
+                        <div class="card-badge">胜率 78%</div>
+                    </div>
+                    <div class="card-sub">指挥 · 战术大师</div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">🥉 黑锋</div>
+                        <div class="card-badge">伤害 3200</div>
+                    </div>
+                    <div class="card-sub">狙击手 · 场均伤害第一</div>
+                </div>
             </div>
         </div>
-        <div class="footer">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
+
+        <!-- 我的页面（模拟） -->
+        <div class="page" id="page-profile">
+            <div class="section-title"><i>👤</i> 个人中心</div>
+            <div class="card" style="text-align:center; padding:30px;">
+                <div style="font-size:64px; margin-bottom:8px;" id="profileAvatar">👤</div>
+                <div style="font-size:20px; font-weight:600; color:#0b1426;" id="profileName">用户</div>
+                <div style="font-size:14px; color:#6c6c70; margin-top:4px;" id="profileRole">队员</div>
+                <div style="display:flex; justify-content:space-around; margin-top:20px;">
+                    <div><div style="font-weight:700; font-size:18px;">12</div><div style="font-size:12px; color:#8e8e93;">参赛</div></div>
+                    <div><div style="font-weight:700; font-size:18px;">68%</div><div style="font-size:12px; color:#8e8e93;">胜率</div></div>
+                    <div><div style="font-weight:700; font-size:18px;">#3</div><div style="font-size:12px; color:#8e8e93;">排名</div></div>
+                </div>
+                <div style="margin-top:24px; display:flex; flex-direction:column; gap:12px;">
+                    <button onclick="alert('编辑资料开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">✏️ 编辑资料</button>
+                    <button onclick="alert('战绩详情开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">📊 我的战绩</button>
+                    <button onclick="alert('设置开发中')" style="background:rgba(0,0,0,0.04); border:none; border-radius:16px; padding:14px; font-size:16px; font-weight:500; cursor:pointer;">⚙️ 设置</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ===== 底部导航 ===== -->
     <div class="bottom-tab" role="tablist">
-        <button class="tab-item active" data-tab="home" onclick="navigateTab(this)">
+        <button class="tab-item active" data-tab="home" onclick="switchPage('home')">
             <span class="tab-icon">🏠</span><span>首页</span>
         </button>
-        <button class="tab-item" data-tab="matches" onclick="navigateTab(this)">
+        <button class="tab-item" data-tab="matches" onclick="switchPage('matches')">
             <span class="tab-icon">🏆</span><span>赛事</span>
         </button>
-        <button class="tab-item" data-tab="team" onclick="navigateTab(this)">
+        <button class="tab-item" data-tab="team" onclick="switchPage('team')">
             <span class="tab-icon">👥</span><span>战队</span>
         </button>
-        <button class="tab-item" data-tab="rank" onclick="navigateTab(this)">
+        <button class="tab-item" data-tab="rank" onclick="switchPage('rank')">
             <span class="tab-icon">📈</span><span>排行</span>
         </button>
-        <button class="tab-item" data-tab="profile" onclick="navigateTab(this)">
+        <button class="tab-item" data-tab="profile" onclick="switchPage('profile')">
             <span class="tab-icon">👤</span><span>我的</span>
         </button>
     </div>
@@ -536,6 +653,10 @@
                         location.reload();
                     }
                 });
+                // 更新个人中心信息
+                document.getElementById('profileName').textContent = name;
+                document.getElementById('profileRole').textContent = role;
+                document.getElementById('profileAvatar').textContent = avatar;
             } else {
                 container.innerHTML = `<button class="nav-btn" id="loginBtn">👤 登录</button>`;
                 document.getElementById('loginBtn').addEventListener('click', () => window.location.href = '/login.html');
@@ -577,62 +698,41 @@
             }
         }
 
-        // ===== 🆕 导航跳转（无任何拦截，直接跳转） =====
-        function navigateTab(el) {
-            // 高亮当前 tab
+        // ===== SPA 页面切换（无刷新，瞬间切换） =====
+        function switchPage(pageId) {
+            // 隐藏所有页面
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // 显示目标页面
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
+
+            // 更新底部导航高亮
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+            const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
+            if (activeTab) activeTab.classList.add('active');
 
-            const tab = el.getAttribute('data-tab');
-            // 映射路径：根据您实际页面调整
-            const map = {
-                home: '/',
-                matches: '/matches.html',   // 如果您有 matches.html，否则可改为 leaderboard.html
-                team: '/team.html',         // 如果有 team.html，否则可改为 members.html
-                rank: '/rankings.html',     // 档案中有 rankings.html
-                profile: '/profile.html'
-            };
-            const url = map[tab];
-            if (!url) return;
-
-            // 如果已在首页且点击的是首页，不跳转
-            if (url === '/' && window.location.pathname === '/') return;
-
-            // 未登录只能访问首页
-            if (!isLoggedIn() && url !== '/') {
-                showLoginAlert('请先登录后访问此页面');
-                // 恢复高亮到首页
-                document.querySelector('.tab-item[data-tab="home"]')?.classList.add('active');
-                el.classList.remove('active');
-                return;
+            // 如果点击的是"我的"且未登录，弹出登录提示（但页面已显示，可改为跳转）
+            if (pageId === 'profile' && !isLoggedIn()) {
+                showLoginAlert('请先登录查看个人中心');
+                // 可自动跳回首页（但此处保留用户操作，仅提示）
+                // 也可强制切换回首页，按需决定
+                // 我们选择仅提示，不强制切换，让用户自己操作
             }
-
-            // ✅ 直接跳转，没有任何拦截
-            window.location.href = url;
         }
 
         // ===== 初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             renderNavbar();
 
-            // 卡片点击绑定
+            // 绑定卡片点击（所有页面中的卡片）
             document.querySelectorAll('.card[data-protected="true"]').forEach(c => {
                 c.addEventListener('click', function() { handleProtectedCardClick(this); });
             });
 
-            // 根据当前路径高亮对应的导航
-            const path = window.location.pathname;
-            const tabMap = {
-                '/': 'home',
-                '/matches.html': 'matches',
-                '/team.html': 'team',
-                '/rankings.html': 'rank',
-                '/profile.html': 'profile'
-            };
-            const activeTab = tabMap[path] || 'home';
-            document.querySelectorAll('.tab-item').forEach(t => {
-                t.classList.toggle('active', t.getAttribute('data-tab') === activeTab);
-            });
+            // 如果未登录且当前页面不是首页，自动切回首页（但不要强制，让用户自由浏览公开内容）
+            // 我们仅对受保护的页面做拦截，已在卡片中处理
+
+            // 默认高亮由 HTML 控制
         });
     </script>
 </body>
