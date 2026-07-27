@@ -143,6 +143,8 @@
         <div class="logo">D<span style="color:#c9a84c;">M</span>N</div>
         <div class="nav-actions">
             <button class="icon-btn" aria-label="通知">🔔<span class="badge-dot"></span></button>
+            <!-- 管理员菜单（仅 YvainCC 可见） -->
+            <span id="adminMenu" style="display:none; cursor:pointer; font-size:20px; font-weight:bold; color:var(--gold);">⋮</span>
             <span id="logoutBtn" style="font-size:14px; color:var(--text-muted); cursor:pointer;">退出</span>
         </div>
     </header>
@@ -230,6 +232,16 @@
                 badge.style.color = '#155724';
             }
 
+            // 管理员菜单：仅 YvainCC 可见
+            const adminMenu = document.getElementById('adminMenu');
+            if (loginUser === 'YvainCC') {
+                adminMenu.style.display = 'inline-block';
+                adminMenu.addEventListener('click', function() {
+                    window.location.href = '/admin.html';
+                });
+            }
+
+            // 退出按钮
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 localStorage.removeItem('loginUser');
                 localStorage.removeItem('userRole');
@@ -237,6 +249,7 @@
                 window.location.href = '/';
             });
 
+            // 更多数据展开
             const toggleBtn = document.getElementById('toggleMore');
             const collapseBox = document.getElementById('collapseBox');
             const arrowIcon = document.getElementById('arrowIcon');
@@ -251,6 +264,7 @@
                 }, 400);
             });
 
+            // 雷达图
             const ctx = document.getElementById('radarChart').getContext('2d');
             const chart = new Chart(ctx, {
                 type: 'radar',
