@@ -193,4 +193,230 @@
         <div style="margin-bottom:20px;">
             <button class="expand-btn" id="toggleMore">
                 <span>📊 更多数据</span>
-                <span class="arrow" id="arrowIcon">
+                <span class="arrow" id="arrowIcon">▾</span>
+            </button>
+            <div class="collapse-box" id="collapseBox">
+                <div class="panel">
+                    <div class="radar-wrapper"><canvas id="radarChart"></canvas></div>
+                    <div class="extra-stats">
+                        <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">-</span></div>
+                        <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">-</span></div>
+                        <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">-</span></div>
+                        <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">-</span></div>
+                    </div>
+                    <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-light); display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted);">
+                        <span>📌 数据来源：API 同步</span>
+                        <span id="updateTime">更新于 刚刚</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="bottom-actions">
+        <button class="btn-outline" onclick="location.href='profile.html'">👤 我的</button>
+        <button class="btn-gold" onclick="location.href='registration.html'">📝 报名管理</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="member.html" class="active"><span class="nav-icon">🏠</span>首页</a>
+        <a href="leaderboard.html"><span class="nav-icon">📊</span>榜单</a>
+        <a href="registration.html"><span class="nav-icon">📝</span>报名</a>
+        <a href="news.html"><span class="nav-icon">📰</span>资讯</a>
+        <a href="profile.html"><span class="nav-icon">👤</span>我的</a>
+    </nav>
+
+    <script>
+        // =============================================================
+        // 全局变量
+        // =============================================================
+        let radarChartInstance = null;
+        let currentSeason = '1';
+
+        // =============================================================
+        // 1. 页面初始化 - 加载数据
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', async function() {
+            const token = localStorage.getItem('token');
+            const loginUser = localStorage.getItem('loginUser');
+
+            // 校验登录
+            if (!token || !loginUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 加载用户信息和战绩
+            await loadUserInfo(token);
+            await loadStats(token, currentSeason);
+
+            // 初始化雷达图
+            initRadarChart();
+
+            // 展开/收起
+            document.getElementById('toggleMore').addEventListener('click', function() {
+                const box = document.getElementById('collapseBox');
+                const arrow = document.getElementById('arrowIcon');
+                const isOpen = box.classList.toggle('open');
+                arrow.classList.toggle('open', isOpen);
+                this.querySelector('span:first-child').textContent = isOpen ? '📊 收起数据' : '📊 更多数据';
+                if (isOpen && radarChartInstance) {
+                    setTimeout(() => radarChartInstance.resize(), 400);
+                }
+            });
+
+            // 赛季切换
+            document.getElementById('seasonSelect').addEventListener('change', async function() {
+                currentSeason = this.value;
+                await loadStats(token, currentSeason);
+                if (radarChartInstance) {
+                    updateRadarChart();
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确认退出登录吗？')) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('loginUser');
+                    localStorage.removeItem('userRole');
+                    window.location.href = 'index.html';
+                }
+            });
+        });
+
+        // =============================================================
+        // 2. 加载用户信息
+        // =============================================================
+        async function loadUserInfo(token) {
+            try {
+                const res = await fetch('/api/users/me', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    document.getElementById('displayName').textContent = data.data.username;
+                    document.getElementById('displayTeam').textContent = data.data.team || '暂无战队';
+                    document.getElementById('displayTag').textContent = data.data.role || '队员';
+
+                    const badge = document.getElementById('statusBadge');
+                    if (data.data.role === '管理员' || data.data.role === '超级管理员') {
+                        badge.textContent = '管理员';
+                        badge.className = 'status-badge approved';
+                    } else if (data.data.registrationStatus === 'approved') {
+                        badge.textContent = '已报名';
+                        badge.className = 'status-badge approved';
+                    } else if (data.data.registrationStatus === 'pending') {
+                        badge.textContent = '待审核';
+                        badge.className = 'status-badge pending';
+                    } else {
+                        badge.textContent = '未报名';
+                        badge.className = 'status-badge';
+                    }
+                }
+            } catch (err) {
+                console.error('加载用户信息失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 3. 加载战绩数据
+        // =============================================================
+        async function loadStats(token, season) {
+            try {
+                const res = await fetch(`/api/users/stats?season=${season}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    const d = data.data;
+                    document.getElementById('statKd').textContent = d.kd || '0';
+                    document.getElementById('statGames').textContent = d.total_matches || '0';
+                    document.getElementById('statWins').textContent = d.total_wins || '0';
+                    document.getElementById('statTop10').textContent = d.top10_rate || '0%';
+                    document.getElementById('extraKills').textContent = d.total_kills || '0';
+                    document.getElementById('extraDamage').textContent = d.total_damage || '0';
+                    document.getElementById('extraSurvival').textContent = d.avg_survival || '0min';
+                    document.getElementById('extraMaxKills').textContent = d.max_kills || '0';
+
+                    // 更新时间
+                    const now = new Date();
+                    document.getElementById('updateTime').textContent =
+                        `更新于 ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                }
+            } catch (err) {
+                console.error('加载战绩失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 4. 雷达图
+        // =============================================================
+        function initRadarChart() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            radarChartInstance = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['击杀', '伤害', '生存', '吃鸡', '前十', 'KD'],
+                    datasets: [{
+                        label: '当前赛季',
+                        data: [50, 50, 50, 50, 50, 50],
+                        backgroundColor: 'rgba(201,168,76,0.15)',
+                        borderColor: '#c9a84c',
+                        borderWidth: 2.5,
+                        pointBackgroundColor: '#c9a84c',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { stepSize: 20, color: '#8e98a3', backdropColor: 'transparent', font: { size: 9 } },
+                            grid: { color: 'rgba(142,152,163,0.15)', circular: true },
+                            angleLines: { color: 'rgba(142,152,163,0.12)' },
+                            pointLabels: { color: '#4a4a5a', font: { size: 11, weight: '500' } }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels]
+            });
+            updateRadarChart();
+        }
+
+        function updateRadarChart() {
+            if (!radarChartInstance) return;
+            // 从页面取值更新雷达图
+            const kd = parseFloat(document.getElementById('statKd').textContent) || 0;
+            const kills = parseInt(document.getElementById('extraKills').textContent) || 0;
+            const damage = parseInt(document.getElementById('extraDamage').textContent) || 0;
+            const survival = parseFloat(document.getElementById('extraSurvival').textContent) || 0;
+
+            radarChartInstance.data.datasets[0].data = [
+                Math.min(kills / 5, 100),
+                Math.min(damage / 300, 100),
+                Math.min(survival * 5, 100),
+                Math.min(parseInt(document.getElementById('statWins').textContent) * 8, 100),
+                Math.min(parseInt(document.getElementById('statTop10').textContent) * 2, 100),
+                Math.min(kd * 25, 100)
+            ];
+            radarChartInstance.update();
+        }
+
+        // =============================================================
+        // 5. PWA
+        // =============================================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
+    </script>
+</body>
+</html>
