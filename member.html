@@ -103,6 +103,23 @@
             border-radius: 50%;
             border: 2px solid #fff;
         }
+        .logout-btn {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: 0.2s;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-btn:active {
+            background: rgba(0,0,0,0.05);
+        }
+        .logout-btn:hover {
+            color: #ea4335;
+        }
 
         /* ========== 主容器 ========== */
         .container {
@@ -174,6 +191,10 @@
         .status-badge.pending {
             background: #fff3cd;
             color: #856404;
+        }
+        .status-badge.approved {
+            background: #d4edda;
+            color: #155724;
         }
 
         /* ========== 赛季选择器 ========== */
@@ -481,11 +502,11 @@
     <header class="navbar">
         <div class="logo">D.<span>M</span>.N</div>
         <div class="nav-actions">
-            <button class="icon-btn" aria-label="通知">
+            <button class="icon-btn" aria-label="通知" onclick="alert('暂无新通知')">
                 🔔
                 <span class="badge-dot"></span>
             </button>
-            <a href="index.html" style="font-size:14px; color:var(--text-muted); text-decoration:none;">退出</a>
+            <button class="logout-btn" id="logoutBtn">退出</button>
         </div>
     </header>
 
@@ -569,21 +590,38 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // ===== 1. 用户信息渲染（从 localStorage 读取登录账号） =====
-            const loginUser = localStorage.getItem('loginUser') || 'DMN丨战神';
-            const userRole = localStorage.getItem('userRole') || '队长';
-            document.getElementById('displayName').textContent = loginUser;
-            document.getElementById('displayTeam').textContent = 'DMN-战神队 · ' + userRole;
-            // 根据角色动态调整状态标签
-            const badge = document.getElementById('statusBadge');
-            if (userRole === '管理员' || userRole === 'admin') {
-                badge.textContent = '管理员';
-                badge.className = 'status-badge approved';
-                badge.style.background = '#d4edda';
-                badge.style.color = '#155724';
+            // =========================================================
+            // 1. 登录状态校验（未登录强制跳转）
+            // =========================================================
+            const loginUser = localStorage.getItem('loginUser');
+            const userRole = localStorage.getItem('userRole');
+            
+            // 如果没有登录信息，跳回登录页
+            if (!loginUser || !userRole) {
+                window.location.href = '/index.html';
+                return; // 阻止后续代码执行
             }
 
-            // ===== 2. 展开/收起 =====
+            // =========================================================
+            // 2. 用户信息渲染
+            // =========================================================
+            document.getElementById('displayName').textContent = loginUser;
+            document.getElementById('displayTeam').textContent = 'DMN-战神队 · ' + userRole;
+            
+            // 根据角色调整状态标签
+            const badge = document.getElementById('statusBadge');
+            if (userRole === '管理员' || userRole === 'admin' || userRole === '超级管理员') {
+                badge.textContent = '管理员';
+                badge.className = 'status-badge approved';
+            } else {
+                // 模拟报名状态（实际可以从 API 获取）
+                badge.textContent = '已报名';
+                badge.className = 'status-badge approved';
+            }
+
+            // =========================================================
+            // 3. 展开/收起
+            // =========================================================
             const toggleBtn = document.getElementById('toggleMore');
             const collapseBox = document.getElementById('collapseBox');
             const arrowIcon = document.getElementById('arrowIcon');
@@ -602,7 +640,9 @@
                 }, 400);
             });
 
-            // ===== 3. 雷达图 =====
+            // =========================================================
+            // 4. 雷达图
+            // =========================================================
             const ctx = document.getElementById('radarChart').getContext('2d');
             const chart = new Chart(ctx, {
                 type: 'radar',
@@ -662,7 +702,9 @@
             });
             window.radarChartInstance = chart;
 
-            // ===== 4. 暗色模式雷达图文字适配 =====
+            // =========================================================
+            // 5. 暗色模式雷达图文字适配
+            // =========================================================
             const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
             function updateRadarColors() {
                 const isDark = darkModeMedia.matches;
@@ -675,7 +717,9 @@
             darkModeMedia.addEventListener('change', updateRadarColors);
             updateRadarColors();
 
-            // ===== 5. 赛季切换 =====
+            // =========================================================
+            // 6. 赛季切换（模拟数据更新）
+            // =========================================================
             document.getElementById('seasonSelect').addEventListener('change', function() {
                 const cards = document.querySelectorAll('#statsGrid .stat-card .value');
                 if (cards.length >= 4) {
@@ -686,8 +730,13 @@
                 }
                 // 更新雷达图数据
                 if (window.radarChartInstance) {
-                    const newData = [60 + Math.random() * 30, 50 + Math.random() * 35, 40 + Math.random() * 30, 30 + Math
-                        .random() * 30, 50 + Math.random() * 30, 60 + Math.random() * 25
+                    const newData = [
+                        60 + Math.random() * 30,
+                        50 + Math.random() * 35,
+                        40 + Math.random() * 30,
+                        30 + Math.random() * 30,
+                        50 + Math.random() * 30,
+                        60 + Math.random() * 25
                     ];
                     window.radarChartInstance.data.datasets[0].data = newData;
                     window.radarChartInstance.update();
@@ -703,12 +752,27 @@
                 setTimeout(() => { btn.textContent = orig; }, 800);
             });
 
-            // ===== 6. 退出登录 =====
-            document.querySelector('.nav-actions a[href="index.html"]')?.addEventListener('click', function(e) {
-                // 不阻止默认跳转，但清除本地存储
-                localStorage.removeItem('loginUser');
-                localStorage.removeItem('userRole');
+            // =========================================================
+            // 7. 退出登录
+            // =========================================================
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('确认退出登录吗？')) {
+                    // 清除本地存储
+                    localStorage.removeItem('loginUser');
+                    localStorage.removeItem('userRole');
+                    // 跳转回登录页
+                    window.location.href = '/index.html';
+                }
             });
+
+            // =========================================================
+            // 8. PWA 注册 Service Worker
+            // =========================================================
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(() => console.log('✅ Service Worker 注册成功'))
+                    .catch(err => console.warn('⚠️ Service Worker 注册失败', err));
+            }
 
         });
     </script>
