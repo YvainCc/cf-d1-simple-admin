@@ -1,131 +1,167 @@
-export async function onRequest({ request, env }) {
-  const corsHeaders = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
-  };
+// functions/api/teams.js
+// 路由: /api/teams (POST创建)  /api/teams/:id (GET详情)
 
-  // 跨域预检
-  if (request.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  // GET 请求：查询当前用户战队信息
-  if (request.method === "GET") {
+export async function onRequest(context) {
+    const { request, env } = context;
+    const db = env.DB;
+    const method = request.method;
     const url = new URL(request.url);
-    const username = url.searchParams.get("username");
-    if (!username) return Response.json({ok:false,msg:"缺少账号参数"},{headers:corsHeaders});
 
-    // 查询选手id
-    const user = await env.DB.prepare(`SELECT id FROM admin WHERE username = ?`).bind(username).first();
-    if (!user) return Response.json({ok:false,msg:"账号不存在"},{headers:corsHeaders});
-    const playerId = user.id;
-
-    // 查询该选手所属战队基础信息
-    const teamMember = await env.DB.prepare(`
-      SELECT tm.member_role, t.id team_id, t.team_name, t.captain_id, t.invite_code
-      FROM team_members tm
-      LEFT JOIN teams t ON tm.team_id = t.id
-      WHERE tm.player_id = ?
-    `).bind(playerId).first();
-
-    if (!teamMember) {
-      return Response.json({
-        ok:true,
-        hasTeam:false,
-        data:null
-      },{headers:corsHeaders})
+    // ===== 认证：从Header获取用户信息 =====
+    const user = await getCurrentUser(request);
+    if (!user) {
+        return jsonResponse({ error: '请先登录' }, 401);
     }
 
-    // 查询战队全部成员
-    const memberList = await env.DB.prepare(`
-      SELECT a.username, tm.member_role, s.historical_total_kd
-      FROM team_members tm
-      LEFT JOIN admin a ON tm.player_id = a.id
-      LEFT JOIN player_stats s ON tm.player_id = s.player_id
-      WHERE tm.team_id = ?
-    `).bind(teamMember.team_id).all();
+    // ===== GET: 获取战队详情 =====
+    if (method === 'GET') {
+        const teamId = url.pathname.split('/').pop();
+        if (!teamId || isNaN(teamId)) {
+            return jsonResponse({ error: 'Invalid team ID' }, 400);
+        }
 
-    return Response.json({
-      ok:true,
-      hasTeam:true,
-      selfRole: teamMember.member_role,
-      teamInfo:{
-        id: teamMember.team_id,
-        name: teamMember.team_name,
-        inviteCode: teamMember.invite_code,
-        captainId: teamMember.captain_id
-      },
-      memberList: memberList.results
-    },{headers:corsHeaders})
-  }
+        const team = await db.prepare(`
+            SELECT t.*, u.username as captain_name 
+            FROM teams t
+            JOIN users u ON t.captain_id = u.id
+            WHERE t.id = ?
+        `).bind(teamId).first();
 
-  // POST 请求：创建战队 / 邀请码入队
-  if (request.method === "POST") {
-    const body = await request.json();
-    const { type, username, teamName, inviteCode } = body;
+        if (!team) {
+            return jsonResponse({ error: '战队不存在' }, 404);
+        }
 
-    // 获取选手ID
-    const user = await env.DB.prepare(`SELECT id FROM admin WHERE username = ?`).bind(username).first();
-    if (!user) return Response.json({ok:false,msg:"账号不存在"},{headers:corsHeaders});
-    const playerId = user.id;
+        const members = await db.prepare(`
+            SELECT u.id, u.username, tm.role
+            FROM team_members tm
+            JOIN users u ON tm.player_id = u.id
+            WHERE tm.team_id = ?
+        `).bind(teamId).all();
 
-    // 创建战队分支
-    if (type === "create") {
-      if (!teamName) return Response.json({ok:false,msg:"战队名称不能为空"},{headers:corsHeaders});
-      const existTeam = await env.DB.prepare(`SELECT id FROM teams WHERE team_name = ?`).bind(teamName).first();
-      if(existTeam) return Response.json({ok:false,msg:"战队名称已存在"},{headers:corsHeaders});
-
-      // 生成6位邀请码
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      let code = "";
-      for(let i=0;i<6;i++) code += chars[Math.floor(Math.random()*chars.length)];
-
-      // 插入战队表
-      const teamInsert = await env.DB.prepare(`
-        INSERT INTO teams (team_name, captain_id, invite_code) VALUES (?,?,?)
-      `).bind(teamName, playerId, code).run();
-      const teamId = teamInsert.lastInsertRowid;
-
-      // 插入队长成员记录
-      await env.DB.prepare(`
-        INSERT INTO team_members (team_id, player_id, member_role) VALUES (?,?,?)
-      `).bind(teamId, playerId, "captain").run();
-
-      return Response.json({
-        ok:true,
-        msg:"战队创建成功",
-        inviteCode: code
-      },{headers:corsHeaders})
+        return jsonResponse({ 
+            ok: true, 
+            data: { ...team, members: members.results }
+        });
     }
 
-    // 加入战队分支
-    if (type === "join") {
-      if (!inviteCode) return Response.json({ok:false,msg:"请输入邀请码"},{headers:corsHeaders});
-      const targetTeam = await env.DB.prepare(`SELECT id FROM teams WHERE invite_code = ?`).bind(inviteCode).first();
-      if(!targetTeam) return Response.json({ok:false,msg:"邀请码无效"},{headers:corsHeaders});
-      const teamId = targetTeam.id;
+    // ===== POST: 创建战队 =====
+    if (method === 'POST') {
+        const { name, seasonId } = await request.json();
 
-      // 判断是否已有战队
-      const hasTeam = await env.DB.prepare(`SELECT id FROM team_members WHERE player_id = ?`).bind(playerId).first();
-      if(hasTeam) return Response.json({ok:false,msg:"你已加入其他战队"},{headers:corsHeaders});
+        // 校验赛季状态
+        const season = await db.prepare(
+            'SELECT status, max_teams FROM seasons WHERE id = ?'
+        ).bind(seasonId).first();
 
-      // 人数上限9人校验
-      const memberCount = await env.DB.prepare(`
-        SELECT COUNT(*) cnt FROM team_members WHERE team_id = ?
-      `).bind(teamId).first();
-      if(memberCount.cnt >=9) return Response.json({ok:false,msg:"战队人数已满"},{headers:corsHeaders});
+        if (!season || season.status !== '报名中') {
+            return jsonResponse({ ok: false, msg: '当前赛季未开放报名' }, 400);
+        }
 
-      // 插入替补队员
-      await env.DB.prepare(`
-        INSERT INTO team_members (team_id, player_id, member_role) VALUES (?,?,?)
-      `).bind(teamId, playerId, "substitute").run();
+        // 校验战队名
+        const existing = await db.prepare(
+            'SELECT id FROM teams WHERE name = ? AND season_id = ?'
+        ).bind(name, seasonId).first();
 
-      return Response.json({ok:true,msg:"成功加入战队"} ,{headers:corsHeaders})
+        if (existing) {
+            return jsonResponse({ ok: false, msg: '战队名称已被使用' }, 400);
+        }
+
+        // 校验名额
+        const count = await db.prepare(
+            'SELECT COUNT(*) as count FROM teams WHERE season_id = ?'
+        ).bind(seasonId).first();
+
+        if (count.count >= season.max_teams) {
+            return jsonResponse({ ok: false, msg: '报名已满' }, 400);
+        }
+
+        // 生成邀请码并创建
+        const inviteCode = generateInviteCode();
+        const result = await db.prepare(
+            `INSERT INTO teams (name, captain_id, season_id, invite_code) 
+             VALUES (?, ?, ?, ?)`
+        ).bind(name, user.id, seasonId, inviteCode).run();
+
+        const teamId = result.meta.last_row_id;
+
+        // 添加队长
+        await db.prepare(
+            `INSERT INTO team_members (team_id, player_id, role) 
+             VALUES (?, ?, 'captain')`
+        ).bind(teamId, user.id).run();
+
+        return jsonResponse({ 
+            ok: true, 
+            teamId,
+            inviteCode,
+            msg: '战队创建成功'
+        });
     }
 
-    return Response.json({ok:false,msg:"非法操作类型"},{headers:corsHeaders})
-  }
+    // ===== PUT: 更新战队（如确认阵容） =====
+    if (method === 'PUT') {
+        const teamId = url.pathname.split('/')[2]; // /api/teams/:id/lineup
+        const action = url.pathname.split('/')[3];
 
-  return Response.json({ok:false,msg:"仅支持GET/POST请求"},{status:405,headers:corsHeaders})
+        // 确认首发阵容
+        if (action === 'lineup') {
+            const { lineupPlayerIds } = await request.json();
+
+            // 校验队长权限
+            const team = await db.prepare(
+                'SELECT captain_id FROM teams WHERE id = ?'
+            ).bind(teamId).first();
+
+            if (!team || team.captain_id !== user.id) {
+                return jsonResponse({ error: '只有队长可以确认阵容' }, 403);
+            }
+
+            // 更新阵容（4个首发）
+            await db.prepare(
+                `UPDATE team_members SET role = 'substitute' WHERE team_id = ?`
+            ).bind(teamId).run();
+
+            for (const playerId of lineupPlayerIds) {
+                await db.prepare(
+                    `UPDATE team_members SET role = 'starter' 
+                     WHERE team_id = ? AND player_id = ?`
+                ).bind(teamId, playerId).run();
+            }
+
+            return jsonResponse({ ok: true, msg: '阵容已更新' });
+        }
+    }
+
+    return jsonResponse({ error: 'Not found' }, 404);
+}
+
+function jsonResponse(data, status = 200) {
+    return new Response(JSON.stringify(data), {
+        status,
+        headers: { 'Content-Type': 'application/json' }
+    });
+}
+
+function generateInviteCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+async function getCurrentUser(request) {
+    const authHeader = request.headers.get('Authorization');
+    const token = authHeader?.replace('Bearer ', '');
+    if (!token) return null;
+    try {
+        const parts = token.split('.');
+        if (parts.length !== 3) return null;
+        const payload = JSON.parse(atob(parts[1]));
+        if (payload.exp < Date.now()) return null;
+        return payload;
+    } catch {
+        return null;
+    }
 }
