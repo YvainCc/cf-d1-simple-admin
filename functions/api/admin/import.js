@@ -11,17 +11,38 @@ export async function onRequest(context) {
     }
 
     const text = await file.text();
-    const lines = text.split('\n').filter(line => line.trim() !== '');
+    // 去除 BOM（如果存在）
+    const cleanText = text.replace(/^\uFEFF/, '');
+    const lines = cleanText.split('\n').filter(line => line.trim() !== '');
     if (lines.length < 2) {
         return new Response(JSON.stringify({ ok: false, msg: '文件为空或格式不正确' }), { status: 400 });
     }
 
-    // 解析表头（支持中英文）
-    const header = lines[0].split(',').map(h => h.trim());
-    const nameIdx = header.findIndex(h => h.includes('玩家名称') || h.includes('name'));
-    const historyIdx = header.findIndex(h => h.includes('历史名称') || h.includes('history'));
+    // 自动检测分隔符（优先逗号，其次分号，其次制表符）
+    const firstLine = lines[0];
+    let delimiter = ',';
+    if (firstLine.includes('\t')) delimiter = '\t';
+    else if (firstLine.includes(';')) delimiter = ';';
+
+    // 解析表头
+    const header = firstLine.split(delimiter).map(h => h.trim().replace(/^["']|["']$/g, ''));
+    
+    // 查找列索引（更宽松的匹配）
+    const nameIdx = header.findIndex(h => {
+        const lower = h.toLowerCase();
+        return lower.includes('玩家名称') || lower.includes('名称') || lower.includes('name');
+    });
+    const historyIdx = header.findIndex(h => {
+        const lower = h.toLowerCase();
+        return lower.includes('历史名称') || lower.includes('历史') || lower.includes('history');
+    });
+
+    // 如果没找到名称列，返回错误并显示检测到的表头
     if (nameIdx === -1) {
-        return new Response(JSON.stringify({ ok: false, msg: '缺少必要列：玩家名称' }), { status: 400 });
+        return new Response(JSON.stringify({
+            ok: false,
+            msg: `未找到"玩家名称"列，检测到的表头为: [${header.join(', ')}]`
+        }), { status: 400 });
     }
 
     const db = env.DB;
@@ -30,13 +51,13 @@ export async function onRequest(context) {
     await db.prepare('DELETE FROM 人员表').run();
 
     let inserted = 0;
-    // 用于生成账号ID的辅助函数
+    // 生成账号ID
     function generateAccountId() {
         return 'account.' + crypto.randomUUID().replace(/-/g, '').substring(0, 32);
     }
 
     for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',').map(c => c.trim());
+        const cols = lines[i].split(delimiter).map(c => c.trim().replace(/^["']|["']$/g, ''));
         const currentName = cols[nameIdx] || '';
         const historyStr = (historyIdx !== -1 && cols[historyIdx]) ? cols[historyIdx] : '';
 
@@ -47,16 +68,12 @@ export async function onRequest(context) {
         if (historyStr) {
             nameList = historyStr.split('/').map(s => s.trim()).filter(Boolean);
         }
-        // 如果当前名称不在列表中，追加到最后
         if (!nameList.includes(currentName)) {
             nameList.push(currentName);
         }
-        // 否则保持列表顺序（历史名称列已包含当前名）
 
-        // 为这一组名称生成一个统一的账号ID
         const accountId = generateAccountId();
 
-        // 插入链式记录
         for (let j = 0; j < nameList.length; j++) {
             const name = nameList[j];
             const previousName = j > 0 ? nameList[j-1] : null;
