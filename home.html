@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DMN 战队</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a2a48">
+    <style>
+        :root {
+            --primary: #1a2a48;
+            --gold: #c9a84c;
+            --gold-light: #f0e3c8;
+            --bg: #f2f4f8;
+            --card-bg: #ffffff;
+            --text-main: #1a1a2e;
+            --text-muted: #8e98a3;
+            --border-light: #eef0f4;
+            --shadow: 0 2px 12px rgba(0,0,0,0.06);
+            --radius: 16px;
+            --safe-bottom: env(safe-area-inset-bottom, 12px);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+            padding-bottom: calc(72px + var(--safe-bottom));
+        }
+        .navbar {
+            background: var(--card-bg);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.88);
+        }
+        .logo { font-size:20px; font-weight:700; color:var(--primary); }
+        .logo span { color:var(--gold); }
+        .container { max-width:480px; margin:0 auto; padding:16px; }
+        .section-title { font-size:18px; font-weight:600; margin:16px 0 8px; display:flex; align-items:center; gap:8px; }
+        .card { background:var(--card-bg); border-radius:var(--radius); padding:16px; margin-bottom:12px; box-shadow:var(--shadow); }
+        .notice-item { border-left:3px solid var(--gold); padding-left:12px; margin-bottom:10px; }
+        .notice-item .time { font-size:12px; color:var(--text-muted); }
+        .event-mini { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-light); padding:10px 0; }
+        .event-mini:last-child { border-bottom:0; }
+        .event-mini .name { font-weight:500; }
+        .event-mini .status { font-size:12px; padding:2px 8px; border-radius:20px; background:#d4edda; color:#155724; }
+        .honor-list { display:flex; gap:12px; overflow-x:auto; padding:4px 0; }
+        .honor-item { flex:0 0 80px; text-align:center; background:var(--bg); border-radius:12px; padding:10px; }
+        .honor-item .avatar { width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg, var(--gold-light), var(--gold)); margin:0 auto 4px; display:flex; align-items:center; justify-content:center; font-size:20px; color:#fff; }
+        .honor-item .name { font-size:12px; font-weight:500; }
+        .honor-item .stat { font-size:11px; color:var(--text-muted); }
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0;
+            background:var(--card-bg); border-top:1px solid var(--border-light);
+            display:flex; justify-content:space-around;
+            padding:6px 0 calc(6px + var(--safe-bottom));
+            z-index:79;
+        }
+        .bottom-nav a {
+            text-decoration:none; text-align:center; font-size:10px; color:var(--text-muted);
+            padding:4px 12px; border-radius:8px;
+            display:flex; flex-direction:column; align-items:center; gap:2px;
+            min-width:48px;
+        }
+        .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
+        .bottom-nav a.active { color:var(--gold); font-weight:600; }
+        @media (prefers-color-scheme: dark) {
+            :root { --bg:#0f1419; --card-bg:#1a2430; --text-main:#f0f2f5; --text-muted:#6e7a8a; --border-light:#2a3342; }
+            .navbar { background:rgba(26,36,48,0.92); border-bottom-color:var(--border-light); }
+            .bottom-nav { background:var(--card-bg); border-top-color:var(--border-light); }
+            .honor-item { background:#111a24; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="logo">D<span style="color:#c9a84c;">M</span>N</div>
+        <div style="font-size:14px; color:var(--text-muted);">
+            <span id="userGreeting">👋 欢迎</span>
+        </div>
+    </header>
+    <main class="container" id="app">
+        <!-- 内容由JS动态渲染 -->
+    </main>
+    <nav class="bottom-nav">
+        <a href="/home" class="active"><span class="nav-icon">🏠</span>首页</a>
+        <a href="/rankings"><span class="nav-icon">📊</span>榜单</a>
+        <a href="/events"><span class="nav-icon">📝</span>报名</a>
+        <a href="/news"><span class="nav-icon">📰</span>资讯</a>
+        <a href="/profile"><span class="nav-icon">👤</span>我的</a>
+    </nav>
+
+    <script>
+        // 页面加载时获取数据
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 显示用户名
+            const username = localStorage.getItem('loginUser') || '队员';
+            document.getElementById('userGreeting').textContent = '👋 ' + username;
+
+            // 加载首页数据
+            await renderHome();
+        });
+
+        async function renderHome() {
+            const app = document.getElementById('app');
+
+            // 模拟公告数据（后续可从API获取）
+            const notices = [
+                { title: '🎉 2026 S1 赛季火热进行中', time: '2026-07-27' },
+                { title: '📢 本周六晚8点 队内训练赛', time: '2026-07-26' },
+                { title: '🏆 恭喜 Super_Rose_ 荣获 MVP', time: '2026-07-25' }
+            ];
+
+            // 获取近期活动（进行中或即将开始）
+            let events = [];
+            try {
+                const res = await fetch('/api/events?status=进行中');
+                const data = await res.json();
+                if (data.ok) events = data.data.slice(0, 3); // 只取前3个
+            } catch (e) {}
+
+            // 荣誉选手（从战绩表或人员表模拟，这里先写死示例）
+            const honorPlayers = [
+                { name: 'Super_Rose_', kd: '2.64', avatar: '🏹' },
+                { name: 'TC_Adun', kd: '1.90', avatar: '⚔️' },
+                { name: 'TC_He19uan8', kd: '1.90', avatar: '🔫' }
+            ];
+
+            let html = '';
+
+            // ---- 公告 ----
+            html += `<div class="section-title">📢 最新公告</div>`;
+            html += `<div class="card">`;
+            notices.forEach(n => {
+                html += `
+                    <div class="notice-item">
+                        <div>${n.title}</div>
+                        <div class="time">${n.time}</div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+
+            // ---- 近期比赛 ----
+            html += `<div class="section-title">⚔️ 近期比赛</div>`;
+            html += `<div class="card">`;
+            if (events.length) {
+                events.forEach(e => {
+                    html += `
+                        <div class="event-mini">
+                            <div class="name">${e.名称}</div>
+                            <div class="status">${e.状态}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                html += `<div style="color:var(--text-muted);">暂无进行中的比赛</div>`;
+            }
+            html += `</div>`;
+
+            // ---- 荣誉选手 ----
+            html += `<div class="section-title">🏅 当前赛季荣誉选手</div>`;
+            html += `<div class="card"><div class="honor-list">`;
+            honorPlayers.forEach(p => {
+                html += `
+                    <div class="honor-item">
+                        <div class="avatar">${p.avatar}</div>
+                        <div class="name">${p.name}</div>
+                        <div class="stat">KD ${p.kd}</div>
+                    </div>
+                `;
+            });
+            html += `</div></div>`;
+
+            // ---- 快捷入口 ----
+            html += `
+                <div style="display:flex; gap:12px; margin-top:16px;">
+                    <a href="/rankings" style="flex:1; background:var(--card-bg); padding:12px; border-radius:12px; text-align:center; text-decoration:none; color:var(--text-main); box-shadow:var(--shadow);">📊 完整榜单</a>
+                    <a href="/events" style="flex:1; background:var(--gold); padding:12px; border-radius:12px; text-align:center; text-decoration:none; color:#1a1a2e; font-weight:600;">📝 立即报名</a>
+                </div>
+            `;
+
+            app.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
