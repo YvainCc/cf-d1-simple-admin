@@ -1,21 +1,11 @@
 {
-  "name": "D.M.N 战队队员中心",
+  "name": "D.M.N 战队管理系统",
   "short_name": "DMN战队",
-  "description": "DMN战队队员数据与报名管理",
-  "start_url": "/index.html",
+  "description": "战队数据与报名管理",
+  "start_url": "/index.html",   // ✅ 明确指向登录页
   "display": "standalone",
-  "background_color": "#f2f4f8",
+  "background_color": "#f5f7fa",
   "theme_color": "#1a2a48",
-  "icons": [
-    {
-      "src": "icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+  "orientation": "portrait",
+  "icons": [...]
 }
