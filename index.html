@@ -9,6 +9,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1426">
     <style>
+        /* ===== 全局重置 ===== */
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
@@ -17,9 +18,10 @@
             padding-bottom: 80px;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
-            background: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.4) 0%, rgba(232, 236, 242, 1) 80%);
+            background: radial-gradient(circle at 10% 20%, rgba(255,255,255,0.4) 0%, rgba(232,236,242,1) 80%);
         }
-        /* 顶部导航 */
+
+        /* ===== 顶部导航 ===== */
         .navbar {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(30px) saturate(180%);
@@ -113,7 +115,7 @@
         }
         .nav-btn:active { background: rgba(0,0,0,0.04); }
 
-        /* 主容器 */
+        /* ===== 主容器 ===== */
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -131,7 +133,7 @@
         }
         .section-title i { font-style: normal; font-size: 22px; }
 
-        /* 卡片 */
+        /* ===== 卡片 ===== */
         .card-list { display: flex; flex-direction: column; gap: 16px; }
         .card {
             background: rgba(255, 255, 255, 0.75);
@@ -220,7 +222,7 @@
             font-size: 16px;
         }
 
-        /* 底部导航 */
+        /* ===== 底部导航 ===== */
         .bottom-tab {
             position: fixed;
             bottom: 0;
@@ -276,6 +278,7 @@
         }
         .tab-item:active { opacity: 0.6; }
 
+        /* ===== 页脚 ===== */
         .footer {
             text-align: center;
             padding: 24px 20px 12px;
@@ -283,7 +286,7 @@
             color: #8e8e93;
         }
 
-        /* 登录弹窗 */
+        /* ===== 登录弹窗 ===== */
         .login-alert-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -333,7 +336,7 @@
             flex: 2;
         }
 
-        /* 暗色模式 */
+        /* ===== 暗色模式 ===== */
         @media (prefers-color-scheme: dark) {
             body {
                 background: #0b0e14;
@@ -389,15 +392,15 @@
 </head>
 <body>
 
-    <!-- 顶部导航 -->
+    <!-- ===== 顶部导航 ===== -->
     <div class="navbar">
         <div class="nav-logo">DMN<span>电竞</span></div>
         <div class="nav-right" id="navRight">
-            <!-- JS动态渲染 -->
+            <!-- 由 JavaScript 动态渲染 -->
         </div>
     </div>
 
-    <!-- 内容 -->
+    <!-- ===== 内容 ===== -->
     <div class="container">
         <!-- 近期赛事 -->
         <div class="section-title"><i>🏆</i> 近期赛事</div>
@@ -476,17 +479,31 @@
         <div class="footer">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
     </div>
 
-    <!-- 底部导航 -->
+    <!-- ===== 底部导航 ===== -->
     <div class="bottom-tab" role="tablist">
-        <button class="tab-item active" data-tab="home" onclick="navigateTab(this)"><span class="tab-icon">🏠</span><span>首页</span></button>
-        <button class="tab-item" data-tab="matches" onclick="navigateTab(this)"><span class="tab-icon">🏆</span><span>赛事</span></button>
-        <button class="tab-item" data-tab="team" onclick="navigateTab(this)"><span class="tab-icon">👥</span><span>战队</span></button>
-        <button class="tab-item" data-tab="rank" onclick="navigateTab(this)"><span class="tab-icon">📈</span><span>排行</span></button>
-        <button class="tab-item" data-tab="profile" onclick="navigateTab(this)"><span class="tab-icon">👤</span><span>我的</span></button>
+        <button class="tab-item active" data-tab="home" onclick="navigateTab(this)">
+            <span class="tab-icon">🏠</span><span>首页</span>
+        </button>
+        <button class="tab-item" data-tab="matches" onclick="navigateTab(this)">
+            <span class="tab-icon">🏆</span><span>赛事</span>
+        </button>
+        <button class="tab-item" data-tab="team" onclick="navigateTab(this)">
+            <span class="tab-icon">👥</span><span>战队</span>
+        </button>
+        <button class="tab-item" data-tab="rank" onclick="navigateTab(this)">
+            <span class="tab-icon">📈</span><span>排行</span>
+        </button>
+        <button class="tab-item" data-tab="profile" onclick="navigateTab(this)">
+            <span class="tab-icon">👤</span><span>我的</span>
+        </button>
     </div>
 
     <script>
-        function isLoggedIn() { return !!localStorage.getItem('dmn_token'); }
+        // ===== 工具函数 =====
+        function isLoggedIn() {
+            return !!localStorage.getItem('dmn_token');
+        }
+
         function getUserInfo() {
             return {
                 name: localStorage.getItem('dmn_user') || '用户',
@@ -494,6 +511,7 @@
             };
         }
 
+        // ===== 渲染顶部导航 =====
         function renderNavbar() {
             const container = document.getElementById('navRight');
             if (!container) return;
@@ -524,6 +542,7 @@
             }
         }
 
+        // ===== 登录弹窗 =====
         function showLoginAlert(msg) {
             const old = document.querySelector('.login-alert-overlay');
             if (old) old.remove();
@@ -545,6 +564,7 @@
             document.getElementById('alertGoLogin').onclick = () => { overlay.remove(); window.location.href = '/login.html'; };
         }
 
+        // ===== 卡片保护 =====
         function handleProtectedCardClick(card) {
             if (card.getAttribute('data-protected') !== 'true') return;
             const url = card.getAttribute('data-url');
@@ -557,32 +577,61 @@
             }
         }
 
+        // ===== 🆕 导航跳转（无任何拦截，直接跳转） =====
         function navigateTab(el) {
+            // 高亮当前 tab
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
+
             const tab = el.getAttribute('data-tab');
-            const map = { home:'/', matches:'/matches.html', team:'/team.html', rank:'/rank.html', profile:'/profile.html' };
-            const url = map[tab] || '/';
+            // 映射路径：根据您实际页面调整
+            const map = {
+                home: '/',
+                matches: '/matches.html',   // 如果您有 matches.html，否则可改为 leaderboard.html
+                team: '/team.html',         // 如果有 team.html，否则可改为 members.html
+                rank: '/rankings.html',     // 档案中有 rankings.html
+                profile: '/profile.html'
+            };
+            const url = map[tab];
+            if (!url) return;
+
+            // 如果已在首页且点击的是首页，不跳转
             if (url === '/' && window.location.pathname === '/') return;
+
+            // 未登录只能访问首页
             if (!isLoggedIn() && url !== '/') {
                 showLoginAlert('请先登录后访问此页面');
+                // 恢复高亮到首页
                 document.querySelector('.tab-item[data-tab="home"]')?.classList.add('active');
                 el.classList.remove('active');
                 return;
             }
+
+            // ✅ 直接跳转，没有任何拦截
             window.location.href = url;
         }
 
+        // ===== 初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             renderNavbar();
+
+            // 卡片点击绑定
             document.querySelectorAll('.card[data-protected="true"]').forEach(c => {
                 c.addEventListener('click', function() { handleProtectedCardClick(this); });
             });
+
+            // 根据当前路径高亮对应的导航
             const path = window.location.pathname;
-            const tabMap = { '/':'home', '/matches.html':'matches', '/team.html':'team', '/rank.html':'rank', '/profile.html':'profile' };
-            const active = tabMap[path] || 'home';
+            const tabMap = {
+                '/': 'home',
+                '/matches.html': 'matches',
+                '/team.html': 'team',
+                '/rankings.html': 'rank',
+                '/profile.html': 'profile'
+            };
+            const activeTab = tabMap[path] || 'home';
             document.querySelectorAll('.tab-item').forEach(t => {
-                t.classList.toggle('active', t.getAttribute('data-tab') === active);
+                t.classList.toggle('active', t.getAttribute('data-tab') === activeTab);
             });
         });
     </script>
