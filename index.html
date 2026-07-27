@@ -1,4 +1,307 @@
 <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>D.M.N 战队管理系统</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a2a48">
+    
+    <!-- vConsole 调试工具（手机端可查看控制台和网络请求） -->
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    <script>
+        // 初始化 vConsole（手机右下角会出现绿色按钮）
+        var vConsole = new window.VConsole();
+    </script>
+
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
+        body { background:#f5f7fa; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+        .login-box { background:#ffffff; width:100%; max-width:400px; padding:40px 28px 36px; border-radius:24px; box-shadow:0 8px 40px rgba(0,0,0,0.06); }
+        .login-title { text-align:center; font-size:26px; font-weight:700; color:#1a2a48; margin-bottom:4px; }
+        .login-title span { color:#c9a84c; }
+        .login-sub { text-align:center; font-size:14px; color:#8e98a3; margin-bottom:28px; }
+        .item { margin-bottom:16px; }
+        .item input { width:100%; height:50px; padding:0 16px; border:1.5px solid #eef0f4; border-radius:14px; font-size:16px; background:#fafbfc; outline:none; color:#1a1a2e; transition:border-color 0.2s; }
+        .item input:focus { border-color:#c9a84c; box-shadow:0 0 0 4px rgba(201,168,76,0.12); background:#ffffff; }
+        .item input::placeholder { color:#b0b8c4; }
+        .row-remember { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .row-remember label { display:flex; align-items:center; gap:6px; font-size:14px; color:#4a4a5a; cursor:pointer; }
+        .row-remember label input[type="checkbox"] { width:18px; height:18px; accent-color:#1a2a48; cursor:pointer; }
+        .row-remember .link-btn { background:none; border:none; color:#1a2a48; font-size:14px; font-weight:500; cursor:pointer; text-decoration:underline; }
+        .row-remember .link-btn:active { opacity:0.6; }
+        .login-btn { width:100%; height:52px; background:#1a2a48; border:none; border-radius:14px; color:white; font-size:17px; font-weight:600; cursor:pointer; transition:0.2s; margin-top:4px; box-shadow:0 4px 14px rgba(26,42,72,0.20); }
+        .login-btn:active { transform:scale(0.97); opacity:0.85; }
+        .login-btn:disabled { opacity:0.6; transform:none; }
+        .err-text { color:#ea4335; text-align:left; margin-top:14px; font-size:14px; display:none; padding:10px 12px; background:#fef0ef; border-radius:10px; word-break:break-all; }
+        .footer-note { text-align:center; margin-top:20px; font-size:12px; color:#b0b8c4; }
+
+        /* 注册弹窗 */
+        .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999; padding:20px; }
+        .modal-overlay.show { display:flex; }
+        .modal-box { background:#fff; width:100%; max-width:400px; border-radius:24px; padding:32px 24px 28px; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:modalIn 0.3s ease; }
+        @keyframes modalIn { from { transform:scale(0.9); opacity:0; } to { transform:scale(1); opacity:1; } }
+        .modal-title { text-align:center; font-size:22px; font-weight:700; color:#1a2a48; margin-bottom:6px; }
+        .modal-title span { color:#c9a84c; }
+        .modal-sub { text-align:center; font-size:13px; color:#8e98a3; margin-bottom:20px; }
+        .modal-box .item { margin-bottom:14px; }
+        .modal-box .item input { height:46px; border-radius:12px; }
+        .modal-actions { display:flex; gap:12px; margin-top:8px; }
+        .modal-actions .btn-cancel { flex:1; background:#f0f2f5; border:none; border-radius:12px; height:48px; font-size:16px; font-weight:500; color:#4a4a5a; cursor:pointer; }
+        .modal-actions .btn-cancel:active { background:#e4e6ea; }
+        .modal-actions .btn-register { flex:2; background:#1a2a48; border:none; border-radius:12px; height:48px; font-size:16px; font-weight:600; color:#fff; cursor:pointer; }
+        .modal-actions .btn-register:active { opacity:0.8; }
+        .modal-err { color:#ea4335; text-align:center; font-size:13px; margin-top:10px; display:none; }
+
+        /* 暗色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            body { background:#0f1419; }
+            .login-box { background:#1a2430; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+            .login-title { color:#f0f2f5; }
+            .login-sub { color:#8e98a3; }
+            .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
+            .item input:focus { border-color:#c9a84c; background:#1a2430; }
+            .row-remember label { color:#b8c2cc; }
+            .row-remember .link-btn { color:#c9a84c; }
+            .login-btn { background:#c9a84c; color:#1a1a2e; box-shadow:0 4px 14px rgba(201,168,76,0.30); }
+            .err-text { background:#3d1a1a; color:#f5a0a0; }
+            .footer-note { color:#6e7a8a; }
+            .modal-overlay { background:rgba(0,0,0,0.7); }
+            .modal-box { background:#1a2430; }
+            .modal-title { color:#f0f2f5; }
+            .modal-sub { color:#8e98a3; }
+            .modal-box .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
+            .modal-box .item input:focus { border-color:#c9a84c; background:#1a2430; }
+            .modal-actions .btn-cancel { background:#2a3342; color:#b8c2cc; }
+            .modal-actions .btn-cancel:active { background:#3a4352; }
+            .modal-actions .btn-register { background:#c9a84c; color:#1a1a2e; }
+            .modal-err { color:#f5a0a0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <div class="login-title">D.<span>M</span>.N</div>
+    <div class="login-sub">战队管理系统 · 队员登录</div>
+    <div class="item">
+        <input type="text" id="username" placeholder="请输入账号" autocomplete="username">
+    </div>
+    <div class="item">
+        <input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password">
+    </div>
+    <div class="row-remember">
+        <label><input type="checkbox" id="rememberMe"> 记住账号</label>
+        <button class="link-btn" id="showRegisterBtn">注册新账号 →</button>
+    </div>
+    <button class="login-btn" id="submitBtn">立即登录</button>
+    <div class="err-text" id="errorMsg"></div>
+    <div class="footer-note">使用 Cloudflare Pages 安全托管</div>
+</div>
+
+<!-- 注册弹窗 -->
+<div class="modal-overlay" id="registerModal">
+    <div class="modal-box">
+        <div class="modal-title">D.<span>M</span>.N</div>
+        <div class="modal-sub">注册新账号</div>
+        <div class="item"><input type="text" id="regUsername" placeholder="请输入账号" autocomplete="off"></div>
+        <div class="item"><input type="password" id="regPwd" placeholder="请输入密码" autocomplete="off"></div>
+        <div class="item"><input type="password" id="regPwd2" placeholder="确认密码" autocomplete="off"></div>
+        <div class="modal-err" id="regErrorMsg"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="closeRegisterBtn">取消</button>
+            <button class="btn-register" id="registerBtn">立即注册</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const usernameInput = document.getElementById('username');
+        const pwdInput = document.getElementById('pwd');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMsg = document.getElementById('errorMsg');
+        const rememberMe = document.getElementById('rememberMe');
+
+        const registerModal = document.getElementById('registerModal');
+        const showRegisterBtn = document.getElementById('showRegisterBtn');
+        const closeRegisterBtn = document.getElementById('closeRegisterBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const regUsername = document.getElementById('regUsername');
+        const regPwd = document.getElementById('regPwd');
+        const regPwd2 = document.getElementById('regPwd2');
+        const regErrorMsg = document.getElementById('regErrorMsg');
+
+        // ===== 记住密码加载 =====
+        (function loadSaved() {
+            const saved = localStorage.getItem('rememberedUser');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    usernameInput.value = data.username || '';
+                    pwdInput.value = data.password || '';
+                    rememberMe.checked = true;
+                } catch(e) {}
+            }
+        })();
+
+        // ===== 登录提交 =====
+        async function loginSubmit() {
+            const username = usernameInput.value.trim();
+            const password = pwdInput.value.trim();
+            errorMsg.style.display = 'none';
+            errorMsg.style.color = '#ea4335';
+            errorMsg.style.background = '#fef0ef';
+
+            if (!username || !password) {
+                showErr('账号密码不能为空');
+                return;
+            }
+
+            submitBtn.textContent = '登录中...';
+            submitBtn.disabled = true;
+
+            try {
+                // ✅ 关键修改：请求路径为 /api/auth，并携带 action: 'login'
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    if (rememberMe.checked) {
+                        localStorage.setItem('rememberedUser', JSON.stringify({ username, password }));
+                    } else {
+                        localStorage.removeItem('rememberedUser');
+                    }
+                    localStorage.setItem('loginUser', username);
+                    localStorage.setItem('userRole', data.role || '队员');
+                    localStorage.setItem('token', data.token || '');
+                    window.location.href = 'member.html';
+                } else {
+                    showErr(data.msg || '登录失败');
+                }
+            } catch (err) {
+                showErr('网络请求异常: ' + err.message);
+                console.error(err);
+            } finally {
+                submitBtn.textContent = '立即登录';
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showErr(text) {
+            errorMsg.innerText = text;
+            errorMsg.style.display = 'block';
+        }
+
+        // 绑定事件
+        submitBtn.addEventListener('click', loginSubmit);
+        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginSubmit(); });
+
+        // ===== 注册弹窗 =====
+        showRegisterBtn.addEventListener('click', () => {
+            registerModal.classList.add('show');
+            regUsername.value = '';
+            regPwd.value = '';
+            regPwd2.value = '';
+            regErrorMsg.style.display = 'none';
+            regUsername.focus();
+        });
+
+        closeRegisterBtn.addEventListener('click', () => {
+            registerModal.classList.remove('show');
+        });
+
+        registerModal.addEventListener('click', (e) => {
+            if (e.target === registerModal) registerModal.classList.remove('show');
+        });
+
+        async function registerSubmit() {
+            const username = regUsername.value.trim();
+            const password = regPwd.value.trim();
+            const password2 = regPwd2.value.trim();
+            regErrorMsg.style.display = 'none';
+
+            if (!username) { showRegErr('请输入账号'); return; }
+            if (username.length < 2) { showRegErr('账号至少2个字符'); return; }
+            if (!password) { showRegErr('请输入密码'); return; }
+            if (password.length < 4) { showRegErr('密码至少4个字符'); return; }
+            if (password !== password2) { showRegErr('两次密码输入不一致'); return; }
+
+            try {
+                registerBtn.textContent = '注册中...';
+                registerBtn.disabled = true;
+
+                // ✅ 注册请求也改为 /api/auth，并携带 action: 'register'
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'register',
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.ok) {
+                    registerModal.classList.remove('show');
+                    usernameInput.value = username;
+                    pwdInput.value = password;
+                    rememberMe.checked = true;
+                    errorMsg.style.display = 'block';
+                    errorMsg.style.color = '#0f9d58';
+                    errorMsg.style.background = '#e6f7ed';
+                    errorMsg.innerText = '✅ 注册成功！请点击登录';
+                    setTimeout(() => {
+                        errorMsg.style.display = 'none';
+                        errorMsg.style.color = '#ea4335';
+                        errorMsg.style.background = '#fef0ef';
+                    }, 4000);
+                } else {
+                    showRegErr(data.msg || '注册失败');
+                }
+            } catch (err) {
+                showRegErr('网络请求异常: ' + err.message);
+                console.error(err);
+            } finally {
+                registerBtn.textContent = '立即注册';
+                registerBtn.disabled = false;
+            }
+        }
+
+        function showRegErr(text) {
+            regErrorMsg.innerText = text;
+            regErrorMsg.style.display = 'block';
+        }
+
+        registerBtn.addEventListener('click', registerSubmit);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && registerModal.classList.contains('show')) {
+                registerSubmit();
+            }
+        });
+
+        // ===== Service Worker =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .catch(err => console.warn('SW注册失败', err));
+        }
+    })();
+</script>
+</body>
 <html>
 <head><title>Member Center</title></head>
 <body><h1>队员中心</h1></body>
