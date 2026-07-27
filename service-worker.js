@@ -2,7 +2,7 @@ const CACHE_NAME = 'dmn-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/member.html',
+  '/member',           // 改为 /member（不带 .html）
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
