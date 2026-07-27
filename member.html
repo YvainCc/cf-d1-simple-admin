@@ -522,12 +522,11 @@
     </nav>
 
     <script>
-        // ===== 1. 登录状态校验（修复跳转） =====
+        // ===== 1. 登录状态校验 =====
         (function() {
             const loginUser = localStorage.getItem('loginUser');
             const userRole = localStorage.getItem('userRole');
             if (!loginUser || !userRole) {
-                // ✅ 使用相对路径，避免重定向问题
                 window.location.href = 'index.html';
                 return;
             }
@@ -549,13 +548,12 @@
                 badge.style.color = '#155724';
             }
 
-            // ----- 2.2 退出登录（修复路径） -----
+            // ----- 2.2 退出登录 -----
             document.getElementById('logoutLink').addEventListener('click', function(e) {
                 e.preventDefault();
                 localStorage.removeItem('loginUser');
                 localStorage.removeItem('userRole');
                 localStorage.removeItem('token');
-                // ✅ 使用相对路径
                 window.location.href = 'index.html';
             });
 
@@ -661,6 +659,15 @@
                     .getMinutes()).padStart(2, '0');
             });
         });
+    </script>
+    <!-- 延迟注册 Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .catch(err => console.warn('SW注册失败', err));
+            });
+        }
     </script>
 </body>
 </html>
