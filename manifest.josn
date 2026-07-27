@@ -2,7 +2,7 @@
   "name": "D.M.N 战队管理系统",
   "short_name": "DMN战队",
   "description": "战队数据与报名管理",
-  "start_url": "/index.html",
+  "start_url": "/member",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#1a2a48",
