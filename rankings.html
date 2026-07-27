@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>榜单 - DMN</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        /* 样式与 home 类似，仅列出差异 */
+        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+        body { background:#f5f7fa; padding-bottom:80px; }
+        .navbar { background:#1a2a48; color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:10; }
+        .navbar .logo { font-size:20px; font-weight:bold; color:#c9a84c; }
+        .container { max-width:600px; margin:0 auto; padding:16px; }
+        .rank-item { background:white; border-radius:12px; padding:12px 16px; margin-bottom:8px; display:flex; align-items:center; gap:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .rank-item .pos { font-weight:bold; width:30px; color:var(--gold); }
+        .rank-item .info { flex:1; }
+        .rank-item .info .name { font-weight:600; }
+        .rank-item .info .stat { font-size:13px; color:#8e98a3; }
+        .rank-item .value { font-weight:700; color:#1a2a48; }
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0;
+            background:white; border-top:1px solid #eef0f4;
+            display:flex; justify-content:space-around; padding:8px 0;
+        }
+        .bottom-nav a { text-decoration:none; text-align:center; font-size:12px; color:#8e98a3; }
+        .bottom-nav a.active { color:#c9a84c; font-weight:600; }
+        .bottom-nav a .icon { font-size:22px; display:block; }
+        .filter-tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+        .filter-tabs button { padding:6px 16px; border-radius:20px; border:1px solid #d0d7de; background:white; cursor:pointer; }
+        .filter-tabs button.active { background:#1a2a48; color:white; border-color:#1a2a48; }
+        @media (prefers-color-scheme: dark) {
+            body { background:#0f1419; }
+            .navbar { background:#1a2430; }
+            .rank-item { background:#1a2430; color:#f0f2f5; }
+            .rank-item .value { color:#c9a84c; }
+            .bottom-nav { background:#1a2430; border-top-color:#2a3342; }
+            .bottom-nav a { color:#6e7a8a; }
+            .bottom-nav a.active { color:#c9a84c; }
+            .filter-tabs button { background:#1a2430; color:#b8c2cc; border-color:#2a3342; }
+            .filter-tabs button.active { background:#c9a84c; color:#1a1a2e; }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">D<span style="color:#c9a84c;">M</span>N</div>
+        <div></div>
+    </div>
+    <div class="container">
+        <h2 style="margin-bottom:12px;">📊 战队榜单</h2>
+        <div class="filter-tabs">
+            <button class="active" data-type="kd">KD</button>
+            <button data-type="kills">总击杀</button>
+            <button data-type="wins">吃鸡数</button>
+        </div>
+        <div id="rankList"></div>
+    </div>
+    <div class="bottom-nav">
+        <a href="/home"><span class="icon">🏠</span>首页</a>
+        <a href="/rankings" class="active"><span class="icon">📊</span>榜单</a>
+        <a href="/events"><span class="icon">📝</span>报名</a>
+        <a href="/news"><span class="icon">📰</span>资讯</a>
+        <a href="/profile"><span class="icon">👤</span>我的</a>
+    </div>
+    <script>
+        // 模拟数据（实际可从API获取）
+        const mockData = {
+            kd: [
+                { name: 'Super_Rose_', value: 2.64 },
+                { name: 'TC_Adun', value: 1.90 },
+                { name: 'TC_He19uan8', value: 1.90 },
+                { name: 'TC_BossFG', value: 1.77 },
+                { name: 'TC_YaoShen0v0', value: 2.0 }
+            ],
+            kills: [
+                { name: 'Super_Rose_', value: 87 },
+                { name: 'TC_Adun', value: 55 },
+                { name: 'TC_He19uan8', value: 55 },
+                { name: 'TC_BossFG', value: 55 },
+                { name: 'TC_YaoShen0v0', value: 54 }
+            ],
+            wins: [
+                { name: 'Super_Rose_', value: 12 },
+                { name: 'TC_Adun', value: 9 },
+                { name: 'TC_He19uan8', value: 8 },
+                { name: 'TC_BossFG', value: 7 },
+                { name: 'TC_YaoShen0v0', value: 6 }
+            ]
+        };
+
+        const rankList = document.getElementById('rankList');
+        const btns = document.querySelectorAll('.filter-tabs button');
+
+        function renderRank(type) {
+            const data = mockData[type] || [];
+            if (data.length === 0) {
+                rankList.innerHTML = '<p>暂无数据</p>';
+                return;
+            }
+            let html = '';
+            data.forEach((item, index) => {
+                html += `
+                    <div class="rank-item">
+                        <div class="pos">#${index+1}</div>
+                        <div class="info">
+                            <div class="name">${item.name}</div>
+                            <div class="stat">${type === 'kd' ? 'KD' : type === 'kills' ? '总击杀' : '吃鸡'}</div>
+                        </div>
+                        <div class="value">${item.value}</div>
+                    </div>
+                `;
+            });
+            rankList.innerHTML = html;
+        }
+
+        btns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                btns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const type = this.dataset.type;
+                renderRank(type);
+            });
+        });
+
+        // 默认显示 KD
+        renderRank('kd');
+    </script>
+</body>
+</html>
