@@ -8,6 +8,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
+    
+    <!-- vConsole 调试工具（手机端可查看控制台和网络请求） -->
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    <script>
+        // 初始化 vConsole（手机右下角会出现绿色按钮）
+        var vConsole = new window.VConsole();
+    </script>
+
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
         body { background:#f5f7fa; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
@@ -29,7 +37,8 @@
         .login-btn:disabled { opacity:0.6; transform:none; }
         .err-text { color:#ea4335; text-align:left; margin-top:14px; font-size:14px; display:none; padding:10px 12px; background:#fef0ef; border-radius:10px; word-break:break-all; }
         .footer-note { text-align:center; margin-top:20px; font-size:12px; color:#b0b8c4; }
-        /* 注册弹窗省略（与之前相同）... 为了节省篇幅，这里不重复，但您可保留原有注册弹窗代码 */
+
+        /* 注册弹窗 */
         .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:999; padding:20px; }
         .modal-overlay.show { display:flex; }
         .modal-box { background:#fff; width:100%; max-width:400px; border-radius:24px; padding:32px 24px 28px; box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:modalIn 0.3s ease; }
@@ -45,11 +54,35 @@
         .modal-actions .btn-register { flex:2; background:#1a2a48; border:none; border-radius:12px; height:48px; font-size:16px; font-weight:600; color:#fff; cursor:pointer; }
         .modal-actions .btn-register:active { opacity:0.8; }
         .modal-err { color:#ea4335; text-align:center; font-size:13px; margin-top:10px; display:none; }
-        /* 暗色模式（略）... */
-        @media (prefers-color-scheme: dark) { ... }
+
+        /* 暗色模式适配 */
+        @media (prefers-color-scheme: dark) {
+            body { background:#0f1419; }
+            .login-box { background:#1a2430; box-shadow:0 8px 32px rgba(0,0,0,0.4); }
+            .login-title { color:#f0f2f5; }
+            .login-sub { color:#8e98a3; }
+            .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
+            .item input:focus { border-color:#c9a84c; background:#1a2430; }
+            .row-remember label { color:#b8c2cc; }
+            .row-remember .link-btn { color:#c9a84c; }
+            .login-btn { background:#c9a84c; color:#1a1a2e; box-shadow:0 4px 14px rgba(201,168,76,0.30); }
+            .err-text { background:#3d1a1a; color:#f5a0a0; }
+            .footer-note { color:#6e7a8a; }
+            .modal-overlay { background:rgba(0,0,0,0.7); }
+            .modal-box { background:#1a2430; }
+            .modal-title { color:#f0f2f5; }
+            .modal-sub { color:#8e98a3; }
+            .modal-box .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
+            .modal-box .item input:focus { border-color:#c9a84c; background:#1a2430; }
+            .modal-actions .btn-cancel { background:#2a3342; color:#b8c2cc; }
+            .modal-actions .btn-cancel:active { background:#3a4352; }
+            .modal-actions .btn-register { background:#c9a84c; color:#1a1a2e; }
+            .modal-err { color:#f5a0a0; }
+        }
     </style>
 </head>
 <body>
+
 <div class="login-box">
     <div class="login-title">D.<span>M</span>.N</div>
     <div class="login-sub">战队管理系统 · 队员登录</div>
@@ -68,8 +101,21 @@
     <div class="footer-note">使用 Cloudflare Pages 安全托管</div>
 </div>
 
-<!-- 注册弹窗（可保留原样，此处省略） -->
-<div class="modal-overlay" id="registerModal">...</div>
+<!-- 注册弹窗 -->
+<div class="modal-overlay" id="registerModal">
+    <div class="modal-box">
+        <div class="modal-title">D.<span>M</span>.N</div>
+        <div class="modal-sub">注册新账号</div>
+        <div class="item"><input type="text" id="regUsername" placeholder="请输入账号" autocomplete="off"></div>
+        <div class="item"><input type="password" id="regPwd" placeholder="请输入密码" autocomplete="off"></div>
+        <div class="item"><input type="password" id="regPwd2" placeholder="确认密码" autocomplete="off"></div>
+        <div class="modal-err" id="regErrorMsg"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="closeRegisterBtn">取消</button>
+            <button class="btn-register" id="registerBtn">立即注册</button>
+        </div>
+    </div>
+</div>
 
 <script>
     (function() {
@@ -80,7 +126,6 @@
         const errorMsg = document.getElementById('errorMsg');
         const rememberMe = document.getElementById('rememberMe');
 
-        // 注册弹窗元素（保留原有逻辑）
         const registerModal = document.getElementById('registerModal');
         const showRegisterBtn = document.getElementById('showRegisterBtn');
         const closeRegisterBtn = document.getElementById('closeRegisterBtn');
@@ -116,30 +161,24 @@
                 return;
             }
 
-            // 显示加载状态
             submitBtn.textContent = '登录中...';
             submitBtn.disabled = true;
 
             try {
-                // 尝试请求
-                const res = await fetch('/api/auth/login', {
+                // ✅ 关键修改：请求路径为 /api/auth，并携带 action: 'login'
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({
+                        action: 'login',
+                        username: username,
+                        password: password
+                    })
                 });
 
-                // 获取原始响应文本（便于调试）
-                const rawText = await res.text();
-                let data;
-                try {
-                    data = JSON.parse(rawText);
-                } catch (e) {
-                    showErr(`⚠️ 服务器返回非JSON (状态码: ${res.status})，内容: ${rawText.substring(0, 150)}`);
-                    return;
-                }
+                const data = await res.json();
 
                 if (res.ok && data.ok) {
-                    // 保存记住密码
                     if (rememberMe.checked) {
                         localStorage.setItem('rememberedUser', JSON.stringify({ username, password }));
                     } else {
@@ -150,18 +189,11 @@
                     localStorage.setItem('token', data.token || '');
                     window.location.href = 'member.html';
                 } else {
-                    const msg = data.msg || data.error || '未知错误';
-                    showErr(`❌ [${res.status}] ${msg}`);
+                    showErr(data.msg || '登录失败');
                 }
             } catch (err) {
-                // 捕获网络错误（如DNS失败、连接拒绝、CORS等）
-                let errorText = err.message || '未知网络错误';
-                // 如果是 TypeError: Failed to fetch，可能是跨域或网络不通
-                if (errorText.includes('Failed to fetch')) {
-                    errorText = '无法连接到服务器，请检查网络或联系管理员（可能后端未部署或路径错误）';
-                }
-                showErr(`❌ 网络请求异常: ${errorText}`);
-                console.error('Login error:', err);
+                showErr('网络请求异常: ' + err.message);
+                console.error(err);
             } finally {
                 submitBtn.textContent = '立即登录';
                 submitBtn.disabled = false;
@@ -175,14 +207,9 @@
 
         // 绑定事件
         submitBtn.addEventListener('click', loginSubmit);
-        document.addEventListener('keydown', (e) => { if(e.key === 'Enter') loginSubmit(); });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginSubmit(); });
 
-        // ===== 注册弹窗事件（保留原有） =====
-        // ... 您的注册逻辑保持不变 ...
-        // 为了完整性，这里简略，实际您可沿用之前注册代码
-        // 但注意：注册时同样需要处理网络错误
-
-        // 这里演示注册按钮功能（实际您已有）
+        // ===== 注册弹窗 =====
         showRegisterBtn.addEventListener('click', () => {
             registerModal.classList.add('show');
             regUsername.value = '';
@@ -191,9 +218,11 @@
             regErrorMsg.style.display = 'none';
             regUsername.focus();
         });
+
         closeRegisterBtn.addEventListener('click', () => {
             registerModal.classList.remove('show');
         });
+
         registerModal.addEventListener('click', (e) => {
             if (e.target === registerModal) registerModal.classList.remove('show');
         });
@@ -203,6 +232,7 @@
             const password = regPwd.value.trim();
             const password2 = regPwd2.value.trim();
             regErrorMsg.style.display = 'none';
+
             if (!username) { showRegErr('请输入账号'); return; }
             if (username.length < 2) { showRegErr('账号至少2个字符'); return; }
             if (!password) { showRegErr('请输入密码'); return; }
@@ -212,12 +242,20 @@
             try {
                 registerBtn.textContent = '注册中...';
                 registerBtn.disabled = true;
-                const res = await fetch('/api/auth/register', {
+
+                // ✅ 注册请求也改为 /api/auth，并携带 action: 'register'
+                const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({
+                        action: 'register',
+                        username: username,
+                        password: password
+                    })
                 });
+
                 const data = await res.json();
+
                 if (res.ok && data.ok) {
                     registerModal.classList.remove('show');
                     usernameInput.value = username;
@@ -236,17 +274,19 @@
                     showRegErr(data.msg || '注册失败');
                 }
             } catch (err) {
-                showRegErr('网络请求失败，请稍后重试');
+                showRegErr('网络请求异常: ' + err.message);
                 console.error(err);
             } finally {
                 registerBtn.textContent = '立即注册';
                 registerBtn.disabled = false;
             }
         }
+
         function showRegErr(text) {
             regErrorMsg.innerText = text;
             regErrorMsg.style.display = 'block';
         }
+
         registerBtn.addEventListener('click', registerSubmit);
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && registerModal.classList.contains('show')) {
