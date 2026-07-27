@@ -446,8 +446,8 @@
         <div class="logo">D.<span>M</span>.N</div>
         <div class="nav-actions">
             <button class="icon-btn" aria-label="通知">🔔<span class="badge-dot"></span></button>
-            <!-- 退出链接改为 "/" -->
-            <a href="/" id="logoutLink" style="font-size:14px; color:var(--text-muted); text-decoration:none;">退出</a>
+            <!-- 使用 span 代替 a，完全由 JS 控制跳转 -->
+            <span id="logoutBtn" style="font-size:14px; color:var(--text-muted); cursor:pointer;">退出</span>
         </div>
     </header>
     <main class="container">
@@ -549,13 +549,12 @@
                 badge.style.color = '#155724';
             }
 
-            // ----- 2.2 退出登录（链接已改为 "/"，但保留JS清除逻辑）-----
-            document.getElementById('logoutLink').addEventListener('click', function(e) {
-                // 注意：由于 href="/"，页面会直接跳转，不会触发此事件，但为了安全保留清除逻辑
+            // ----- 2.2 退出登录（完全由 JS 控制）-----
+            document.getElementById('logoutBtn').addEventListener('click', function() {
                 localStorage.removeItem('loginUser');
                 localStorage.removeItem('userRole');
                 localStorage.removeItem('token');
-                // 跳转由 href 处理，无需额外操作
+                window.location.href = '/';  // 直接跳转到根路径
             });
 
             // ----- 2.3 展开/收起 -----
