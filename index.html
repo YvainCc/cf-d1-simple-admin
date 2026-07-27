@@ -9,59 +9,406 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
-        body { background:#f5f7fa; min-height:100vh; }
+        /* ===== 全局重置 & 基础 ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
+            background: #f2f4f8;
+            color: #1c1c1e;
+            padding-bottom: 80px; /* 底部导航占位 */
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        /* 导航栏 */
-        .navbar { background:#1a2a48; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
-        .nav-logo { font-size:22px; font-weight:700; color:#fff; }
-        .nav-logo span { color:#c9a84c; }
-        .nav-btn { background:transparent; border:1.5px solid #c9a84c; color:#c9a84c; padding:10px 18px; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:6px; }
-        .nav-btn:active { background:#c9a84c; color:#1a1a2e; }
+        /* ===== 顶部导航栏 ===== */
+        .navbar {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+        }
+        .nav-logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1a2a48;
+            letter-spacing: -0.3px;
+        }
+        .nav-logo span {
+            color: #c9a84c;
+        }
+        .nav-btn {
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            font-weight: 500;
+            color: #1a2a48;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:active {
+            background: rgba(0, 0, 0, 0.05);
+        }
 
-        /* 主内容 */
-        .container { max-width:600px; margin:0 auto; padding:20px; }
-        .section-title { font-size:20px; font-weight:700; color:#1a2a48; margin:24px 0 12px; display:flex; align-items:center; gap:8px; }
-        .section-title i { font-style:normal; font-size:22px; }
+        /* ===== 主容器 ===== */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px 20px 20px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1c1c1e;
+            margin: 28px 0 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: -0.2px;
+        }
+        .section-title i {
+            font-style: normal;
+            font-size: 22px;
+        }
 
-        /* 卡片通用 */
-        .card-list { display:flex; flex-direction:column; gap:12px; }
-        .card { background:#fff; border-radius:18px; padding:18px 16px; box-shadow:0 4px 16px rgba(0,0,0,0.04); transition:transform 0.2s; cursor:pointer; }
-        .card:active { transform:scale(0.98); }
-        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-        .card-title { font-size:16px; font-weight:600; color:#1a2a48; }
-        .card-badge { font-size:12px; background:#c9a84c; color:#fff; padding:2px 10px; border-radius:20px; font-weight:500; }
-        .card-sub { font-size:13px; color:#6b7280; margin-top:4px; }
-        .card-info { display:flex; gap:16px; font-size:12px; color:#9ca3af; margin-top:8px; }
+        /* ===== 卡片通用 ===== */
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 16px 18px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.2s;
+            cursor: pointer;
+            border: 0.5px solid rgba(0, 0, 0, 0.02);
+        }
+        .card:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+        .card-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
+        .card-badge {
+            font-size: 12px;
+            background: #c9a84c;
+            color: #fff;
+            padding: 2px 12px;
+            border-radius: 30px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .card-sub {
+            font-size: 14px;
+            color: #6c6c70;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+        .card-info {
+            display: flex;
+            gap: 16px;
+            font-size: 13px;
+            color: #8e8e93;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
 
-        /* 选手卡片特殊 */
-        .player-card { display:flex; align-items:center; gap:12px; }
-        .player-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, #1a2a48, #2a3a58); color:#c9a84c; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; }
-        .player-info { flex:1; }
-        .player-name { font-size:16px; font-weight:600; color:#1a2a48; }
-        .player-role { font-size:12px; color:#6b7280; }
+        /* 选手卡片 */
+        .player-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .player-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #1a2a48, #2c3e5e);
+            color: #c9a84c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .player-info {
+            flex: 1;
+        }
+        .player-name {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1c1c1e;
+        }
+        .player-role {
+            font-size: 13px;
+            color: #6c6c70;
+            margin-top: 1px;
+        }
 
         /* 公告卡片 */
-        .notice-card { border-left:4px solid #c9a84c; }
-        .notice-title { font-weight:600; color:#1a2a48; }
+        .notice-card {
+            border-left: 4px solid #c9a84c;
+            padding-left: 14px;
+        }
+        .notice-title {
+            font-weight: 600;
+            color: #1c1c1e;
+            font-size: 16px;
+        }
+        .notice-card .card-sub {
+            margin-top: 3px;
+        }
 
-        /* 页脚 */
-        .footer { text-align:center; padding:24px 20px; font-size:12px; color:#b0b8c4; }
+        /* ===== 底部导航栏（iOS风格） ===== */
+        .bottom-tab {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: saturate(180%) blur(24px);
+            -webkit-backdrop-filter: saturate(180%) blur(24px);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0 env(safe-area-inset-bottom, 8px) 0;
+            z-index: 100;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.03);
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #8e8e93;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 4px 12px;
+            transition: color 0.2s;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            gap: 2px;
+            letter-spacing: 0.2px;
+        }
+        .tab-item .tab-icon {
+            font-size: 24px;
+            line-height: 1.2;
+        }
+        .tab-item.active {
+            color: #1a2a48;
+        }
+        .tab-item.active .tab-icon {
+            /* 可加微动效 */
+        }
+        .tab-item:active {
+            opacity: 0.6;
+        }
 
-        /* 暗黑模式 */
+        /* ===== 页脚 ===== */
+        .footer {
+            text-align: center;
+            padding: 24px 20px 12px;
+            font-size: 12px;
+            color: #8e8e93;
+        }
+
+        /* ===== 登录弹窗 (自定义) ===== */
+        .login-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 20px;
+        }
+        .login-alert-box {
+            background: #fff;
+            border-radius: 28px;
+            padding: 32px 24px 28px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.2);
+            animation: alertFadeIn 0.3s ease;
+        }
+        @keyframes alertFadeIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .alert-icon {
+            font-size: 44px;
+            margin-bottom: 10px;
+        }
+        .alert-title {
+            font-size: 19px;
+            font-weight: 700;
+            color: #1c1c1e;
+            margin-bottom: 4px;
+        }
+        .alert-msg {
+            font-size: 15px;
+            color: #6c6c70;
+            margin-bottom: 22px;
+            line-height: 1.4;
+        }
+        .alert-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .alert-btn {
+            flex: 1;
+            height: 48px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .alert-btn:active {
+            opacity: 0.6;
+        }
+        .alert-btn-cancel {
+            background: #f2f2f7;
+            color: #1c1c1e;
+        }
+        .alert-btn-primary {
+            background: #1a2a48;
+            color: #fff;
+            flex: 2;
+        }
+
+        /* ===== 暗色模式 ===== */
         @media (prefers-color-scheme: dark) {
-            body { background:#0f1419; }
-            .navbar { background:#1a2430; }
-            .section-title { color:#f0f2f5; }
-            .card { background:#1a2430; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
-            .card-title, .player-name, .notice-title { color:#f0f2f5; }
-            .card-sub, .player-role { color:#b8c2cc; }
-            .card-info { color:#8e98a3; }
+            body {
+                background: #0b0e14;
+                color: #f0f2f5;
+            }
+            .navbar {
+                background: rgba(26, 42, 72, 0.78);
+                border-bottom-color: rgba(255, 255, 255, 0.06);
+            }
+            .nav-logo {
+                color: #f0f2f5;
+            }
+            .nav-btn {
+                color: #f0f2f5;
+            }
+            .nav-btn:active {
+                background: rgba(255, 255, 255, 0.08);
+            }
+            .section-title {
+                color: #f0f2f5;
+            }
+            .card {
+                background: #1a2430;
+                border-color: rgba(255, 255, 255, 0.04);
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+            .card-title,
+            .player-name,
+            .notice-title {
+                color: #f0f2f5;
+            }
+            .card-sub,
+            .player-role {
+                color: #b0b8c4;
+            }
+            .card-info {
+                color: #8e98a3;
+            }
+            .player-avatar {
+                background: linear-gradient(145deg, #2c3e5e, #1a2a48);
+            }
+            .bottom-tab {
+                background: rgba(26, 42, 72, 0.78);
+                border-top-color: rgba(255, 255, 255, 0.06);
+            }
+            .tab-item {
+                color: #8e98a3;
+            }
+            .tab-item.active {
+                color: #c9a84c;
+            }
+            .footer {
+                color: #6c7a8a;
+            }
+            .login-alert-box {
+                background: #1a2430;
+            }
+            .alert-title {
+                color: #f0f2f5;
+            }
+            .alert-msg {
+                color: #b0b8c4;
+            }
+            .alert-btn-cancel {
+                background: #2a3342;
+                color: #f0f2f5;
+            }
+            .alert-btn-primary {
+                background: #c9a84c;
+                color: #1a1a2e;
+            }
+        }
+
+        /* 小屏适配 */
+        @media (max-width: 400px) {
+            .container {
+                padding: 12px 16px;
+            }
+            .card {
+                padding: 14px 16px;
+            }
+            .tab-item .tab-icon {
+                font-size: 22px;
+            }
+            .tab-item {
+                font-size: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- 导航栏 -->
+
+    <!-- ===== 顶部导航栏 ===== -->
     <div class="navbar">
         <div class="nav-logo">DMN<span>电竞</span></div>
         <button id="navLoginBtn" class="nav-btn">
@@ -69,13 +416,14 @@
         </button>
     </div>
 
+    <!-- ===== 主内容 ===== -->
     <div class="container">
-        <!-- 赛事信息板块 -->
+
+        <!-- 近期赛事 -->
         <div class="section-title">
             <i>🏆</i> 近期赛事
         </div>
         <div class="card-list">
-            <!-- 所有卡片增加 data-protected 属性和 data-url（可选），data-msg 为提示语 -->
             <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看夏季联赛详情">
                 <div class="card-header">
                     <div class="card-title">DMN 夏季联赛</div>
@@ -111,7 +459,7 @@
             </div>
         </div>
 
-        <!-- 明星选手板块 -->
+        <!-- 明星选手 -->
         <div class="section-title">
             <i>⭐</i> 明星选手
         </div>
@@ -139,7 +487,7 @@
             </div>
         </div>
 
-        <!-- 公会/公告板块 -->
+        <!-- 公会公告 -->
         <div class="section-title">
             <i>📢</i> 公会公告
         </div>
@@ -160,25 +508,49 @@
                 <div class="card-info">2026-07-20</div>
             </div>
         </div>
+
+        <div class="footer">
+            DMN 战队管理系统 · 让每一场战斗都被铭记
+        </div>
     </div>
 
-    <div class="footer">
-        DMN 战队管理系统 · 让每一场战斗都被铭记
+    <!-- ===== 底部导航栏（5个Tab） ===== -->
+    <div class="bottom-tab" role="tablist">
+        <button class="tab-item active" data-tab="home" onclick="navigateTab(this)">
+            <span class="tab-icon">🏠</span>
+            <span>首页</span>
+        </button>
+        <button class="tab-item" data-tab="matches" onclick="navigateTab(this)">
+            <span class="tab-icon">🏆</span>
+            <span>赛事</span>
+        </button>
+        <button class="tab-item" data-tab="team" onclick="navigateTab(this)">
+            <span class="tab-icon">👥</span>
+            <span>战队</span>
+        </button>
+        <button class="tab-item" data-tab="rank" onclick="navigateTab(this)">
+            <span class="tab-icon">📈</span>
+            <span>排行</span>
+        </button>
+        <button class="tab-item" data-tab="profile" onclick="navigateTab(this)">
+            <span class="tab-icon">👤</span>
+            <span>我的</span>
+        </button>
     </div>
 
-    <!-- 核心脚本：登录检测 + 保护卡片 + 动态导航 -->
+    <!-- ===== JavaScript ===== -->
     <script>
-        // 检测登录状态（token 存储在 localStorage 中，key 为 dmn_token）
+        // ----- 登录检测 -----
         function isLoggedIn() {
             return !!localStorage.getItem('dmn_token');
         }
 
-        // 根据登录状态更新右上角按钮的文字和跳转行为
+        // 更新顶部按钮
         function updateNavButton() {
             const btn = document.getElementById('navLoginBtn');
             if (!btn) return;
             if (isLoggedIn()) {
-                btn.textContent = '⚙️ 进入后台';
+                btn.textContent = '⚙️ 后台';
                 btn.onclick = () => window.location.href = '/admin.html';
             } else {
                 btn.textContent = '👤 登录';
@@ -186,31 +558,21 @@
             }
         }
 
-        // 自定义“需要登录”弹窗
+        // ----- 登录弹窗（自定义）-----
         function showLoginAlert(message) {
-            // 移除可能已存在的弹窗
-            const old = document.getElementById('loginAlertOverlay');
+            const old = document.querySelector('.login-alert-overlay');
             if (old) old.remove();
 
             const overlay = document.createElement('div');
-            overlay.id = 'loginAlertOverlay';
-            overlay.style.cssText = `
-                position:fixed; top:0; left:0; width:100%; height:100%;
-                background:rgba(0,0,0,0.5); display:flex; justify-content:center;
-                align-items:center; z-index:9999; padding:20px;
-            `;
+            overlay.className = 'login-alert-overlay';
             overlay.innerHTML = `
-                <div style="background:#fff; border-radius:24px; padding:32px 24px 28px;
-                            max-width:340px; width:100%; text-align:center;
-                            box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-                    <div style="font-size:40px; margin-bottom:12px;">🔒</div>
-                    <div style="font-size:18px; font-weight:700; color:#1a2a48; margin-bottom:6px;">需要登录</div>
-                    <div style="font-size:14px; color:#6b7280; margin-bottom:20px;">${message}</div>
-                    <div style="display:flex; gap:10px;">
-                        <button id="alertCancel" style="flex:1; background:#f0f2f5; border:none; border-radius:12px;
-                                height:46px; font-size:15px; font-weight:500; color:#4a4a5a; cursor:pointer;">取消</button>
-                        <button id="alertGoLogin" style="flex:2; background:#1a2a48; border:none; border-radius:12px;
-                                height:46px; font-size:15px; font-weight:600; color:#fff; cursor:pointer;">去登录</button>
+                <div class="login-alert-box">
+                    <div class="alert-icon">🔒</div>
+                    <div class="alert-title">需要登录</div>
+                    <div class="alert-msg">${message}</div>
+                    <div class="alert-actions">
+                        <button class="alert-btn alert-btn-cancel" id="alertCancel">取消</button>
+                        <button class="alert-btn alert-btn-primary" id="alertGoLogin">去登录</button>
                     </div>
                 </div>
             `;
@@ -223,38 +585,79 @@
             };
         }
 
-        // 统一处理需要保护的卡片点击
-        function handleProtectedCardClick(cardElement) {
-            const isProtected = cardElement.getAttribute('data-protected') === 'true';
+        // ----- 卡片保护点击 -----
+        function handleProtectedCardClick(card) {
+            const isProtected = card.getAttribute('data-protected') === 'true';
             if (!isProtected) return;
-
-            const url = cardElement.getAttribute('data-url');
-            const msg = cardElement.getAttribute('data-msg') || '请先登录后再查看详情';
+            const url = card.getAttribute('data-url');
+            const msg = card.getAttribute('data-msg') || '请先登录后再查看详情';
 
             if (isLoggedIn()) {
-                // 已登录：跳转到详情页（若有 url）
                 if (url) {
                     window.location.href = url;
                 } else {
                     alert('详情页开发中，敬请期待！');
                 }
             } else {
-                // 未登录：弹出登录引导
                 showLoginAlert(msg);
             }
         }
 
-        // 页面初始化
+        // ----- 底部导航点击处理 -----
+        function navigateTab(el) {
+            // 先移除所有 active
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            const tab = el.getAttribute('data-tab');
+            // 映射页面路径（可根据实际调整）
+            const pageMap = {
+                home: '/',
+                matches: '/matches.html',
+                team: '/team.html',
+                rank: '/rank.html',
+                profile: '/profile.html'
+            };
+            const url = pageMap[tab] || '/';
+            // 如果是首页，且当前已在首页，不跳转
+            if (url === '/' && window.location.pathname === '/') {
+                return;
+            }
+            // 其他页面跳转（若未创建，可提示）
+            // 简单检测是否已登录，若未登录且不是首页，也引导登录
+            if (!isLoggedIn() && url !== '/') {
+                showLoginAlert('请先登录后访问此页面');
+                // 重置高亮到首页
+                document.querySelector('.tab-item[data-tab="home"]')?.classList.add('active');
+                el.classList.remove('active');
+                return;
+            }
+            window.location.href = url;
+        }
+
+        // ----- 初始化 -----
         document.addEventListener('DOMContentLoaded', function() {
-            // 更新导航按钮
             updateNavButton();
 
-            // 为所有带有 data-protected="true" 的卡片绑定点击事件
-            const cards = document.querySelectorAll('.card[data-protected="true"]');
-            cards.forEach(card => {
+            // 卡片点击绑定
+            document.querySelectorAll('.card[data-protected="true"]').forEach(card => {
                 card.addEventListener('click', function() {
                     handleProtectedCardClick(this);
                 });
+            });
+
+            // 底部导航高亮当前页面（根据路径）
+            const currentPath = window.location.pathname;
+            const tabMap = {
+                '/': 'home',
+                '/matches.html': 'matches',
+                '/team.html': 'team',
+                '/rank.html': 'rank',
+                '/profile.html': 'profile'
+            };
+            const activeTab = tabMap[currentPath] || 'home';
+            document.querySelectorAll('.tab-item').forEach(t => {
+                t.classList.toggle('active', t.getAttribute('data-tab') === activeTab);
             });
         });
     </script>
