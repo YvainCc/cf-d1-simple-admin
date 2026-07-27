@@ -237,6 +237,7 @@
             if (loginUser === 'YvainCC') {
                 adminMenu.style.display = 'inline-block';
                 adminMenu.addEventListener('click', function() {
+                    // ✅ 修复：跳转 /admin（无 .html 后缀）
                     window.location.href = '/admin';
                 });
             }
