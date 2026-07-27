@@ -1,15 +1,23 @@
 // ============================================================
 // 文件：functions/api/auth.js
-// 路由：/api/auth
-// 使用 onRequestPost 强制只处理 POST
+// 路由：/api/auth（POST）
+// 支持 action: login 和 action: register
+// 表名：人员表，字段：游戏名称、密码、状态（1有效）
 // ============================================================
 
-export async function onRequestPost(context) {
+export async function onRequest(context) {
     const { request, env } = context;
 
-    // ----- 1. 解析 URL 获取 action -----
-    const url = new URL(request.url);
-    const action = url.pathname.split('/').pop(); // 'login' 或 'register'
+    // ----- 1. 只允许 POST -----
+    if (request.method !== 'POST') {
+        return new Response(JSON.stringify({
+            ok: false,
+            msg: '请使用 POST 请求'
+        }), {
+            status: 405,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 
     // ----- 2. 解析 JSON Body -----
     let body;
@@ -25,9 +33,9 @@ export async function onRequestPost(context) {
         });
     }
 
-    const { username, password } = body;
+    // ----- 3. 提取参数 -----
+    const { username, password, action } = body;
 
-    // ----- 3. 参数校验 -----
     if (!username || !password) {
         return new Response(JSON.stringify({
             ok: false,
@@ -38,7 +46,7 @@ export async function onRequestPost(context) {
         });
     }
 
-    // ----- 4. 获取 D1 数据库 -----
+    // ----- 4. 获取 D1 数据库绑定 -----
     const db = env.DB;
     if (!db) {
         return new Response(JSON.stringify({
@@ -50,61 +58,11 @@ export async function onRequestPost(context) {
         });
     }
 
-    // ============================================================
-    // 登录逻辑
-    // ============================================================
-    if (action === 'login') {
-        try {
-            const user = await db.prepare(
-                'SELECT id, "游戏名称" as username, "密码" as password FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
-            ).bind(username).first();
-
-            if (!user) {
-                return new Response(JSON.stringify({
-                    ok: false,
-                    msg: '账号不存在或已被停用'
-                }), {
-                    status: 401,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            }
-
-            if (user.password !== password) {
-                return new Response(JSON.stringify({
-                    ok: false,
-                    msg: '密码错误'
-                }), {
-                    status: 401,
-                    headers: { 'Content-Type': 'application/json' }
-                });
-            }
-
-            return new Response(JSON.stringify({
-                ok: true,
-                token: 'dmn-token-' + Date.now(),
-                role: '队员',
-                username: user.username
-            }), {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        } catch (err) {
-            return new Response(JSON.stringify({
-                ok: false,
-                msg: '数据库查询失败: ' + err.message
-            }), {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-    }
-
-    // ============================================================
-    // 注册逻辑
-    // ============================================================
-    if (action === 'register') {
-        try {
-            // 检查是否已存在
+    // ----- 5. 根据 action 分发 -----
+    try {
+        if (action === 'register') {
+            // ========== 注册 ==========
+            // 检查是否已存在有效账号
             const existing = await db.prepare(
                 'SELECT id FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
             ).bind(username).first();
@@ -119,7 +77,7 @@ export async function onRequestPost(context) {
                 });
             }
 
-            // 插入新用户
+            // 插入新用户（状态默认1）
             const result = await db.prepare(
                 `INSERT INTO "人员表" ("游戏名称", "密码", "状态") VALUES (?, ?, 1)`
             ).bind(username, password).run();
@@ -132,23 +90,66 @@ export async function onRequestPost(context) {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
             });
-        } catch (err) {
+        } 
+        else if (action === 'login') {
+            // ========== 登录 ==========
+            // 查询状态=1的用户
+            const user = await db.prepare(
+                'SELECT id, "游戏名称" as username, "密码" as password FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
+            ).bind(username).first();
+
+            if (!user) {
+                return new Response(JSON.stringify({
+                    ok: false,
+                    msg: '账号不存在或已被停用'
+                }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            // 密码比对（明文）
+            if (user.password !== password) {
+                return new Response(JSON.stringify({
+                    ok: false,
+                    msg: '密码错误'
+                }), {
+                    status: 401,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
+
+            // 生成简易Token（可扩展）
+            const token = 'dmn-token-' + Date.now();
+
+            return new Response(JSON.stringify({
+                ok: true,
+                token: token,
+                role: '队员',
+                username: user.username
+            }), {
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } 
+        else {
+            // action 无效
             return new Response(JSON.stringify({
                 ok: false,
-                msg: '注册失败: ' + err.message
+                msg: '无效的操作类型，请使用 login 或 register'
             }), {
-                status: 500,
+                status: 400,
                 headers: { 'Content-Type': 'application/json' }
             });
         }
+    } catch (err) {
+        // 数据库异常
+        return new Response(JSON.stringify({
+            ok: false,
+            msg: '数据库错误: ' + err.message
+        }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+        });
     }
-
-    // action 无效
-    return new Response(JSON.stringify({
-        ok: false,
-        msg: '无效的操作类型，请使用 login 或 register'
-    }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-    });
 }
