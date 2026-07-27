@@ -165,7 +165,6 @@
             submitBtn.disabled = true;
 
             try {
-                // ✅ 关键修改：请求路径为 /api/auth，并携带 action: 'login'
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -187,7 +186,8 @@
                     localStorage.setItem('loginUser', username);
                     localStorage.setItem('userRole', data.role || '队员');
                     localStorage.setItem('token', data.token || '');
-                    window.location.href = 'member.html';
+                    // ✅ 修改：跳转到 /member 而非 member.html
+                    window.location.href = 'member';
                 } else {
                     showErr(data.msg || '登录失败');
                 }
@@ -243,7 +243,6 @@
                 registerBtn.textContent = '注册中...';
                 registerBtn.disabled = true;
 
-                // ✅ 注册请求也改为 /api/auth，并携带 action: 'register'
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -294,15 +293,14 @@
             }
         });
 
-        // ===== Service Worker =====
+        // ===== Service Worker 延迟注册 =====
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .catch(err => console.warn('SW注册失败', err));
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .catch(err => console.warn('SW注册失败', err));
+            });
         }
     })();
 </script>
 </body>
-<html>
-<head><title>Member Center</title></head>
-<body><h1>队员中心</h1></body>
 </html>
