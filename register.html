@@ -4,202 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>注册 - D.M.N 战队管理系统</title>
-    
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a2a48">
-
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif;
-        }
-        body {
-            background: #f5f7fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .register-box {
-            background: #ffffff;
-            width: 100%;
-            max-width: 400px;
-            padding: 40px 28px 36px;
-            border-radius: 24px;
-            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.06);
-        }
-        .register-title {
-            text-align: center;
-            font-size: 26px;
-            font-weight: 700;
-            color: #1a2a48;
-            margin-bottom: 4px;
-        }
-        .register-title span {
-            color: #c9a84c;
-        }
-        .register-sub {
-            text-align: center;
-            font-size: 14px;
-            color: #8e98a3;
-            margin-bottom: 32px;
-        }
-        .item {
-            margin-bottom: 16px;
-        }
-        .item input {
-            width: 100%;
-            height: 50px;
-            padding: 0 16px;
-            border: 1.5px solid #eef0f4;
-            border-radius: 14px;
-            font-size: 16px;
-            background: #fafbfc;
-            transition: border-color 0.2s, box-shadow 0.2s;
-            outline: none;
-            color: #1a1a2e;
-        }
-        .item input:focus {
-            border-color: #c9a84c;
-            box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.12);
-            background: #ffffff;
-        }
-        .item input::placeholder {
-            color: #b0b8c4;
-        }
-        .register-btn {
-            width: 100%;
-            height: 52px;
-            background: #c9a84c;
-            border: none;
-            border-radius: 14px;
-            color: #1a1a2e;
-            font-size: 17px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 4px;
-            box-shadow: 0 4px 14px rgba(201, 168, 76, 0.30);
-        }
-        .register-btn:active {
-            transform: scale(0.97);
-            opacity: 0.85;
-        }
-        .register-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .err-text {
-            color: #ea4335;
-            text-align: center;
-            margin-top: 14px;
-            font-size: 14px;
-            display: none;
-            padding: 8px 12px;
-            background: #fef0ef;
-            border-radius: 10px;
-        }
-        .success-text {
-            color: #0f9d58;
-            text-align: center;
-            margin-top: 14px;
-            font-size: 14px;
-            display: none;
-            padding: 8px 12px;
-            background: #e6f9ed;
-            border-radius: 10px;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 18px;
-            font-size: 14px;
-            color: #8e98a3;
-        }
-        .back-link a {
-            color: #c9a84c;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .back-link a:active {
-            opacity: 0.7;
-        }
-        .hint {
-            font-size: 12px;
-            color: #8e98a3;
-            margin-top: 4px;
-            padding-left: 4px;
-        }
-
-        /* 暗色模式 */
+        * { margin:0; padding:0; box-sizing:border-box; font-family:-apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
+        body { background:#f2f4f8; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
+        .register-box { background:#ffffff; width:100%; max-width:400px; padding:40px 28px 36px; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .register-title { text-align:center; font-size:26px; font-weight:700; color:#1a2a48; margin-bottom:4px; }
+        .register-title span { color:#c9a84c; }
+        .register-sub { text-align:center; font-size:14px; color:#8e98a3; margin-bottom:32px; }
+        .item { margin-bottom:16px; }
+        .item input { width:100%; height:50px; padding:0 16px; border:1.5px solid #eef0f4; border-radius:14px; font-size:16px; background:#fafbfc; outline:none; color:#1a1a2e; transition:border-color 0.2s, box-shadow 0.2s; }
+        .item input:focus { border-color:#c9a84c; box-shadow:0 0 0 4px rgba(201,168,76,0.12); background:#ffffff; }
+        .item input::placeholder { color:#b0b8c4; }
+        .hint { font-size:12px; color:#8e98a3; margin-top:4px; padding-left:4px; }
+        .register-btn { width:100%; height:52px; background:#c9a84c; border:none; border-radius:14px; color:#1a1a2e; font-size:17px; font-weight:600; cursor:pointer; transition:0.2s; margin-top:4px; box-shadow:0 4px 14px rgba(201,168,76,0.30); }
+        .register-btn:active { transform:scale(0.97); opacity:0.85; }
+        .register-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .err-text { color:#ea4335; text-align:center; margin-top:14px; font-size:14px; display:none; padding:8px 12px; background:#fef0ef; border-radius:10px; }
+        .success-text { color:#0f9d58; text-align:center; margin-top:14px; font-size:14px; display:none; padding:8px 12px; background:#e6f9ed; border-radius:10px; }
+        .back-link { text-align:center; margin-top:18px; font-size:14px; color:#8e98a3; }
+        .back-link a { color:#c9a84c; text-decoration:none; font-weight:500; }
         @media (prefers-color-scheme: dark) {
-            body { background: #0f1419; }
-            .register-box {
-                background: #1a2430;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            }
-            .register-title { color: #f0f2f5; }
-            .register-sub { color: #8e98a3; }
-            .item input {
-                background: #111a24;
-                border-color: #2a3342;
-                color: #f0f2f5;
-            }
-            .item input:focus {
-                border-color: #c9a84c;
-                background: #1a2430;
-            }
-            .register-btn {
-                background: #c9a84c;
-                color: #1a1a2e;
-            }
-            .err-text {
-                background: #3d1a1a;
-                color: #f5a0a0;
-            }
-            .success-text {
-                background: #1a3a2a;
-                color: #8dd4a8;
-            }
-            .back-link { color: #6e7a8a; }
-            .back-link a { color: #c9a84c; }
-            .hint { color: #6e7a8a; }
+            body { background:#0f1419; }
+            .register-box { background:#1a2430; box-shadow:0 2px 8px rgba(0,0,0,0.4); }
+            .register-title { color:#f0f2f5; }
+            .register-sub { color:#8e98a3; }
+            .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
+            .item input:focus { border-color:#c9a84c; background:#1a2430; }
+            .register-btn { background:#c9a84c; color:#1a1a2e; }
+            .err-text { background:#3d1a1a; color:#f5a0a0; }
+            .success-text { background:#1a3a2a; color:#8dd4a8; }
+            .back-link { color:#6e7a8a; }
+            .back-link a { color:#c9a84c; }
+            .hint { color:#6e7a8a; }
         }
     </style>
 </head>
 <body>
-
 <div class="register-box">
     <div class="register-title">D.<span>M</span>.N</div>
     <div class="register-sub">创建新账号</div>
-
-    <div class="item">
-        <input type="text" id="regUsername" placeholder="请输入游戏名称（唯一）" autocomplete="off">
-        <div class="hint" id="usernameHint">💡 游戏名称将作为登录账号，不可重复</div>
-    </div>
-    <div class="item">
-        <input type="password" id="regPassword" placeholder="请设置密码（至少6位）">
-    </div>
-    <div class="item">
-        <input type="password" id="regConfirmPwd" placeholder="请再次输入密码">
-    </div>
-
+    <div class="item"><input type="text" id="regUsername" placeholder="请输入游戏名称（唯一）" autocomplete="off"><div class="hint" id="usernameHint">💡 游戏名称将作为登录账号，不可重复</div></div>
+    <div class="item"><input type="password" id="regPassword" placeholder="请设置密码（至少6位）"></div>
+    <div class="item"><input type="password" id="regConfirmPwd" placeholder="请再次输入密码"></div>
     <button class="register-btn" id="registerBtn">立即注册</button>
     <div class="err-text" id="errorMsg"></div>
-    <div class="success-text" id="successMsg">✅ 注册成功！3秒后自动跳转登录</div>
-    <div class="back-link">
-        已有账号？<a href="index.html">返回登录</a>
-    </div>
+    <div class="success-text" id="successMsg">✅ 注册成功！正在跳转...</div>
+    <div class="back-link">已有账号？<a href="index.html">返回登录</a></div>
 </div>
-
 <script>
-    // =============================================================
-    // 1. DOM 元素
-    // =============================================================
     const regUsername = document.getElementById('regUsername');
     const regPassword = document.getElementById('regPassword');
     const regConfirmPwd = document.getElementById('regConfirmPwd');
@@ -208,41 +63,38 @@
     const successMsg = document.getElementById('successMsg');
     const usernameHint = document.getElementById('usernameHint');
 
-    // =============================================================
-    // 2. 实时校验用户名是否已存在（防抖）
-    // =============================================================
+    // ===== 实时校验用户名 =====
     let checkTimeout = null;
     regUsername.addEventListener('input', function() {
         clearTimeout(checkTimeout);
         const name = this.value.trim();
         if (name.length < 2) {
-            usernameHint.textContent = '💡 游戏名称至少2个字符，不可重复';
+            usernameHint.textContent = '💡 游戏名称至少2个字符';
             usernameHint.style.color = '#8e98a3';
             return;
         }
-        checkTimeout = setTimeout(() => {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
-            const exists = users.some(u => u.username === name);
-            if (exists) {
-                usernameHint.textContent = '❌ 该游戏名称已被注册，请换一个';
-                usernameHint.style.color = '#ea4335';
-            } else {
-                usernameHint.textContent = '✅ 该游戏名称可用';
-                usernameHint.style.color = '#0f9d58';
+        checkTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/api/users/check?username=${encodeURIComponent(name)}`);
+                const data = await response.json();
+                if (data.exists) {
+                    usernameHint.textContent = '❌ 该名称已被注册';
+                    usernameHint.style.color = '#ea4335';
+                } else {
+                    usernameHint.textContent = '✅ 该名称可用';
+                    usernameHint.style.color = '#0f9d58';
+                }
+            } catch {
+                usernameHint.textContent = '⚠️ 网络异常，请稍后重试';
+                usernameHint.style.color = '#fbad39';
             }
-        }, 300);
+        }, 400);
     });
 
-    // =============================================================
-    // 3. 注册逻辑
-    // =============================================================
     registerBtn.addEventListener('click', handleRegister);
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') handleRegister();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleRegister(); });
 
-    function handleRegister() {
-        // 隐藏之前的提示
+    async function handleRegister() {
         errorMsg.style.display = 'none';
         successMsg.style.display = 'none';
 
@@ -250,95 +102,63 @@
         const password = regPassword.value.trim();
         const confirmPwd = regConfirmPwd.value.trim();
 
-        // ----- 校验1：非空 -----
         if (!username || !password || !confirmPwd) {
             showErr('请完整填写所有字段');
             return;
         }
-
-        // ----- 校验2：用户名长度 -----
         if (username.length < 2) {
             showErr('游戏名称至少2个字符');
             return;
         }
-
-        // ----- 校验3：密码长度 -----
         if (password.length < 6) {
             showErr('密码至少6位');
             return;
         }
-
-        // ----- 校验4：密码一致性 -----
         if (password !== confirmPwd) {
             showErr('两次输入的密码不一致');
             return;
         }
 
-        // ----- 校验5：唯一性（再次确认，防止绕过） -----
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        if (users.some(u => u.username === username)) {
-            showErr('该游戏名称已被注册，请换一个');
-            return;
-        }
-
-        // =============================================================
-        // 4. ✅ 注册成功，写入数据
-        // =============================================================
-        const newUser = {
-            username: username,
-            password: password,
-            role: '队员',           // 默认角色
-            registerTime: new Date().toISOString()
-        };
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-
-        // =============================================================
-        // 5. 同时写入选手表（players），供队员中心读取
-        // =============================================================
-        const players = JSON.parse(localStorage.getItem('players') || '[]');
-        if (!players.some(p => p.name === username)) {
-            players.push({
-                name: username,
-                kd: 0,
-                games: 0,
-                wins: 0,
-                top10Rate: '0%'
-            });
-            localStorage.setItem('players', JSON.stringify(players));
-        }
-
-        // =============================================================
-        // 6. 显示成功信息，3秒后跳转
-        // =============================================================
-        successMsg.style.display = 'block';
         registerBtn.disabled = true;
+        registerBtn.textContent = '注册中...';
 
-        setTimeout(() => {
-            // 把新注册的账号带到登录页
-            localStorage.setItem('savedUsername', username);
-            localStorage.setItem('savedPassword', password);
-            localStorage.setItem('rememberMe', 'true');
-            window.location.href = 'index.html';
-        }, 3000);
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (data.ok) {
+                successMsg.style.display = 'block';
+                localStorage.setItem('savedUsername', username);
+                localStorage.setItem('savedPassword', password);
+                localStorage.setItem('rememberMe', 'true');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } else {
+                showErr(data.msg || '注册失败');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '立即注册';
+            }
+        } catch (err) {
+            showErr('网络请求失败，请稍后重试');
+            console.error(err);
+            registerBtn.disabled = false;
+            registerBtn.textContent = '立即注册';
+        }
     }
 
-    // =============================================================
-    // 7. 错误提示
-    // =============================================================
     function showErr(text) {
         errorMsg.innerText = text;
         errorMsg.style.display = 'block';
-        registerBtn.disabled = false;
     }
 
-    // =============================================================
-    // 8. PWA 注册
-    // =============================================================
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-            .then(() => console.log('✅ Service Worker 注册成功'))
-            .catch(err => console.warn('⚠️ Service Worker 注册失败', err));
+        navigator.serviceWorker.register('/service-worker.js');
     }
 </script>
 </body>
