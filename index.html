@@ -3,18 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>D.M.N 战队管理系统</title>
+    <title>DMN 战队管理系统</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
-    
-    <!-- vConsole 调试工具（手机端可查看控制台和网络请求） -->
-    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-    <script>
-        var vConsole = new window.VConsole();
-    </script>
-
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
         body { background:#f5f7fa; display:flex; justify-content:center; align-items:center; min-height:100vh; padding:20px; }
@@ -79,16 +72,11 @@
     </style>
 </head>
 <body>
-
 <div class="login-box">
-    <div class="login-title">D.<span>M</span>.N</div>
+    <div class="login-title">D<span style="color:#c9a84c;">M</span>N</div>
     <div class="login-sub">战队管理系统 · 队员登录</div>
-    <div class="item">
-        <input type="text" id="username" placeholder="请输入账号" autocomplete="username">
-    </div>
-    <div class="item">
-        <input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password">
-    </div>
+    <div class="item"><input type="text" id="username" placeholder="请输入账号" autocomplete="username"></div>
+    <div class="item"><input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password"></div>
     <div class="row-remember">
         <label><input type="checkbox" id="rememberMe"> 记住账号</label>
         <button class="link-btn" id="showRegisterBtn">注册新账号 →</button>
@@ -100,7 +88,7 @@
 
 <div class="modal-overlay" id="registerModal">
     <div class="modal-box">
-        <div class="modal-title">D.<span>M</span>.N</div>
+        <div class="modal-title">D<span style="color:#c9a84c;">M</span>N</div>
         <div class="modal-sub">注册新账号</div>
         <div class="item"><input type="text" id="regUsername" placeholder="请输入账号" autocomplete="off"></div>
         <div class="item"><input type="password" id="regPwd" placeholder="请输入密码" autocomplete="off"></div>
@@ -161,15 +149,9 @@
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'login',
-                        username: username,
-                        password: password
-                    })
+                    body: JSON.stringify({ action: 'login', username, password })
                 });
-
                 const data = await res.json();
-
                 if (res.ok && data.ok) {
                     if (rememberMe.checked) {
                         localStorage.setItem('rememberedUser', JSON.stringify({ username, password }));
@@ -212,7 +194,6 @@
         closeRegisterBtn.addEventListener('click', () => {
             registerModal.classList.remove('show');
         });
-
         registerModal.addEventListener('click', (e) => {
             if (e.target === registerModal) registerModal.classList.remove('show');
         });
@@ -232,19 +213,12 @@
             try {
                 registerBtn.textContent = '注册中...';
                 registerBtn.disabled = true;
-
                 const res = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'register',
-                        username: username,
-                        password: password
-                    })
+                    body: JSON.stringify({ action: 'register', username, password })
                 });
-
                 const data = await res.json();
-
                 if (res.ok && data.ok) {
                     registerModal.classList.remove('show');
                     usernameInput.value = username;
