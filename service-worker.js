@@ -3,6 +3,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/member',
+  '/admin.html',
   '/manifest.json',
   '/icons/19f734a3d8000319d1fa98d12fab4ce1.png',
   '/icons/b542b5d7dcafe6d6905e1d8bf5d7b8b3.png'
