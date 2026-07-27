@@ -11,16 +11,19 @@
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
         body { background:#f5f7fa; min-height:100vh; }
+
         /* 导航栏 */
         .navbar { background:#1a2a48; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
         .nav-logo { font-size:22px; font-weight:700; color:#fff; }
         .nav-logo span { color:#c9a84c; }
         .nav-btn { background:transparent; border:1.5px solid #c9a84c; color:#c9a84c; padding:10px 18px; border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; transition:0.2s; display:flex; align-items:center; gap:6px; }
         .nav-btn:active { background:#c9a84c; color:#1a1a2e; }
+
         /* 主内容 */
         .container { max-width:600px; margin:0 auto; padding:20px; }
         .section-title { font-size:20px; font-weight:700; color:#1a2a48; margin:24px 0 12px; display:flex; align-items:center; gap:8px; }
         .section-title i { font-style:normal; font-size:22px; }
+
         /* 卡片通用 */
         .card-list { display:flex; flex-direction:column; gap:12px; }
         .card { background:#fff; border-radius:18px; padding:18px 16px; box-shadow:0 4px 16px rgba(0,0,0,0.04); transition:transform 0.2s; cursor:pointer; }
@@ -30,15 +33,18 @@
         .card-badge { font-size:12px; background:#c9a84c; color:#fff; padding:2px 10px; border-radius:20px; font-weight:500; }
         .card-sub { font-size:13px; color:#6b7280; margin-top:4px; }
         .card-info { display:flex; gap:16px; font-size:12px; color:#9ca3af; margin-top:8px; }
+
         /* 选手卡片特殊 */
         .player-card { display:flex; align-items:center; gap:12px; }
         .player-avatar { width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, #1a2a48, #2a3a58); color:#c9a84c; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; }
         .player-info { flex:1; }
         .player-name { font-size:16px; font-weight:600; color:#1a2a48; }
         .player-role { font-size:12px; color:#6b7280; }
+
         /* 公告卡片 */
         .notice-card { border-left:4px solid #c9a84c; }
         .notice-title { font-weight:600; color:#1a2a48; }
+
         /* 页脚 */
         .footer { text-align:center; padding:24px 20px; font-size:12px; color:#b0b8c4; }
 
@@ -58,7 +64,7 @@
     <!-- 导航栏 -->
     <div class="navbar">
         <div class="nav-logo">DMN<span>电竞</span></div>
-        <button class="nav-btn" onclick="window.location.href='/login.html'">
+        <button id="navLoginBtn" class="nav-btn">
             👤 登录
         </button>
     </div>
@@ -69,7 +75,8 @@
             <i>🏆</i> 近期赛事
         </div>
         <div class="card-list">
-            <div class="card" onclick="alert('暂无详情页，可后续跳转')">
+            <!-- 所有卡片增加 data-protected 属性和 data-url（可选），data-msg 为提示语 -->
+            <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看夏季联赛详情">
                 <div class="card-header">
                     <div class="card-title">DMN 夏季联赛</div>
                     <div class="card-badge">进行中</div>
@@ -80,7 +87,7 @@
                     <span>👥 12支战队</span>
                 </div>
             </div>
-            <div class="card" onclick="alert('暂无详情页')">
+            <div class="card" data-protected="true" data-url="/match-detail.html" data-msg="登录后查看全明星邀请赛详情">
                 <div class="card-header">
                     <div class="card-title">全明星邀请赛</div>
                     <div class="card-badge">报名中</div>
@@ -91,7 +98,7 @@
                     <span>🏅 冠军奖励 5,000 金币</span>
                 </div>
             </div>
-            <div class="card" onclick="alert('暂无详情页')">
+            <div class="card" data-protected="true" data-msg="登录后查看城市争霸赛详情">
                 <div class="card-header">
                     <div class="card-title">城市争霸赛 · 深圳站</div>
                     <div class="card-badge">预告</div>
@@ -109,21 +116,21 @@
             <i>⭐</i> 明星选手
         </div>
         <div class="card-list">
-            <div class="card player-card">
+            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
                 <div class="player-avatar">YN</div>
                 <div class="player-info">
                     <div class="player-name">YvainCc</div>
                     <div class="player-role">突击手 · 赛季击杀王</div>
                 </div>
             </div>
-            <div class="card player-card">
+            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
                 <div class="player-avatar">LS</div>
                 <div class="player-info">
                     <div class="player-name">凌霜</div>
                     <div class="player-role">指挥 · 胜率 78%</div>
                 </div>
             </div>
-            <div class="card player-card">
+            <div class="card player-card" data-protected="true" data-msg="登录后查看选手完整数据">
                 <div class="player-avatar">HF</div>
                 <div class="player-info">
                     <div class="player-name">黑锋</div>
@@ -132,22 +139,22 @@
             </div>
         </div>
 
-        <!-- 公会/咨询板块 -->
+        <!-- 公会/公告板块 -->
         <div class="section-title">
             <i>📢</i> 公会公告
         </div>
         <div class="card-list">
-            <div class="card notice-card">
+            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
                 <div class="notice-title">新赛季奖励升级</div>
                 <div class="card-sub">所有完成报名的战队可获专属头像框，冠军战队额外获得限定皮肤。</div>
                 <div class="card-info">2026-07-25</div>
             </div>
-            <div class="card notice-card">
+            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
                 <div class="notice-title">招募管理员与裁判</div>
                 <div class="card-sub">熟悉赛事规则、有责任心者请通过 Discord 或站内信联系会长。</div>
                 <div class="card-info">2026-07-22</div>
             </div>
-            <div class="card notice-card">
+            <div class="card notice-card" data-protected="true" data-msg="登录后查看完整公告">
                 <div class="notice-title">服务器维护通知</div>
                 <div class="card-sub">8月1日凌晨2:00-4:00进行数据维护，届时排行榜暂不可用。</div>
                 <div class="card-info">2026-07-20</div>
@@ -158,5 +165,98 @@
     <div class="footer">
         DMN 战队管理系统 · 让每一场战斗都被铭记
     </div>
+
+    <!-- 核心脚本：登录检测 + 保护卡片 + 动态导航 -->
+    <script>
+        // 检测登录状态（token 存储在 localStorage 中，key 为 dmn_token）
+        function isLoggedIn() {
+            return !!localStorage.getItem('dmn_token');
+        }
+
+        // 根据登录状态更新右上角按钮的文字和跳转行为
+        function updateNavButton() {
+            const btn = document.getElementById('navLoginBtn');
+            if (!btn) return;
+            if (isLoggedIn()) {
+                btn.textContent = '⚙️ 进入后台';
+                btn.onclick = () => window.location.href = '/admin.html';
+            } else {
+                btn.textContent = '👤 登录';
+                btn.onclick = () => window.location.href = '/login.html';
+            }
+        }
+
+        // 自定义“需要登录”弹窗
+        function showLoginAlert(message) {
+            // 移除可能已存在的弹窗
+            const old = document.getElementById('loginAlertOverlay');
+            if (old) old.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'loginAlertOverlay';
+            overlay.style.cssText = `
+                position:fixed; top:0; left:0; width:100%; height:100%;
+                background:rgba(0,0,0,0.5); display:flex; justify-content:center;
+                align-items:center; z-index:9999; padding:20px;
+            `;
+            overlay.innerHTML = `
+                <div style="background:#fff; border-radius:24px; padding:32px 24px 28px;
+                            max-width:340px; width:100%; text-align:center;
+                            box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                    <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+                    <div style="font-size:18px; font-weight:700; color:#1a2a48; margin-bottom:6px;">需要登录</div>
+                    <div style="font-size:14px; color:#6b7280; margin-bottom:20px;">${message}</div>
+                    <div style="display:flex; gap:10px;">
+                        <button id="alertCancel" style="flex:1; background:#f0f2f5; border:none; border-radius:12px;
+                                height:46px; font-size:15px; font-weight:500; color:#4a4a5a; cursor:pointer;">取消</button>
+                        <button id="alertGoLogin" style="flex:2; background:#1a2a48; border:none; border-radius:12px;
+                                height:46px; font-size:15px; font-weight:600; color:#fff; cursor:pointer;">去登录</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('alertCancel').onclick = () => overlay.remove();
+            document.getElementById('alertGoLogin').onclick = () => {
+                overlay.remove();
+                window.location.href = '/login.html';
+            };
+        }
+
+        // 统一处理需要保护的卡片点击
+        function handleProtectedCardClick(cardElement) {
+            const isProtected = cardElement.getAttribute('data-protected') === 'true';
+            if (!isProtected) return;
+
+            const url = cardElement.getAttribute('data-url');
+            const msg = cardElement.getAttribute('data-msg') || '请先登录后再查看详情';
+
+            if (isLoggedIn()) {
+                // 已登录：跳转到详情页（若有 url）
+                if (url) {
+                    window.location.href = url;
+                } else {
+                    alert('详情页开发中，敬请期待！');
+                }
+            } else {
+                // 未登录：弹出登录引导
+                showLoginAlert(msg);
+            }
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 更新导航按钮
+            updateNavButton();
+
+            // 为所有带有 data-protected="true" 的卡片绑定点击事件
+            const cards = document.querySelectorAll('.card[data-protected="true"]');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    handleProtectedCardClick(this);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
