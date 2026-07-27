@@ -2,7 +2,8 @@
 // 文件：functions/api/auth.js
 // 路由：/api/auth（POST）
 // 支持 action: login 和 action: register
-// 表名：人员表，字段：游戏名称、密码、状态（1有效）
+// 表名：人员表
+// 字段：游戏名称、密码、是否当前（1=最新/有效，0=历史）
 // ============================================================
 
 export async function onRequest(context) {
@@ -62,9 +63,9 @@ export async function onRequest(context) {
     try {
         if (action === 'register') {
             // ========== 注册 ==========
-            // 检查是否已存在有效账号
+            // 检查是否已存在有效账号（是否当前 = 1）
             const existing = await db.prepare(
-                'SELECT id FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
+                'SELECT id FROM "人员表" WHERE "游戏名称" = ? AND "是否当前" = 1'
             ).bind(username).first();
 
             if (existing) {
@@ -77,9 +78,9 @@ export async function onRequest(context) {
                 });
             }
 
-            // 插入新用户（状态默认1）
+            // 插入新用户（是否当前 默认为 1）
             const result = await db.prepare(
-                `INSERT INTO "人员表" ("游戏名称", "密码", "状态") VALUES (?, ?, 1)`
+                `INSERT INTO "人员表" ("游戏名称", "密码", "是否当前") VALUES (?, ?, 1)`
             ).bind(username, password).run();
 
             return new Response(JSON.stringify({
@@ -93,9 +94,9 @@ export async function onRequest(context) {
         } 
         else if (action === 'login') {
             // ========== 登录 ==========
-            // 查询状态=1的用户
+            // ✅ 查询 是否当前 = 1 的用户
             const user = await db.prepare(
-                'SELECT id, "游戏名称" as username, "密码" as password FROM "人员表" WHERE "游戏名称" = ? AND "状态" = 1'
+                'SELECT id, "游戏名称" as username, "密码" as password FROM "人员表" WHERE "游戏名称" = ? AND "是否当前" = 1'
             ).bind(username).first();
 
             if (!user) {
@@ -119,7 +120,7 @@ export async function onRequest(context) {
                 });
             }
 
-            // 生成简易Token（可扩展）
+            // 生成简易Token
             const token = 'dmn-token-' + Date.now();
 
             return new Response(JSON.stringify({
