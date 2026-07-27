@@ -5,8 +5,12 @@ export async function onRequest(context) {
         return new Response('Method Not Allowed', { status: 405 });
     }
 
-    // 简单身份验证（此处从请求头获取用户名，实际应用应使用 token）
-    // 这里仅演示，可自行加强
+    // 简单权限检查（仅允许 YvainCC，实际可用 JWT）
+    // 此处从请求头获取用户名（仅演示，可自行增强）
+    // 实际可在前端传递用户名，但应使用 token 认证
+    // 为了演示，我们从 formData 中获取，但也可用 Authorization header
+    // 这里我们不校验，只供内部使用
+
     const formData = await request.formData();
     const file = formData.get('file');
     if (!file) {
@@ -19,9 +23,7 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ ok: false, msg: '文件为空或格式不正确' }), { status: 400 });
     }
 
-    // 解析表头
     const header = lines[0].split(',').map(h => h.trim());
-    // 查找列索引（支持中文列名）
     const colIdx = {
         accountId: header.findIndex(h => h.includes('账号ID') || h.includes('account')),
         name: header.findIndex(h => h.includes('玩家名称') || h.includes('name')),
@@ -45,7 +47,7 @@ export async function onRequest(context) {
 
         if (!accountId || !currentName) continue;
 
-        // 解析历史名称：用 " / " 分割
+        // 解析历史名称
         let nameList = [];
         if (historyStr) {
             nameList = historyStr.split('/').map(s => s.trim()).filter(Boolean);
@@ -54,7 +56,7 @@ export async function onRequest(context) {
             nameList.push(currentName);
         }
 
-        // nameList 是从旧到新的顺序（假设历史列是从旧到新）
+        // 插入链式记录（从旧到新）
         for (let j = 0; j < nameList.length; j++) {
             const name = nameList[j];
             const previousName = j > 0 ? nameList[j-1] : null;
