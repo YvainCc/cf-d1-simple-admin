@@ -67,7 +67,6 @@
     <div class="footer-note">使用 Cloudflare Pages 安全托管</div>
 </div>
 
-<!-- 注册弹窗 -->
 <div class="modal-overlay" id="registerModal">
     <div class="modal-box">
         <div class="modal-title">D.<span>M</span>.N</div>
@@ -84,204 +83,101 @@
 </div>
 
 <script>
-    // ===== DOM 元素 =====
-    var usernameInput = document.getElementById('username');
-    var pwdInput = document.getElementById('pwd');
-    var submitBtn = document.getElementById('submitBtn');
-    var errorMsg = document.getElementById('errorMsg');
-    var rememberMe = document.getElementById('rememberMe');
+    var usernameInput=document.getElementById('username');
+    var pwdInput=document.getElementById('pwd');
+    var submitBtn=document.getElementById('submitBtn');
+    var errorMsg=document.getElementById('errorMsg');
+    var rememberMe=document.getElementById('rememberMe');
+    var registerModal=document.getElementById('registerModal');
+    var showRegisterBtn=document.getElementById('showRegisterBtn');
+    var closeRegisterBtn=document.getElementById('closeRegisterBtn');
+    var registerBtn=document.getElementById('registerBtn');
+    var regUsername=document.getElementById('regUsername');
+    var regPwd=document.getElementById('regPwd');
+    var regPwd2=document.getElementById('regPwd2');
+    var regErrorMsg=document.getElementById('regErrorMsg');
 
-    var registerModal = document.getElementById('registerModal');
-    var showRegisterBtn = document.getElementById('showRegisterBtn');
-    var closeRegisterBtn = document.getElementById('closeRegisterBtn');
-    var registerBtn = document.getElementById('registerBtn');
-    var regUsername = document.getElementById('regUsername');
-    var regPwd = document.getElementById('regPwd');
-    var regPwd2 = document.getElementById('regPwd2');
-    var regErrorMsg = document.getElementById('regErrorMsg');
+    (function(){var saved=localStorage.getItem('rememberedUser');if(saved){try{var data=JSON.parse(saved);usernameInput.value=data.username||'';pwdInput.value=data.password||'';rememberMe.checked=true;}catch(e){}}})();
 
-    // ===== 记住密码：加载保存的账号 =====
-    (function() {
-        var saved = localStorage.getItem('rememberedUser');
-        if (saved) {
-            try {
-                var data = JSON.parse(saved);
-                usernameInput.value = data.username || '';
-                pwdInput.value = data.password || '';
-                rememberMe.checked = true;
-            } catch (e) {}
-        }
-    })();
+    submitBtn.addEventListener('click',loginSubmit);
+    document.addEventListener('keydown',function(e){if(e.key==='Enter')loginSubmit();});
 
-    // ===== 登录提交 =====
-    submitBtn.addEventListener('click', loginSubmit);
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') loginSubmit();
-    });
-
-    async function loginSubmit() {
-        var username = usernameInput.value.trim();
-        var password = pwdInput.value.trim();
-
-        errorMsg.style.display = 'none';
-        errorMsg.style.color = '#ea4335';
-        errorMsg.style.background = '#fef0ef';
-
-        if (!username || !password) {
-            showErr('账号密码不能为空');
-            return;
-        }
-
-        try {
-            submitBtn.textContent = '登录中...';
-            submitBtn.disabled = true;
-
-            // ✅ 修改：统一请求 /api/auth，通过 action 区分
-            var res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    action: 'login', 
-                    username: username, 
-                    password: password 
-                })
+    async function loginSubmit(){
+        var username=usernameInput.value.trim();
+        var password=pwdInput.value.trim();
+        errorMsg.style.display='none';
+        errorMsg.style.color='#ea4335';
+        errorMsg.style.background='#fef0ef';
+        if(!username||!password){showErr('账号密码不能为空');return;}
+        try{
+            submitBtn.textContent='登录中...';
+            submitBtn.disabled=true;
+            var res=await fetch('/api/auth',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({action:'login',username:username,password:password})
             });
-
-            var rawText = await res.text();
+            var rawText=await res.text();
             var data;
-            try {
-                data = JSON.parse(rawText);
-            } catch (e) {
-                showErr('服务器返回非JSON (状态码:' + res.status + ') 内容:' + rawText.substring(0, 100));
-                return;
-            }
-
-            if (res.ok && data.ok) {
-                if (rememberMe.checked) {
-                    localStorage.setItem('rememberedUser', JSON.stringify({ username: username, password: password }));
-                } else {
-                    localStorage.removeItem('rememberedUser');
-                }
-                localStorage.setItem('loginUser', username);
-                localStorage.setItem('userRole', data.role || '队员');
-                localStorage.setItem('token', data.token || '');
-                window.location.href = 'member.html';
-            } else {
-                var msg = data.msg || data.error || '未知错误';
-                showErr('[' + res.status + '] ' + msg);
-            }
-        } catch (err) {
-            showErr('网络请求异常: ' + (err.message || '未知错误'));
-            console.error(err);
-        } finally {
-            submitBtn.textContent = '立即登录';
-            submitBtn.disabled = false;
-        }
+            try{data=JSON.parse(rawText);}catch(e){showErr('服务器返回非JSON (状态码:'+res.status+') 内容:'+rawText.substring(0,100));return;}
+            if(res.ok&&data.ok){
+                if(rememberMe.checked){localStorage.setItem('rememberedUser',JSON.stringify({username:username,password:password}));}
+                else{localStorage.removeItem('rememberedUser');}
+                localStorage.setItem('loginUser',username);
+                localStorage.setItem('userRole',data.role||'队员');
+                localStorage.setItem('token',data.token||'');
+                window.location.href='member.html';
+            }else{var msg=data.msg||data.error||'未知错误';showErr('['+res.status+'] '+msg);}
+        }catch(err){showErr('网络请求异常:'+(err.message||'未知错误'));console.error(err);}
+        finally{submitBtn.textContent='立即登录';submitBtn.disabled=false;}
     }
 
-    function showErr(text) {
-        errorMsg.innerText = text;
-        errorMsg.style.display = 'block';
-    }
+    function showErr(text){errorMsg.innerText=text;errorMsg.style.display='block';}
 
-    // ===== 注册弹窗控制 =====
-    showRegisterBtn.addEventListener('click', function() {
-        registerModal.classList.add('show');
-        regUsername.value = '';
-        regPwd.value = '';
-        regPwd2.value = '';
-        regErrorMsg.style.display = 'none';
-        regUsername.focus();
-    });
+    showRegisterBtn.addEventListener('click',function(){registerModal.classList.add('show');regUsername.value='';regPwd.value='';regPwd2.value='';regErrorMsg.style.display='none';regUsername.focus();});
+    closeRegisterBtn.addEventListener('click',function(){registerModal.classList.remove('show');});
+    registerModal.addEventListener('click',function(e){if(e.target===registerModal)registerModal.classList.remove('show');});
+    registerBtn.addEventListener('click',registerSubmit);
+    document.addEventListener('keydown',function(e){if(e.key==='Enter'&&registerModal.classList.contains('show')){registerSubmit();}});
 
-    closeRegisterBtn.addEventListener('click', function() {
-        registerModal.classList.remove('show');
-    });
-
-    registerModal.addEventListener('click', function(e) {
-        if (e.target === registerModal) registerModal.classList.remove('show');
-    });
-
-    // ===== 注册提交 =====
-    registerBtn.addEventListener('click', registerSubmit);
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && registerModal.classList.contains('show')) {
-            registerSubmit();
-        }
-    });
-
-    async function registerSubmit() {
-        var username = regUsername.value.trim();
-        var password = regPwd.value.trim();
-        var password2 = regPwd2.value.trim();
-
-        regErrorMsg.style.display = 'none';
-
-        if (!username) { showRegErr('请输入游戏名称'); return; }
-        if (username.length < 2) { showRegErr('游戏名称至少2个字符'); return; }
-        if (!password) { showRegErr('请输入密码'); return; }
-        if (password.length < 4) { showRegErr('密码至少4个字符'); return; }
-        if (password !== password2) { showRegErr('两次密码输入不一致'); return; }
-
-        try {
-            registerBtn.textContent = '注册中...';
-            registerBtn.disabled = true;
-
-            // ✅ 修改：统一请求 /api/auth，通过 action 区分
-            var res = await fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    action: 'register', 
-                    username: username, 
-                    password: password 
-                })
+    async function registerSubmit(){
+        var username=regUsername.value.trim();
+        var password=regPwd.value.trim();
+        var password2=regPwd2.value.trim();
+        regErrorMsg.style.display='none';
+        if(!username){showRegErr('请输入游戏名称');return;}
+        if(username.length<2){showRegErr('游戏名称至少2个字符');return;}
+        if(!password){showRegErr('请输入密码');return;}
+        if(password.length<4){showRegErr('密码至少4个字符');return;}
+        if(password!==password2){showRegErr('两次密码输入不一致');return;}
+        try{
+            registerBtn.textContent='注册中...';
+            registerBtn.disabled=true;
+            var res=await fetch('/api/auth',{
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({action:'register',username:username,password:password})
             });
-
-            var data = await res.json();
-
-            if (res.ok && data.ok) {
-                regErrorMsg.style.display = 'none';
+            var data=await res.json();
+            if(res.ok&&data.ok){
+                regErrorMsg.style.display='none';
                 registerModal.classList.remove('show');
-
-                usernameInput.value = username;
-                pwdInput.value = password;
-                rememberMe.checked = true;
-
-                errorMsg.style.display = 'block';
-                errorMsg.style.color = '#0f9d58';
-                errorMsg.style.background = '#e6f7ed';
-                errorMsg.innerText = '✅ 注册成功！请点击登录';
-
-                setTimeout(function() {
-                    errorMsg.style.display = 'none';
-                    errorMsg.style.color = '#ea4335';
-                    errorMsg.style.background = '#fef0ef';
-                }, 4000);
-            } else {
-                showRegErr(data.msg || '注册失败');
-            }
-        } catch (err) {
-            showRegErr('网络请求失败，请稍后重试');
-            console.error(err);
-        } finally {
-            registerBtn.textContent = '立即注册';
-            registerBtn.disabled = false;
-        }
+                usernameInput.value=username;
+                pwdInput.value=password;
+                rememberMe.checked=true;
+                errorMsg.style.display='block';
+                errorMsg.style.color='#0f9d58';
+                errorMsg.style.background='#e6f7ed';
+                errorMsg.innerText='注册成功！请点击登录';
+                setTimeout(function(){errorMsg.style.display='none';errorMsg.style.color='#ea4335';errorMsg.style.background='#fef0ef';},4000);
+            }else{showRegErr(data.msg||'注册失败');}
+        }catch(err){showRegErr('网络请求失败，请稍后重试');console.error(err);}
+        finally{registerBtn.textContent='立即注册';registerBtn.disabled=false;}
     }
 
-    function showRegErr(text) {
-        regErrorMsg.innerText = text;
-        regErrorMsg.style.display = 'block';
-    }
+    function showRegErr(text){regErrorMsg.innerText=text;regErrorMsg.style.display='block';}
 
-    // ===== Service Worker 注册 =====
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
-            .catch(function(err) {
-                console.warn('SW注册失败', err);
-            });
-    }
+    if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js').catch(function(err){console.warn('SW注册失败',err);});}
 </script>
 
 </body>
