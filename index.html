@@ -8,13 +8,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
-    
-    <!-- vConsole 调试工具（手机端可查看控制台和网络请求） -->
-    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-    <script>
-        // 初始化 vConsole（手机右下角会出现绿色按钮）
-        var vConsole = new window.VConsole();
-    </script>
 
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", system-ui, sans-serif; }
@@ -186,7 +179,7 @@
                     localStorage.setItem('loginUser', username);
                     localStorage.setItem('userRole', data.role || '队员');
                     localStorage.setItem('token', data.token || '');
-                    // ✅ 修改：跳转到 /member 而非 member.html
+                    // 修改：跳转到 /member
                     window.location.href = 'member';
                 } else {
                     showErr(data.msg || '登录失败');
