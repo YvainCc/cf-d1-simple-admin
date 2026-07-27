@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DMN 战队管理系统</title>
+    <title>DMN 战队管理系统 - 登录</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -56,214 +56,198 @@
             .row-remember label { color:#b8c2cc; }
             .row-remember .link-btn { color:#c9a84c; }
             .login-btn { background:#c9a84c; color:#1a1a2e; box-shadow:0 4px 14px rgba(201,168,76,0.30); }
-            .err-text { background:#3d1a1a; color:#f5a0a0; }
-            .footer-note { color:#6e7a8a; }
-            .modal-overlay { background:rgba(0,0,0,0.7); }
-            .modal-box { background:#1a2430; }
+            .modal-box { background:#1a2430; color:#f0f2f5; }
             .modal-title { color:#f0f2f5; }
             .modal-sub { color:#8e98a3; }
             .modal-box .item input { background:#111a24; border-color:#2a3342; color:#f0f2f5; }
-            .modal-box .item input:focus { border-color:#c9a84c; background:#1a2430; }
-            .modal-actions .btn-cancel { background:#2a3342; color:#b8c2cc; }
-            .modal-actions .btn-cancel:active { background:#3a4352; }
-            .modal-actions .btn-register { background:#c9a84c; color:#1a1a2e; }
-            .modal-err { color:#f5a0a0; }
+            .btn-cancel { background:#2a3342; color:#b8c2cc; }
         }
     </style>
 </head>
 <body>
-<div class="login-box">
-    <div class="login-title">D<span style="color:#c9a84c;">M</span>N</div>
-    <div class="login-sub">战队管理系统 · 队员登录</div>
-    <div class="item"><input type="text" id="username" placeholder="请输入账号" autocomplete="username"></div>
-    <div class="item"><input type="password" id="pwd" placeholder="请输入密码" autocomplete="current-password"></div>
-    <div class="row-remember">
-        <label><input type="checkbox" id="rememberMe"> 记住账号</label>
-        <button class="link-btn" id="showRegisterBtn">注册新账号 →</button>
-    </div>
-    <button class="login-btn" id="submitBtn">立即登录</button>
-    <div class="err-text" id="errorMsg"></div>
-    <div class="footer-note">使用 Cloudflare Pages 安全托管</div>
-</div>
+    <div class="login-box">
+        <div class="login-title">DMN<span>电竞</span></div>
+        <div class="login-sub">战队管理系统 · 登录</div>
 
-<div class="modal-overlay" id="registerModal">
-    <div class="modal-box">
-        <div class="modal-title">D<span style="color:#c9a84c;">M</span>N</div>
-        <div class="modal-sub">注册新账号</div>
-        <div class="item"><input type="text" id="regUsername" placeholder="请输入账号" autocomplete="off"></div>
-        <div class="item"><input type="password" id="regPwd" placeholder="请输入密码" autocomplete="off"></div>
-        <div class="item"><input type="password" id="regPwd2" placeholder="确认密码" autocomplete="off"></div>
-        <div class="modal-err" id="regErrorMsg"></div>
-        <div class="modal-actions">
-            <button class="btn-cancel" id="closeRegisterBtn">取消</button>
-            <button class="btn-register" id="registerBtn">立即注册</button>
+        <!-- 登录表单 -->
+        <div class="item">
+            <input type="text" id="username" placeholder="用户名 / 邮箱" autocomplete="username">
+        </div>
+        <div class="item">
+            <input type="password" id="password" placeholder="密码" autocomplete="current-password">
+        </div>
+        <div class="row-remember">
+            <label>
+                <input type="checkbox" id="rememberMe"> 记住登录
+            </label>
+            <button class="link-btn" type="button" onclick="alert('请联系管理员重置密码')">忘记密码?</button>
+        </div>
+        <button class="login-btn" id="loginBtn" onclick="handleLogin()">登 录</button>
+        <div class="err-text" id="loginError"></div>
+
+        <div style="text-align:center; margin-top:24px; font-size:14px; color:#6b7280;">
+            还没有账号？
+            <button class="link-btn" type="button" onclick="openRegisterModal()" style="font-size:14px;">立即注册</button>
+        </div>
+        <div class="footer-note">DMN 战队管理系统 · 让每一场战斗都被铭记</div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-box">
+            <div class="modal-title">创建<span>账号</span></div>
+            <div class="modal-sub">加入 DMN 公会，参与赛事</div>
+            <div class="item">
+                <input type="text" id="regUsername" placeholder="用户名">
+            </div>
+            <div class="item">
+                <input type="email" id="regEmail" placeholder="邮箱地址">
+            </div>
+            <div class="item">
+                <input type="password" id="regPassword" placeholder="密码（至少6位）">
+            </div>
+            <div class="item">
+                <input type="password" id="regPasswordConfirm" placeholder="确认密码">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeRegisterModal()">取消</button>
+                <button class="btn-register" id="registerBtn" onclick="handleRegister()">注册</button>
+            </div>
+            <div class="modal-err" id="registerError"></div>
         </div>
     </div>
-</div>
 
-<script>
-    (function() {
-        const usernameInput = document.getElementById('username');
-        const pwdInput = document.getElementById('pwd');
-        const submitBtn = document.getElementById('submitBtn');
-        const errorMsg = document.getElementById('errorMsg');
-        const rememberMe = document.getElementById('rememberMe');
-
-        const registerModal = document.getElementById('registerModal');
-        const showRegisterBtn = document.getElementById('showRegisterBtn');
-        const closeRegisterBtn = document.getElementById('closeRegisterBtn');
-        const registerBtn = document.getElementById('registerBtn');
-        const regUsername = document.getElementById('regUsername');
-        const regPwd = document.getElementById('regPwd');
-        const regPwd2 = document.getElementById('regPwd2');
-        const regErrorMsg = document.getElementById('regErrorMsg');
-
-        (function loadSaved() {
-            const saved = localStorage.getItem('rememberedUser');
-            if (saved) {
-                try {
-                    const data = JSON.parse(saved);
-                    usernameInput.value = data.username || '';
-                    pwdInput.value = data.password || '';
-                    rememberMe.checked = true;
-                } catch(e) {}
-            }
-        })();
-
-        async function loginSubmit() {
-            const username = usernameInput.value.trim();
-            const password = pwdInput.value.trim();
-            errorMsg.style.display = 'none';
-            errorMsg.style.color = '#ea4335';
-            errorMsg.style.background = '#fef0ef';
+    <script>
+        // ========== 登录处理 ==========
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorEl = document.getElementById('loginError');
+            const btn = document.getElementById('loginBtn');
 
             if (!username || !password) {
-                showErr('账号密码不能为空');
+                errorEl.style.display = 'block';
+                errorEl.textContent = '请输入用户名和密码';
                 return;
             }
 
-            submitBtn.textContent = '登录中...';
-            submitBtn.disabled = true;
+            // 禁用按钮防止重复提交
+            btn.disabled = true;
+            btn.textContent = '登录中...';
+            errorEl.style.display = 'none';
 
             try {
-                const res = await fetch('/api/auth', {
+                const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'login', username, password })
+                    body: JSON.stringify({ username, password })
                 });
-                const data = await res.json();
-                if (res.ok && data.ok) {
-                    if (rememberMe.checked) {
-                        localStorage.setItem('rememberedUser', JSON.stringify({ username, password }));
-                    } else {
-                        localStorage.removeItem('rememberedUser');
-                    }
-                    localStorage.setItem('loginUser', username);
-                    localStorage.setItem('userRole', data.role || '队员');
-                    localStorage.setItem('token', data.token || '');
-                    window.location.href = 'member';
-                } else {
-                    showErr(data.msg || '登录失败');
+
+                const data = await response.json();
+
+                if (!response.ok || !data.token) {
+                    throw new Error(data.message || '登录失败，请检查用户名和密码');
                 }
+
+                // ✅ 登录成功：存储 token
+                localStorage.setItem('dmn_token', data.token);
+
+                // 如果勾选了“记住登录”，也可以存一个标记（可选）
+                if (document.getElementById('rememberMe').checked) {
+                    localStorage.setItem('dmn_remember', 'true');
+                }
+
+                // ✅ 跳转到首页
+                window.location.href = '/';
+
             } catch (err) {
-                showErr('网络请求异常: ' + err.message);
-                console.error(err);
+                errorEl.style.display = 'block';
+                errorEl.textContent = err.message || '网络错误，请稍后重试';
             } finally {
-                submitBtn.textContent = '立即登录';
-                submitBtn.disabled = false;
+                btn.disabled = false;
+                btn.textContent = '登 录';
             }
         }
 
-        function showErr(text) {
-            errorMsg.innerText = text;
-            errorMsg.style.display = 'block';
+        // 回车键快捷登录
+        document.getElementById('password').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // ========== 注册处理 ==========
+        function openRegisterModal() {
+            document.getElementById('registerModal').classList.add('show');
+            document.getElementById('registerError').style.display = 'none';
         }
 
-        submitBtn.addEventListener('click', loginSubmit);
-        document.addEventListener('keydown', (e) => { if (e.key === 'Enter') loginSubmit(); });
+        function closeRegisterModal() {
+            document.getElementById('registerModal').classList.remove('show');
+        }
 
-        showRegisterBtn.addEventListener('click', () => {
-            registerModal.classList.add('show');
-            regUsername.value = '';
-            regPwd.value = '';
-            regPwd2.value = '';
-            regErrorMsg.style.display = 'none';
-            regUsername.focus();
-        });
+        async function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const passwordConfirm = document.getElementById('regPasswordConfirm').value;
+            const errorEl = document.getElementById('registerError');
+            const btn = document.getElementById('registerBtn');
 
-        closeRegisterBtn.addEventListener('click', () => {
-            registerModal.classList.remove('show');
-        });
-        registerModal.addEventListener('click', (e) => {
-            if (e.target === registerModal) registerModal.classList.remove('show');
-        });
+            // 简单校验
+            if (!username || !email || !password) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = '请填写所有字段';
+                return;
+            }
+            if (password !== passwordConfirm) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = '两次密码输入不一致';
+                return;
+            }
+            if (password.length < 6) {
+                errorEl.style.display = 'block';
+                errorEl.textContent = '密码至少需要6位';
+                return;
+            }
 
-        async function registerSubmit() {
-            const username = regUsername.value.trim();
-            const password = regPwd.value.trim();
-            const password2 = regPwd2.value.trim();
-            regErrorMsg.style.display = 'none';
-
-            if (!username) { showRegErr('请输入账号'); return; }
-            if (username.length < 2) { showRegErr('账号至少2个字符'); return; }
-            if (!password) { showRegErr('请输入密码'); return; }
-            if (password.length < 4) { showRegErr('密码至少4个字符'); return; }
-            if (password !== password2) { showRegErr('两次密码输入不一致'); return; }
+            btn.disabled = true;
+            btn.textContent = '注册中...';
+            errorEl.style.display = 'none';
 
             try {
-                registerBtn.textContent = '注册中...';
-                registerBtn.disabled = true;
-                const res = await fetch('/api/auth', {
+                const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'register', username, password })
+                    body: JSON.stringify({ username, email, password })
                 });
-                const data = await res.json();
-                if (res.ok && data.ok) {
-                    registerModal.classList.remove('show');
-                    usernameInput.value = username;
-                    pwdInput.value = password;
-                    rememberMe.checked = true;
-                    errorMsg.style.display = 'block';
-                    errorMsg.style.color = '#0f9d58';
-                    errorMsg.style.background = '#e6f7ed';
-                    errorMsg.innerText = '✅ 注册成功！请点击登录';
-                    setTimeout(() => {
-                        errorMsg.style.display = 'none';
-                        errorMsg.style.color = '#ea4335';
-                        errorMsg.style.background = '#fef0ef';
-                    }, 4000);
-                } else {
-                    showRegErr(data.msg || '注册失败');
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || '注册失败，请稍后重试');
                 }
+
+                // 注册成功：自动登录（如果后端返回 token）或提示用户
+                if (data.token) {
+                    localStorage.setItem('dmn_token', data.token);
+                    window.location.href = '/';
+                } else {
+                    alert('注册成功，请登录');
+                    closeRegisterModal();
+                }
+
             } catch (err) {
-                showRegErr('网络请求异常: ' + err.message);
-                console.error(err);
+                errorEl.style.display = 'block';
+                errorEl.textContent = err.message || '网络错误';
             } finally {
-                registerBtn.textContent = '立即注册';
-                registerBtn.disabled = false;
+                btn.disabled = false;
+                btn.textContent = '注册';
             }
         }
 
-        function showRegErr(text) {
-            regErrorMsg.innerText = text;
-            regErrorMsg.style.display = 'block';
-        }
-
-        registerBtn.addEventListener('click', registerSubmit);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && registerModal.classList.contains('show')) {
-                registerSubmit();
-            }
+        // 点击模态框外部关闭
+        document.getElementById('registerModal').addEventListener('click', function(e) {
+            if (e.target === this) closeRegisterModal();
         });
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', function() {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .catch(err => console.warn('SW注册失败', err));
-            });
-        }
-    })();
-</script>
+    </script>
 </body>
 </html>
