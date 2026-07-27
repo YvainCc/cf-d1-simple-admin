@@ -34,9 +34,10 @@
     <p>导入人员数据（CSV 格式，UTF-8 编码）</p>
 
     <div class="upload-area" id="dropZone">
+        <!-- 修改 accept 为 .csv -->
         <input type="file" id="fileInput" accept=".csv">
         <div class="label">📁 点击选择 CSV 文件</div>
-        <div class="hint">表头必须包含：玩家账号ID, 玩家名称, 历史名称（可选）</div>
+        <div class="hint">表头必须包含：玩家名称, 历史名称（可选）</div>
     </div>
 
     <button class="btn-upload" id="uploadBtn" disabled>上传并导入</button>
