@@ -9,7 +9,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#1a2a48">
     <style>
-        /* ===== 与 member.html 完全一致 ===== */
+        /* 与 member.html 完全一致的样式，此处以节约篇幅省略 */
+        /* 实际部署时复制 member.html 的完整样式 */
         :root {
             --primary: #1a2a48;
             --gold: #c9a84c;
@@ -54,8 +55,6 @@
         .nav-actions .icon-btn:active { transform:scale(0.92); }
         .badge-dot { position:absolute; top:0; right:0; width:8px; height:8px; background:#ea4335; border-radius:50%; border:2px solid #fff; }
         .container { max-width:480px; margin:0 auto; padding:16px 16px 0; }
-
-        /* ===== 进度条 ===== */
         .progress-card {
             background:var(--card-bg); border-radius:var(--radius-card); padding:16px 20px;
             box-shadow:var(--shadow-sm); margin-bottom:14px;
@@ -63,12 +62,8 @@
         .progress-card .label { font-size:14px; color:var(--text-muted); display:flex; justify-content:space-between; }
         .progress-card .label span { font-weight:600; color:var(--text-main); }
         .progress-bar { width:100%; height:8px; background:var(--border-light); border-radius:4px; margin-top:8px; overflow:hidden; }
-        .progress-bar .fill { height:100%; background:linear-gradient(90deg, var(--gold), var(--primary)); border-radius:4px; transition:width 0.6s ease; width:40%; }
-
-        /* ===== 车位网格 ===== */
-        .parking-grid {
-            display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:14px;
-        }
+        .progress-bar .fill { height:100%; background:linear-gradient(90deg, var(--gold), var(--primary)); border-radius:4px; transition:width 0.6s ease; width:0%; }
+        .parking-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:14px; }
         .parking-slot {
             aspect-ratio:1/1; border-radius:var(--radius-sm); display:flex; flex-direction:column;
             align-items:center; justify-content:center; font-size:11px; font-weight:600;
@@ -82,8 +77,6 @@
         .parking-slot.pending { border-color:#fbad39; background:#fff8e6; color:#856404; }
         .parking-slot.approved { border-color:#0f9d58; background:#e6f9ed; color:#0f9d58; }
         .parking-slot.rejected { border-color:#ea4335; background:#fef0ef; color:#ea4335; }
-
-        /* ===== 状态卡 ===== */
         .status-card {
             background:var(--card-bg); border-radius:var(--radius-card); padding:16px 20px;
             box-shadow:var(--shadow-sm); margin-bottom:14px;
@@ -96,9 +89,8 @@
             box-shadow:0 4px 14px rgba(201,168,76,0.30); transition:0.2s;
         }
         .status-card .action-btn:active { transform:scale(0.97); opacity:0.85; }
+        .status-card .action-btn:disabled { opacity:0.5; cursor:not-allowed; }
         .status-card .action-btn.secondary { background:var(--primary); color:#fff; box-shadow:0 4px 14px rgba(26,42,72,0.20); }
-
-        /* ===== 底部导航 ===== */
         .bottom-nav {
             position:fixed; bottom:0; left:0; right:0; background:var(--card-bg); border-top:1px solid var(--border-light);
             display:flex; justify-content:space-around; padding:6px 0 calc(6px + var(--safe-bottom)); z-index:100;
@@ -111,7 +103,23 @@
         .bottom-nav a .nav-icon { font-size:22px; line-height:1.2; }
         .bottom-nav a.active { color:var(--gold); font-weight:600; }
         .bottom-nav a:active { transform:scale(0.92); }
-
+        .modal-overlay {
+            position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5);
+            display:none; justify-content:center; align-items:center; z-index:200;
+            padding:20px;
+        }
+        .modal-overlay.show { display:flex; }
+        .modal-box {
+            background:var(--card-bg); border-radius:var(--radius-card); padding:24px 20px;
+            max-width:400px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box .modal-title { font-size:18px; font-weight:600; margin-bottom:16px; color:var(--text-main); }
+        .modal-box .modal-input { width:100%; padding:12px 14px; border:1.5px solid var(--border-light); border-radius:var(--radius-sm); font-size:15px; margin-bottom:12px; background:var(--bg); color:var(--text-main); }
+        .modal-box .modal-input:focus { border-color:var(--gold); outline:none; }
+        .modal-box .modal-btns { display:flex; gap:12px; }
+        .modal-box .modal-btns button { flex:1; padding:12px; border:none; border-radius:var(--radius-sm); font-size:15px; font-weight:600; cursor:pointer; }
+        .modal-box .modal-btns .btn-cancel { background:var(--border-light); color:var(--text-muted); }
+        .modal-box .modal-btns .btn-confirm { background:var(--gold); color:#1a1a2e; }
         @media (prefers-color-scheme: dark) {
             :root { --bg:#0f1419; --card-bg:#1a2430; --text-main:#f0f2f5; --text-secondary:#b8c2cc; --text-muted:#6e7a8a; --border-light:#2a3342; --shadow-sm:0 2px 8px rgba(0,0,0,0.4); }
             .navbar { background:rgba(26,36,48,0.92); border-bottom-color:var(--border-light); }
@@ -124,10 +132,12 @@
             .bottom-nav a.active { color:var(--gold); }
             .progress-card .label span { color:#f0f2f5; }
             .status-card .action-btn.secondary { background:var(--gold); color:#1a1a2e; }
+            .modal-box { background:var(--card-bg); }
         }
     </style>
 </head>
 <body>
+
     <header class="navbar">
         <div class="logo">D.<span>M</span>.N</div>
         <div class="nav-actions">
@@ -137,20 +147,19 @@
     </header>
 
     <main class="container">
-        <!-- 进度 -->
         <div class="progress-card">
-            <div class="label"><span>🏁 报名进度</span><span id="progressText">8 / 20 队</span></div>
-            <div class="progress-bar"><div class="fill" id="progressFill" style="width:40%;"></div></div>
+            <div class="label"><span>🏁 报名进度</span><span id="progressText">加载中...</span></div>
+            <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%;"></div></div>
         </div>
 
-        <!-- 车位 -->
-        <div class="parking-grid" id="parkingGrid"></div>
+        <div class="parking-grid" id="parkingGrid">
+            <!-- JS 动态生成 -->
+        </div>
 
-        <!-- 状态卡 -->
         <div class="status-card">
             <div class="title" id="statusTitle">📝 我的报名状态</div>
-            <div class="desc" id="statusDesc">您尚未创建或加入战队，点击下方按钮开始</div>
-            <button class="action-btn" id="mainActionBtn">➕ 创建战队</button>
+            <div class="desc" id="statusDesc">加载中...</div>
+            <button class="action-btn" id="mainActionBtn">加载中...</button>
         </div>
     </main>
 
@@ -162,48 +171,345 @@
         <a href="profile.html"><span class="nav-icon">👤</span>我的</a>
     </nav>
 
-    <script>
-        const totalSlots = 20;
-        let slots = [];
-        function loadSlots() {
-            const saved = localStorage.getItem('parkingSlots');
-            if (saved) { slots = JSON.parse(saved); }
-            else { slots = Array(totalSlots).fill(0); for(let i=0;i<8;i++) slots[i]=1; slots[8]=2; slots[9]=2; slots[10]=3; localStorage.setItem('parkingSlots', JSON.stringify(slots)); }
-            return slots;
-        }
-        function renderParking() {
-            const grid = document.getElementById('parkingGrid');
-            const statusMap = { 0:{label:'空位',cls:'available',icon:'⚪'}, 1:{label:'已报',cls:'approved',icon:'✅'}, 2:{label:'待审',cls:'pending',icon:'⏳'}, 3:{label:'驳回',cls:'rejected',icon:'❌'} };
-            let html = '';
-            slots.forEach((status, index) => {
-                const info = statusMap[status] || statusMap[0];
-                html += `<div class="parking-slot ${info.cls}" onclick="alert('车位 ${index+1}: ${info.label}')"><span class="num">${index+1}</span><span class="status-icon">${info.icon}</span></div>`;
-            });
-            grid.innerHTML = html;
-            const approved = slots.filter(s => s === 1).length;
-            const pending = slots.filter(s => s === 2).length;
-            document.getElementById('progressText').textContent = `${approved + pending} / ${totalSlots} 队`;
-            document.getElementById('progressFill').style.width = `${((approved + pending) / totalSlots) * 100}%`;
-        }
-        loadSlots(); renderParking();
+    <!-- 创建战队弹窗 -->
+    <div class="modal-overlay" id="createTeamModal">
+        <div class="modal-box">
+            <div class="modal-title">🏗️ 创建战队</div>
+            <input class="modal-input" id="teamNameInput" placeholder="请输入战队名称（唯一）">
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-confirm" id="confirmCreateBtn">创建</button>
+            </div>
+        </div>
+    </div>
 
-        const loginUser = localStorage.getItem('loginUser');
-        document.getElementById('mainActionBtn').addEventListener('click', function() {
-            if (this.textContent.includes('创建')) {
-                const name = prompt('请输入战队名称：');
-                if (name) {
-                    localStorage.setItem('userTeam', name);
-                    document.getElementById('statusTitle').textContent = `✅ 已报名：${name}`;
-                    document.getElementById('statusDesc').textContent = '等待管理员审核中，请耐心等待';
-                    this.textContent = '📋 查看报名详情';
-                    this.className = 'action-btn secondary';
-                    alert(`战队 "${name}" 创建成功！请等待审核`);
-                }
-            } else {
-                alert('查看报名详情功能开发中...');
+    <!-- 加入战队弹窗 -->
+    <div class="modal-overlay" id="joinTeamModal">
+        <div class="modal-box">
+            <div class="modal-title">🔑 加入战队</div>
+            <input class="modal-input" id="inviteCodeInput" placeholder="请输入6位邀请码">
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn-confirm" id="confirmJoinBtn">加入</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================================
+        // 全局变量
+        // =============================================================
+        let myTeamId = null;
+        let myTeamName = null;
+        let myRole = null;
+        let isCaptain = false;
+        let currentSeason = '1';
+
+        // =============================================================
+        // 页面初始化
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
             }
+
+            loadParking();
+            loadMyStatus();
+
+            // 主按钮点击
+            document.getElementById('mainActionBtn').addEventListener('click', handleMainAction);
         });
-        if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/service-worker.js'); }
+
+        // =============================================================
+        // 1. 加载车位状态
+        // =============================================================
+        async function loadParking() {
+            try {
+                const res = await fetch(`/api/registration/parking?season=${currentSeason}`);
+                const data = await res.json();
+
+                if (data.ok) {
+                    const grid = document.getElementById('parkingGrid');
+                    let html = '';
+                    data.slots.forEach((slot, index) => {
+                        const statusMap = {
+                            'available': { cls: 'available', icon: '⚪' },
+                            'pending': { cls: 'pending', icon: '⏳' },
+                            'approved': { cls: 'approved', icon: '✅' },
+                            'rejected': { cls: 'rejected', icon: '❌' }
+                        };
+                        const info = statusMap[slot.status] || statusMap['available'];
+                        const label = slot.status === 'available' ? '空位' :
+                                      slot.status === 'pending' ? '待审' :
+                                      slot.status === 'approved' ? '已报' : '驳回';
+                        html += `
+                            <div class="parking-slot ${info.cls}" onclick="alert('车位 ${index+1}: ${label}${slot.teamName ? ' - ' + slot.teamName : ''}')">
+                                <span class="num">${index+1}</span>
+                                <span class="status-icon">${info.icon}</span>
+                            </div>
+                        `;
+                    });
+                    grid.innerHTML = html;
+
+                    document.getElementById('progressText').textContent =
+                        `${data.filled} / ${data.total} 队`;
+                    document.getElementById('progressFill').style.width =
+                        `${(data.filled / data.total) * 100}%`;
+                }
+            } catch (err) {
+                console.error('加载车位失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 2. 加载我的报名状态
+        // =============================================================
+        async function loadMyStatus() {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('/api/registration/status', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+
+                const title = document.getElementById('statusTitle');
+                const desc = document.getElementById('statusDesc');
+                const btn = document.getElementById('mainActionBtn');
+
+                if (data.ok && data.hasTeam) {
+                    myTeamId = data.teamId;
+                    myTeamName = data.teamName;
+                    myRole = data.role;
+                    isCaptain = data.isCaptain;
+
+                    title.textContent = `🏠 ${data.teamName}`;
+
+                    if (data.registration) {
+                        if (data.registration.status === 'pending') {
+                            desc.textContent = '⏳ 报名已提交，等待管理员审核';
+                            btn.textContent = '📋 查看详情';
+                            btn.className = 'action-btn secondary';
+                            btn.disabled = false;
+                        } else if (data.registration.status === 'approved') {
+                            desc.textContent = '✅ 报名已通过！等待开赛';
+                            btn.textContent = '📋 查看详情';
+                            btn.className = 'action-btn secondary';
+                            btn.disabled = false;
+                        } else if (data.registration.status === 'rejected') {
+                            desc.textContent = `❌ 报名被驳回：${data.registration.admin_comment || '请联系管理员'}`;
+                            btn.textContent = '🔄 重新报名';
+                            btn.className = 'action-btn';
+                            btn.disabled = false;
+                        }
+                    } else {
+                        if (isCaptain) {
+                            desc.textContent = `队长 · 请确认4名首发阵容后提交报名`;
+                            btn.textContent = '📝 确认阵容并提交';
+                            btn.className = 'action-btn';
+                            btn.disabled = false;
+                        } else {
+                            desc.textContent = `${myRole} · 等待队长确认阵容`;
+                            btn.textContent = '👥 查看战队';
+                            btn.className = 'action-btn secondary';
+                            btn.disabled = false;
+                        }
+                    }
+                } else {
+                    title.textContent = '📝 我的报名状态';
+                    desc.textContent = '您尚未创建或加入战队，点击下方按钮开始';
+                    btn.textContent = '➕ 创建战队 / 加入战队';
+                    btn.className = 'action-btn';
+                    btn.disabled = false;
+                    myTeamId = null;
+                }
+            } catch (err) {
+                console.error('加载状态失败:', err);
+            }
+        }
+
+        // =============================================================
+        // 3. 主按钮操作
+        // =============================================================
+        function handleMainAction() {
+            const btn = document.getElementById('mainActionBtn');
+            const text = btn.textContent;
+
+            if (text.includes('创建战队') || text.includes('加入战队')) {
+                // 显示选择弹窗
+                const choice = confirm('点击确定创建战队，取消则加入战队');
+                if (choice) {
+                    showCreateTeamModal();
+                } else {
+                    showJoinTeamModal();
+                }
+            } else if (text.includes('确认阵容')) {
+                // 跳转到阵容确认页面（简化：弹窗提示）
+                alert('请到战队管理页面确认4名首发阵容');
+            } else if (text.includes('查看详情') || text.includes('查看战队')) {
+                alert('战队详情功能开发中...');
+            } else if (text.includes('重新报名')) {
+                if (confirm('确认重新提交报名申请吗？')) {
+                    submitRegistration();
+                }
+            }
+        }
+
+        // =============================================================
+        // 4. 创建战队
+        // =============================================================
+        function showCreateTeamModal() {
+            document.getElementById('createTeamModal').classList.add('show');
+            document.getElementById('teamNameInput').value = '';
+            document.getElementById('teamNameInput').focus();
+        }
+
+        document.getElementById('confirmCreateBtn').addEventListener('click', async function() {
+            const name = document.getElementById('teamNameInput').value.trim();
+            if (!name) {
+                alert('请输入战队名称');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            this.disabled = true;
+            this.textContent = '创建中...';
+
+            try {
+                const res = await fetch('/api/registration/team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ teamName: name, seasonId: currentSeason })
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    alert(`✅ 战队 "${name}" 创建成功！\n邀请码：${data.inviteCode}\n请将邀请码分享给队友加入`);
+                    closeModal();
+                    loadMyStatus();
+                    loadParking();
+                } else {
+                    alert(`❌ 创建失败：${data.msg}`);
+                }
+            } catch (err) {
+                alert('网络请求失败，请稍后重试');
+                console.error(err);
+            }
+
+            this.disabled = false;
+            this.textContent = '创建';
+        });
+
+        // =============================================================
+        // 5. 加入战队
+        // =============================================================
+        function showJoinTeamModal() {
+            document.getElementById('joinTeamModal').classList.add('show');
+            document.getElementById('inviteCodeInput').value = '';
+            document.getElementById('inviteCodeInput').focus();
+        }
+
+        document.getElementById('confirmJoinBtn').addEventListener('click', async function() {
+            const code = document.getElementById('inviteCodeInput').value.trim().toUpperCase();
+            if (!code || code.length !== 6) {
+                alert('请输入6位邀请码');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            this.disabled = true;
+            this.textContent = '加入中...';
+
+            try {
+                const res = await fetch('/api/registration/join', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ inviteCode: code })
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    alert(`✅ 成功加入 ${data.teamName}！`);
+                    closeModal();
+                    loadMyStatus();
+                    loadParking();
+                } else {
+                    alert(`❌ 加入失败：${data.msg}`);
+                }
+            } catch (err) {
+                alert('网络请求失败，请稍后重试');
+                console.error(err);
+            }
+
+            this.disabled = false;
+            this.textContent = '加入';
+        });
+
+        // =============================================================
+        // 6. 提交报名
+        // =============================================================
+        async function submitRegistration() {
+            const token = localStorage.getItem('token');
+            const btn = document.getElementById('mainActionBtn');
+            btn.disabled = true;
+            btn.textContent = '提交中...';
+
+            try {
+                const res = await fetch('/api/registration/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ teamId: myTeamId })
+                });
+                const data = await res.json();
+
+                if (data.ok) {
+                    alert(`✅ 报名已提交！\n奢侈税：${data.tax.taxAmount} 元\n请等待管理员审核`);
+                    loadMyStatus();
+                    loadParking();
+                } else {
+                    alert(`❌ 提交失败：${data.msg}`);
+                }
+            } catch (err) {
+                alert('网络请求失败，请稍后重试');
+                console.error(err);
+            }
+
+            btn.disabled = false;
+            btn.textContent = '📋 查看详情';
+        }
+
+        // =============================================================
+        // 7. 弹窗控制
+        // =============================================================
+        function closeModal() {
+            document.querySelectorAll('.modal-overlay').forEach(el => {
+                el.classList.remove('show');
+            });
+        }
+
+        // 点击遮罩关闭
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            el.addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+        });
+
+        // =============================================================
+        // 8. PWA
+        // =============================================================
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js');
+        }
     </script>
 </body>
 </html>
