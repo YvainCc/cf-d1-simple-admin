@@ -69,9 +69,8 @@
         <div class="login-title">DMN<span>电竞</span></div>
         <div class="login-sub">战队管理系统 · 登录</div>
 
-        <!-- 登录表单 -->
         <div class="item">
-            <input type="text" id="username" placeholder="用户名 / 邮箱" autocomplete="username">
+            <input type="text" id="username" placeholder="游戏名称" autocomplete="username">
         </div>
         <div class="item">
             <input type="password" id="password" placeholder="密码" autocomplete="current-password">
@@ -98,7 +97,7 @@
             <div class="modal-title">创建<span>账号</span></div>
             <div class="modal-sub">加入 DMN 公会，参与赛事</div>
             <div class="item">
-                <input type="text" id="regUsername" placeholder="用户名">
+                <input type="text" id="regUsername" placeholder="游戏名称">
             </div>
             <div class="item">
                 <input type="email" id="regEmail" placeholder="邮箱地址">
@@ -127,11 +126,10 @@
 
             if (!username || !password) {
                 errorEl.style.display = 'block';
-                errorEl.textContent = '请输入用户名和密码';
+                errorEl.textContent = '请输入游戏名称和密码';
                 return;
             }
 
-            // 禁用按钮防止重复提交
             btn.disabled = true;
             btn.textContent = '登录中...';
             errorEl.style.display = 'none';
@@ -140,24 +138,21 @@
                 const response = await fetch('/api/auth', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    // 发送中文键名，匹配数据库字段
+                    body: JSON.stringify({ "游戏名称": username, "密码": password })
                 });
 
                 const data = await response.json();
 
                 if (!response.ok || !data.token) {
-                    throw new Error(data.message || '登录失败，请检查用户名和密码');
+                    throw new Error(data.message || '登录失败，请检查游戏名称和密码');
                 }
 
-                // ✅ 登录成功：存储 token
+                // 存储 token
                 localStorage.setItem('dmn_token', data.token);
-
-                // 如果勾选了“记住登录”，也可以存一个标记（可选）
                 if (document.getElementById('rememberMe').checked) {
                     localStorage.setItem('dmn_remember', 'true');
                 }
-
-                // ✅ 跳转到首页
                 window.location.href = '/';
 
             } catch (err) {
@@ -169,7 +164,6 @@
             }
         }
 
-        // 回车键快捷登录
         document.getElementById('password').addEventListener('keydown', function(e) {
             if (e.key === 'Enter') handleLogin();
         });
@@ -192,7 +186,6 @@
             const errorEl = document.getElementById('registerError');
             const btn = document.getElementById('registerBtn');
 
-            // 简单校验
             if (!username || !email || !password) {
                 errorEl.style.display = 'block';
                 errorEl.textContent = '请填写所有字段';
@@ -217,7 +210,8 @@
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, email, password })
+                    // 发送中文字段名，后端按此接收并填充其他默认值
+                    body: JSON.stringify({ "游戏名称": username, "邮箱": email, "密码": password })
                 });
 
                 const data = await response.json();
@@ -226,7 +220,6 @@
                     throw new Error(data.message || '注册失败，请稍后重试');
                 }
 
-                // 注册成功：自动登录（如果后端返回 token）或提示用户
                 if (data.token) {
                     localStorage.setItem('dmn_token', data.token);
                     window.location.href = '/';
@@ -244,7 +237,6 @@
             }
         }
 
-        // 点击模态框外部关闭
         document.getElementById('registerModal').addEventListener('click', function(e) {
             if (e.target === this) closeRegisterModal();
         });
