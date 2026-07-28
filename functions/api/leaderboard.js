@@ -13,7 +13,7 @@ export async function onRequest(context) {
         ).all();
 
         if (!players.results.length) {
-            return new Response(JSON.stringify({ data: [] }), {
+            return new Response(JSON.stringify({ ok: true, data: [] }), {
                 headers: { 'Content-Type': 'application/json' }
             });
         }
@@ -51,6 +51,7 @@ export async function onRequest(context) {
             const 总存活时间秒 = result.总存活时间 || 0;
             const 死亡 = result.死亡 || 0;
 
+            // 注意：此处死亡判断可能不准确，但按您逻辑保留
             const kd = 死亡 > 0 ? (击杀 / 死亡) : 击杀;
             const avgSurvivalMinutes = 场次 > 0 ? (总存活时间秒 / 场次 / 60) : 0;
 
@@ -83,13 +84,14 @@ export async function onRequest(context) {
             排名: index + 1
         }));
 
-        return new Response(JSON.stringify({ data: ranked }), {
+        // ✅ 关键：增加 ok: true
+        return new Response(JSON.stringify({ ok: true, data: ranked }), {
             headers: { 'Content-Type': 'application/json' }
         });
 
     } catch (err) {
         console.error('Leaderboard API error:', err);
-        return new Response(JSON.stringify({ error: err.message }), {
+        return new Response(JSON.stringify({ ok: false, error: err.message }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });
