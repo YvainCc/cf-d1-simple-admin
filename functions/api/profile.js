@@ -3,7 +3,7 @@ export async function onRequest(context) {
     const { request, env } = context;
     const url = new URL(request.url);
     const username = url.searchParams.get('username');
-    const season = url.searchParams.get('season') || 'all'; // 默认全部赛季
+    const season = url.searchParams.get('season') || 'all';
 
     if (!username) {
         return new Response(JSON.stringify({ error: '缺少用户名' }), { status: 400 });
@@ -28,7 +28,7 @@ export async function onRequest(context) {
             'SELECT 游戏名称 FROM 人员表 WHERE 账号ID = ?'
         ).bind(accountId).all();
 
-        const allNames = nameRows.results.map(row => row.游戏名称);
+        let allNames = nameRows.results.map(row => row.游戏名称);
         if (allNames.length === 0) allNames = [username];
 
         // 3. 构建查询
@@ -64,7 +64,7 @@ export async function onRequest(context) {
 
         const kd = (totalMatches - totalWins) > 0 ? (totalKills / (totalMatches - totalWins)) : totalKills;
         const top10Rate = totalMatches > 0 ? (totalTop10 / totalMatches) * 100 : 0;
-        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0; // 分钟
+        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0;
         const avgKills = totalMatches > 0 ? (totalKills / totalMatches) : 0;
         const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
 
