@@ -28,7 +28,8 @@ export async function onRequest(context) {
             'SELECT 游戏名称 FROM 人员表 WHERE 账号ID = ?'
         ).bind(accountId).all();
 
-        const allNames = nameRows.results.map(row => row.游戏名称);
+        // ✅ 修复：使用 let 而不是 const
+        let allNames = nameRows.results.map(row => row.游戏名称);
         if (allNames.length === 0) allNames = [username];
 
         // 3. 构建查询参数
@@ -57,11 +58,9 @@ export async function onRequest(context) {
         const totalDamage = result.总伤害 || 0;
         const totalSurvival = result.总生存时间 || 0;
 
-        // KD = 总击杀 / (总场次 - 吃鸡数) ，若分母为0则直接取总击杀
         const kd = (totalMatches - totalWins) > 0 ? (totalKills / (totalMatches - totalWins)) : totalKills;
-
         const top10Rate = totalMatches > 0 ? (totalTop10 / totalMatches) * 100 : 0;
-        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0; // 转分钟
+        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0;
         const avgKills = totalMatches > 0 ? (totalKills / totalMatches) : 0;
         const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
 
@@ -72,7 +71,6 @@ export async function onRequest(context) {
         ).bind(...params).first();
         const maxKills = maxKillRow.最高击杀 || 0;
 
-        // 6. 返回数据（字段名与前端对应）
         return new Response(JSON.stringify({
             ok: true,
             data: {
