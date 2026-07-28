@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1426">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
@@ -293,54 +294,145 @@
             color: #8e8e93;
         }
 
-        /* ===== 登录弹窗 ===== */
-        .login-alert-overlay {
+        /* ===== 全局自定义弹框 ===== */
+        .dialog-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.35);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             padding: 20px;
+            animation: fadeInOverlay 0.3s ease;
         }
-        .login-alert-box {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .dialog-box {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-radius: 32px;
             padding: 32px 24px 28px;
-            max-width: 340px;
+            max-width: 360px;
             width: 100%;
-            text-align: center;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.15);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.2);
             border: 0.5px solid rgba(255,255,255,0.5);
-            animation: alertFade 0.35s ease;
+            animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-align: center;
         }
-        @keyframes alertFade {
-            from { opacity:0; transform:scale(0.92); }
-            to { opacity:1; transform:scale(1); }
+        @keyframes slideUp {
+            from { transform: translateY(20px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        .alert-icon { font-size: 44px; margin-bottom: 10px; }
-        .alert-title { font-size: 19px; font-weight: 700; color: #0b1426; }
-        .alert-msg { font-size: 15px; color: #6c6c70; margin: 6px 0 22px; line-height: 1.4; }
-        .alert-actions { display: flex; gap: 12px; }
-        .alert-btn {
-            flex: 1; height: 48px; border-radius: 20px;
-            font-size: 16px; font-weight: 500; border: none;
-            cursor: pointer; transition: opacity 0.2s;
+        .dialog-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
         }
-        .alert-btn:active { opacity: 0.6; }
-        .alert-btn-cancel {
-            background: rgba(0,0,0,0.04);
+        .dialog-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0b1426;
+            margin-bottom: 6px;
+        }
+        .dialog-message {
+            font-size: 15px;
+            color: #6c6c70;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .dialog-actions {
+            display: flex;
+            gap: 12px;
+        }
+        .dialog-actions button {
+            flex: 1;
+            padding: 14px 0;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.15s;
+        }
+        .dialog-actions button:active {
+            transform: scale(0.96);
+            opacity: 0.7;
+        }
+        .dialog-btn-cancel {
+            background: rgba(0,0,0,0.05);
             color: #0b1426;
         }
-        .alert-btn-primary {
+        .dialog-btn-confirm {
             background: #0b1426;
             color: #fff;
             flex: 2;
+        }
+        .dialog-btn-confirm.gold {
+            background: #D4AF37;
+            color: #0b1426;
+        }
+        .dialog-btn-confirm.danger {
+            background: #ea4335;
+            color: #fff;
+        }
+        .dialog-single-btn .dialog-actions button {
+            flex: 1;
+        }
+        .dialog-single-btn .dialog-actions {
+            justify-content: center;
+        }
+
+        /* ===== 自定义下拉框美化 ===== */
+        .season-select-wrapper {
+            position: relative;
+            display: inline-block;
+            min-width: 140px;
+        }
+        .season-select-wrapper select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: var(--card-bg, #fff);
+            border: 1.5px solid var(--border-light, #eef0f4);
+            border-radius: 14px;
+            padding: 10px 40px 10px 18px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-main, #1a1a2e);
+            width: 100%;
+            cursor: pointer;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M2 2l6 6 6-6' stroke='%238e98a3' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 16px 10px;
+        }
+        .season-select-wrapper select:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.15);
+        }
+        .season-select-wrapper select option {
+            background: #fff;
+            color: #1a1a2e;
+        }
+        /* 暗色模式 */
+        @media (prefers-color-scheme: dark) {
+            .season-select-wrapper select {
+                background-color: #1a2430;
+                border-color: #2a3342;
+                color: #f0f2f5;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M2 2l6 6 6-6' stroke='%23b0b8c4' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            }
+            .season-select-wrapper select option {
+                background: #1a2430;
+                color: #f0f2f5;
+            }
         }
 
         /* ===== 个人中心专用样式 ===== */
@@ -390,14 +482,6 @@
             display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;
         }
         .season-bar .label { font-size:14px; font-weight:500; color:var(--text-secondary, #4a4a5a); }
-        .season-select {
-            padding:6px 30px 6px 12px; background:var(--card-bg, #fff);
-            border:1px solid var(--border-light, #eef0f4); border-radius:12px;
-            font-size:14px; font-weight:500; color:var(--text-main, #1a1a2e);
-            appearance:none;
-            background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238e98a3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat:no-repeat; background-position:right 10px center; cursor:pointer;
-        }
         .grid-4 {
             display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:16px;
         }
@@ -485,19 +569,23 @@
             }
             .tab-item { color: #8e98a3; }
             .tab-item.active { color: #D4AF37; }
-            .login-alert-box {
-                background: rgba(26, 42, 72, 0.9);
+            .dialog-box {
+                background: rgba(26, 42, 72, 0.92);
                 border-color: rgba(255,255,255,0.05);
             }
-            .alert-title { color: #f0f2f5; }
-            .alert-msg { color: #b0b8c4; }
-            .alert-btn-cancel {
+            .dialog-title { color: #f0f2f5; }
+            .dialog-message { color: #b0b8c4; }
+            .dialog-btn-cancel {
                 background: rgba(255,255,255,0.06);
                 color: #f0f2f5;
             }
-            .alert-btn-primary {
+            .dialog-btn-confirm {
                 background: #D4AF37;
                 color: #0b1426;
+            }
+            .dialog-btn-confirm.danger {
+                background: #ea4335;
+                color: #fff;
             }
             .footer { color: #6c7a8a; }
             /* 个人中心暗色覆盖 */
@@ -510,7 +598,6 @@
             .status-badge { background: #2a3342; color: #f0f2f5; }
             .status-badge.pending { background: #4a3a1a; color: #f0d080; }
             .status-badge.approved { background: #1a3a2a; color: #80d0a0; }
-            .season-select { background-color: #1a2430; color: #f0f2f5; border-color: #2a3342; }
             .grid-4 .stat-card .value { color: #D4AF37; }
             .extra-stats .item { background: #111a24; }
             .extra-stats .item .val { color: #f0f2f5; }
@@ -717,12 +804,14 @@
                     <span class="status-badge pending" id="profileStatusBadge">待审核</span>
                 </div>
 
-                <!-- 赛季切换 -->
+                <!-- 赛季切换（美化下拉框） -->
                 <div class="season-bar">
                     <span class="label">📅 赛季</span>
-                    <select class="season-select" id="seasonSelect">
-                        <!-- 由 JS 动态填充 -->
-                    </select>
+                    <div class="season-select-wrapper">
+                        <select class="season-select" id="seasonSelect">
+                            <!-- 由 JS 动态填充 -->
+                        </select>
+                    </div>
                 </div>
 
                 <!-- 四项核心数据 -->
@@ -756,10 +845,10 @@
                     </div>
                 </div>
 
-                <!-- 底部操作按钮 -->
+                <!-- 底部操作按钮（使用自定义弹框） -->
                 <div class="bottom-actions">
-                    <button class="btn-outline" onclick="alert('跳转至战队管理')">👥 战队</button>
-                    <button class="btn-gold" onclick="alert('跳转至报名中心')">📝 报名管理</button>
+                    <button class="btn-outline" onclick="showDialog('提示', '战队管理功能开发中，敬请期待！', 'info')">👥 战队</button>
+                    <button class="btn-gold" onclick="showDialog('提示', '报名管理功能开发中，敬请期待！', 'info')">📝 报名管理</button>
                 </div>
             </div>
         </div>
@@ -785,6 +874,53 @@
     </div>
 
     <script>
+        // ===== 全局自定义弹框 =====
+        function showDialog(title, message, type = 'info', confirmText = '确定', cancelText = null, onConfirm = null, onCancel = null) {
+            // 移除已有弹框
+            const existing = document.querySelector('.dialog-overlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.className = 'dialog-overlay';
+            overlay.innerHTML = `
+                <div class="dialog-box ${cancelText ? '' : 'dialog-single-btn'}">
+                    <div class="dialog-icon">${type === 'confirm' ? '❓' : type === 'danger' ? '⚠️' : 'ℹ️'}</div>
+                    <div class="dialog-title">${title}</div>
+                    <div class="dialog-message">${message}</div>
+                    <div class="dialog-actions">
+                        ${cancelText ? `<button class="dialog-btn-cancel" id="dialogCancel">${cancelText}</button>` : ''}
+                        <button class="dialog-btn-confirm ${type === 'danger' ? 'danger' : type === 'confirm' ? 'gold' : ''}" id="dialogConfirm">${confirmText}</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            const confirmBtn = document.getElementById('dialogConfirm');
+            const cancelBtn = document.getElementById('dialogCancel');
+
+            const removeDialog = () => overlay.remove();
+
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', () => {
+                    removeDialog();
+                    if (onConfirm) onConfirm();
+                });
+            }
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', () => {
+                    removeDialog();
+                    if (onCancel) onCancel();
+                });
+            }
+            // 点击背景关闭（仅当有取消按钮时）
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay && cancelText) {
+                    removeDialog();
+                    if (onCancel) onCancel();
+                }
+            });
+        }
+
         // ===== 工具函数 =====
         function isLoggedIn() {
             return !!localStorage.getItem('dmn_token');
@@ -815,12 +951,12 @@
                     <button class="logout-btn" id="logoutBtn">退出</button>
                 `;
                 document.getElementById('logoutBtn').addEventListener('click', function() {
-                    if (confirm('确定退出？')) {
+                    showDialog('确认退出', '确定要退出登录吗？', 'confirm', '退出', '取消', () => {
                         localStorage.removeItem('dmn_token');
                         localStorage.removeItem('dmn_user');
                         localStorage.removeItem('dmn_role');
                         location.reload();
-                    }
+                    });
                 });
             } else {
                 container.innerHTML = `<button class="nav-btn" id="loginBtn">👤 登录</button>`;
@@ -828,26 +964,11 @@
             }
         }
 
-        // ===== 登录弹窗 =====
+        // ===== 登录弹窗（已替换为自定义） =====
         function showLoginAlert(msg) {
-            const old = document.querySelector('.login-alert-overlay');
-            if (old) old.remove();
-            const overlay = document.createElement('div');
-            overlay.className = 'login-alert-overlay';
-            overlay.innerHTML = `
-                <div class="login-alert-box">
-                    <div class="alert-icon">🔒</div>
-                    <div class="alert-title">需要登录</div>
-                    <div class="alert-msg">${msg}</div>
-                    <div class="alert-actions">
-                        <button class="alert-btn alert-btn-cancel" id="alertCancel">取消</button>
-                        <button class="alert-btn alert-btn-primary" id="alertGoLogin">去登录</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(overlay);
-            document.getElementById('alertCancel').onclick = () => overlay.remove();
-            document.getElementById('alertGoLogin').onclick = () => { overlay.remove(); window.location.href = '/login.html'; };
+            showDialog('需要登录', msg, 'info', '去登录', '取消', () => {
+                window.location.href = '/login.html';
+            });
         }
 
         // ===== 卡片保护 =====
@@ -856,8 +977,11 @@
             const url = card.getAttribute('data-url');
             const msg = card.getAttribute('data-msg') || '请先登录';
             if (isLoggedIn()) {
-                if (url) window.location.href = url;
-                else alert('详情页开发中');
+                if (url) {
+                    window.location.href = url;
+                } else {
+                    showDialog('提示', '详情页开发中，敬请期待！', 'info');
+                }
             } else {
                 showLoginAlert(msg);
             }
@@ -865,18 +989,14 @@
 
         // ===== SPA 页面切换 =====
         function switchPage(pageId) {
-            // 隐藏所有页面
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // 显示目标页面
             const target = document.getElementById('page-' + pageId);
             if (target) target.classList.add('active');
 
-            // 更新底部导航高亮
             document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
             const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
             if (activeTab) activeTab.classList.add('active');
 
-            // 如果切换到个人中心，重新初始化
             if (pageId === 'profile') {
                 setTimeout(() => {
                     if (window.radarChartInstance) {
@@ -899,13 +1019,11 @@
                 const select = document.getElementById('seasonSelect');
                 select.innerHTML = '';
 
-                // 添加“全部赛季”选项
                 const allOption = document.createElement('option');
                 allOption.value = 'all';
                 allOption.textContent = '全部赛季';
                 select.appendChild(allOption);
 
-                // 添加各个赛季
                 data.seasons.forEach(season => {
                     const option = document.createElement('option');
                     option.value = season;
@@ -913,20 +1031,14 @@
                     select.appendChild(option);
                 });
 
-                // 默认选中“全部赛季”
                 select.value = 'all';
-
-                // 绑定 change 事件
                 select.onchange = function() {
                     initProfile();
                 };
-
-                // 加载数据
                 await initProfile();
 
             } catch (err) {
                 console.error('加载赛季列表失败:', err);
-                // 降级方案：使用硬编码选项
                 const select = document.getElementById('seasonSelect');
                 select.innerHTML = `
                     <option value="all">全部赛季</option>
@@ -950,7 +1062,6 @@
             const seasonSelect = document.getElementById('seasonSelect');
             const season = seasonSelect.value;
 
-            // 显示加载状态
             document.querySelectorAll('#statsGrid .value').forEach(el => el.textContent = '...');
 
             try {
@@ -964,19 +1075,19 @@
                 }
                 const data = json.data;
 
-                // 更新四项核心数据
-                document.getElementById('statKd').textContent = data.KD || '0';
+                // 更新核心数据
+                document.getElementById('statKd').textContent = data.KD.toFixed(2);
                 document.getElementById('statGames').textContent = data.总场次 || '0';
                 document.getElementById('statWins').textContent = data.吃鸡数 || '0';
                 document.getElementById('statTop10').textContent = (data.前十率 || 0) + '%';
 
-                // 更新更多数据
+                // 更多数据
                 document.getElementById('extraKills').textContent = data.总击杀 || '0';
                 document.getElementById('extraDamage').textContent = data.总伤害 || '0';
                 document.getElementById('extraSurvival').textContent = (data.平均生存分钟 || 0) + 'min';
                 document.getElementById('extraMaxKills').textContent = data.最高击杀 || '0';
 
-                // 更新雷达图
+                // 雷达图
                 if (window.radarChartInstance) {
                     const maxValues = { kills: 100, damage: 50000, survival: 30, wins: 20, top10: 80, kd: 5 };
                     const kills = data.总击杀 || 0;
@@ -997,26 +1108,23 @@
                     window.radarChartInstance.update();
                 }
 
-                // 更新时间
                 const now = new Date();
                 document.getElementById('updateTime').textContent = '更新于 ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
 
             } catch (err) {
                 console.error('加载个人数据失败:', err);
-                alert('加载数据失败，请稍后再试');
+                showDialog('加载失败', '数据加载失败，请稍后重试', 'danger');
             }
         }
 
         // ===== 个人中心 UI 初始化 =====
         function initProfileUI() {
-            // 个人信息显示
             const user = localStorage.getItem('dmn_user') || 'DMN丨战神';
             const role = localStorage.getItem('dmn_role') || '队长';
             document.getElementById('profileDisplayName').textContent = user;
             document.getElementById('profileDisplayTeam').textContent = 'DMN-战神队 · ' + role;
             document.getElementById('profileAvatar').textContent = user.charAt(0).toUpperCase();
 
-            // 状态徽章
             const badge = document.getElementById('profileStatusBadge');
             if (role === '管理员' || role === 'admin') {
                 badge.textContent = '管理员';
@@ -1030,7 +1138,7 @@
                 badge.style.color = '#856404';
             }
 
-            // 更多数据折叠
+            // 折叠展开
             const toggleBtn = document.getElementById('toggleMore');
             const collapseBox = document.getElementById('collapseBox');
             const arrowIcon = document.getElementById('arrowIcon');
@@ -1049,7 +1157,7 @@
                 }, 400);
             });
 
-            // 初始化雷达图
+            // 雷达图
             const ctx = document.getElementById('radarChart').getContext('2d');
             const chart = new Chart(ctx, {
                 type: 'radar',
@@ -1104,7 +1212,6 @@
             });
             window.radarChartInstance = chart;
 
-            // 暗色模式适配雷达图标签颜色
             const darkModeMedia = window.matchMedia('(prefers-color-scheme: dark)');
             function updateRadarColors() {
                 const isDark = darkModeMedia.matches;
@@ -1114,7 +1221,6 @@
             darkModeMedia.addEventListener('change', updateRadarColors);
             updateRadarColors();
 
-            // 加载赛季列表（内部会调用 initProfile）
             loadSeasons();
         }
 
@@ -1122,12 +1228,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             renderNavbar();
 
-            // 绑定卡片点击
             document.querySelectorAll('.card[data-protected="true"]').forEach(c => {
                 c.addEventListener('click', function() { handleProtectedCardClick(this); });
             });
 
-            // 如果当前页面是个人中心，初始化UI
             const activePage = document.querySelector('.page.active');
             if (activePage && activePage.id === 'page-profile') {
                 setTimeout(initProfileUI, 200);
