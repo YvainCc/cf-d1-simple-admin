@@ -539,6 +539,116 @@
         }
         .btn-outline:active { transform:scale(0.97); background:rgba(26,42,72,0.04); }
 
+        /* ===== 排行榜专用样式 ===== */
+        .rank-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 6px;
+            border: 0.5px solid rgba(255,255,255,0.3);
+        }
+        .rank-tabs button {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 10px 0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #6c6c70;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .rank-tabs button.active {
+            background: #0b1426;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .rank-tabs button:active { transform: scale(0.95); }
+        /* 前三名卡片 */
+        .top-three {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .top-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 16px 10px;
+            text-align: center;
+            border: 0.5px solid rgba(255,255,255,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+            transition: transform 0.2s;
+        }
+        .top-card:active { transform: scale(0.95); }
+        .top-card .medal { font-size: 32px; display: block; margin-bottom: 4px; }
+        .top-card .t-name { font-size: 16px; font-weight: 600; color: #0b1426; }
+        .top-card .t-stat { font-size: 13px; color: #6c6c70; margin-top: 2px; }
+        .top-card.gold { background: linear-gradient(145deg, #fff7e6, #fce9c4); border-color: #c9a84c; }
+        .top-card.silver { background: linear-gradient(145deg, #f5f5f5, #e8e8e8); border-color: #b0b0b0; }
+        .top-card.bronze { background: linear-gradient(145deg, #fdf0e6, #f5dcc8); border-color: #cd7f32; }
+        @media (max-width: 420px) {
+            .top-three { flex-direction: column; align-items: center; }
+            .top-card { width: 100%; max-width: 280px; }
+        }
+        /* 排行榜列表 */
+        .rank-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .rank-item {
+            display: grid;
+            grid-template-columns: 50px 1fr 60px 50px 50px 60px 60px;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(6px);
+            border-radius: 14px;
+            padding: 12px 14px;
+            border: 0.5px solid rgba(255,255,255,0.3);
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+        .rank-item .rank-num {
+            font-weight: 700;
+            color: #6c6c70;
+            text-align: center;
+        }
+        .rank-item .rank-name {
+            font-weight: 500;
+            color: #0b1426;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .rank-item .rank-stat {
+            text-align: center;
+            color: #4a4a5a;
+        }
+        .rank-item.highlight {
+            background: rgba(201, 168, 76, 0.15);
+            border-color: #c9a84c;
+            box-shadow: 0 0 0 1px #c9a84c;
+        }
+        @media (max-width: 480px) {
+            .rank-item {
+                grid-template-columns: 36px 1fr 40px 36px 36px 44px 44px;
+                font-size: 12px;
+                padding: 10px 8px;
+            }
+        }
+        .loading {
+            text-align: center;
+            padding: 40px 0;
+            color: #8e8e93;
+        }
+
         /* ===== 暗色模式 ===== */
         @media (prefers-color-scheme: dark) {
             body {
@@ -604,6 +714,33 @@
             .btn-outline { color: #D4AF37; border-color: #D4AF37; }
             .btn-gold { background: #D4AF37; color: #1a1a2e; }
             .expand-btn { background: #1a2430; border-color: #2a3342; color: #b0b8c4; }
+            /* 排行榜暗色覆盖 */
+            .rank-tabs {
+                background: rgba(26,42,72,0.5);
+                border-color: rgba(255,255,255,0.05);
+            }
+            .rank-tabs button { color: #b0b8c4; }
+            .rank-tabs button.active {
+                background: #D4AF37;
+                color: #0b1426;
+            }
+            .top-card { background: rgba(26,42,72,0.6); border-color: rgba(255,255,255,0.05); }
+            .top-card.gold { background: linear-gradient(145deg, #3a2a1a, #2a1a0a); border-color: #c9a84c; }
+            .top-card.silver { background: linear-gradient(145deg, #2a2a2a, #1a1a1a); border-color: #8a8a8a; }
+            .top-card.bronze { background: linear-gradient(145deg, #3a2a1a, #2a1a0a); border-color: #cd7f32; }
+            .top-card .t-name { color: #f0f2f5; }
+            .top-card .t-stat { color: #b0b8c4; }
+            .rank-item {
+                background: rgba(26,42,72,0.5);
+                border-color: rgba(255,255,255,0.05);
+            }
+            .rank-item .rank-num { color: #8e98a3; }
+            .rank-item .rank-name { color: #f0f2f5; }
+            .rank-item .rank-stat { color: #b0b8c4; }
+            .rank-item.highlight {
+                background: rgba(201,168,76,0.2);
+                border-color: #c9a84c;
+            }
         }
         @media (max-width: 400px) {
             .page-container { padding: 12px 16px; }
@@ -760,30 +897,25 @@
             </div>
         </div>
 
-        <!-- ===== 排行页面 ===== -->
+        <!-- ===== 排行页面（排行榜） ===== -->
         <div class="page" id="page-rank">
-            <div class="section-title"><i>📈</i> 排行榜</div>
-            <div class="card-list">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">🥇 YvainCc</div>
-                        <div class="card-badge">击杀 156</div>
-                    </div>
-                    <div class="card-sub">突击手 · 赛季击杀王</div>
+            <div style="padding: 16px 0;">
+                <!-- 排序切换 -->
+                <div class="rank-tabs">
+                    <button class="active" data-sort="kd" onclick="loadLeaderboard('kd')">🏅 KD</button>
+                    <button data-sort="damage" onclick="loadLeaderboard('damage')">💥 伤害</button>
+                    <button data-sort="survival" onclick="loadLeaderboard('survival')">⏱️ 生存</button>
                 </div>
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">🥈 凌霜</div>
-                        <div class="card-badge">胜率 78%</div>
-                    </div>
-                    <div class="card-sub">指挥 · 战术大师</div>
-                </div>
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-title">🥉 黑锋</div>
-                        <div class="card-badge">伤害 3200</div>
-                    </div>
-                    <div class="card-sub">狙击手 · 场均伤害第一</div>
+
+                <!-- 加载提示 -->
+                <div id="rankLoading" class="loading" style="text-align:center; padding:40px 0; color:#8e8e93;">加载中...</div>
+
+                <!-- 前三名卡片 -->
+                <div id="topThreeContainer" style="display:none;" class="top-three"></div>
+
+                <!-- 排行榜列表 -->
+                <div id="rankListContainer" style="display:none;">
+                    <div class="rank-list" id="rankList"></div>
                 </div>
             </div>
         </div>
@@ -845,7 +977,7 @@
                     </div>
                 </div>
 
-                <!-- 底部操作按钮（使用自定义弹框） -->
+                <!-- 底部操作按钮 -->
                 <div class="bottom-actions">
                     <button class="btn-outline" onclick="showDialog('提示', '战队管理功能开发中，敬请期待！', 'info')">👥 战队</button>
                     <button class="btn-gold" onclick="showDialog('提示', '报名管理功能开发中，敬请期待！', 'info')">📝 报名管理</button>
@@ -876,7 +1008,6 @@
     <script>
         // ===== 全局自定义弹框 =====
         function showDialog(title, message, type = 'info', confirmText = '确定', cancelText = null, onConfirm = null, onCancel = null) {
-            // 移除已有弹框
             const existing = document.querySelector('.dialog-overlay');
             if (existing) existing.remove();
 
@@ -912,7 +1043,6 @@
                     if (onCancel) onCancel();
                 });
             }
-            // 点击背景关闭（仅当有取消按钮时）
             overlay.addEventListener('click', (e) => {
                 if (e.target === overlay && cancelText) {
                     removeDialog();
@@ -964,7 +1094,7 @@
             }
         }
 
-        // ===== 登录弹窗（已替换为自定义） =====
+        // ===== 登录弹窗 =====
         function showLoginAlert(msg) {
             showDialog('需要登录', msg, 'info', '去登录', '取消', () => {
                 window.location.href = '/login.html';
@@ -1005,6 +1135,102 @@
                     }
                     initProfileUI();
                 }, 100);
+            } else if (pageId === 'rank') {
+                setTimeout(() => loadLeaderboard('kd'), 100);
+            }
+        }
+
+        // ===== 排行榜功能 =====
+        let currentSort = 'kd';
+        let rankData = [];
+
+        async function loadLeaderboard(sort) {
+            currentSort = sort;
+            document.querySelectorAll('.rank-tabs button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.sort === sort);
+            });
+
+            const loading = document.getElementById('rankLoading');
+            const topContainer = document.getElementById('topThreeContainer');
+            const listContainer = document.getElementById('rankListContainer');
+            loading.style.display = 'block';
+            topContainer.style.display = 'none';
+            listContainer.style.display = 'none';
+
+            try {
+                const username = localStorage.getItem('dmn_user');
+                if (!username) {
+                    loading.textContent = '请先登录';
+                    return;
+                }
+                const response = await fetch(`/api/leaderboard?sort=${sort}`);
+                if (!response.ok) throw new Error('网络错误');
+                const json = await response.json();
+                if (json.error) throw new Error(json.error);
+                rankData = json.data || [];
+
+                loading.style.display = 'none';
+                topContainer.style.display = 'flex';
+                listContainer.style.display = 'block';
+
+                renderTopThree(rankData);
+                renderRankList(rankData, username);
+
+            } catch (err) {
+                loading.textContent = '加载失败，请重试';
+                console.error(err);
+                showDialog('加载失败', err.message || '请检查网络连接', 'danger');
+            }
+        }
+
+        function renderTopThree(data) {
+            const container = document.getElementById('topThreeContainer');
+            const top = data.slice(0, 3);
+            const medals = ['🥇', '🥈', '🥉'];
+            const classes = ['gold', 'silver', 'bronze'];
+            const sortLabels = { kd: 'KD', damage: '伤害', survival: '生存时间' };
+            const label = sortLabels[currentSort] || 'KD';
+
+            container.innerHTML = top.map((item, i) => `
+                <div class="top-card ${classes[i] || ''}">
+                    <span class="medal">${medals[i] || '🏅'}</span>
+                    <div class="t-name">${item.当前名称}</div>
+                    <div class="t-stat">${label}: ${item[currentSort === 'kd' ? 'KD' : currentSort === 'damage' ? '伤害' : '平均存活时间'].toFixed(1)}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderRankList(data, currentUser) {
+            const container = document.getElementById('rankList');
+            const listItems = data.map((item, index) => {
+                const isCurrent = item.当前名称 === currentUser;
+                const highlightClass = isCurrent ? 'highlight' : '';
+                return `
+                    <div class="rank-item ${highlightClass}" data-username="${item.当前名称}">
+                        <span class="rank-num">${index + 1}</span>
+                        <span class="rank-name">${item.当前名称}</span>
+                        <span class="rank-stat">${item.场次}</span>
+                        <span class="rank-stat">${item.击杀}</span>
+                        <span class="rank-stat">${item.死亡}</span>
+                        <span class="rank-stat">${item.伤害}</span>
+                        <span class="rank-stat">${item.平均存活时间.toFixed(1)}min</span>
+                    </div>
+                `;
+            }).join('');
+            container.innerHTML = listItems;
+
+            const highlightRow = container.querySelector('.highlight');
+            if (highlightRow) {
+                setTimeout(() => {
+                    highlightRow.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                    const removeHighlight = () => {
+                        highlightRow.classList.remove('highlight');
+                        window.removeEventListener('scroll', removeHighlight);
+                        window.removeEventListener('touchmove', removeHighlight);
+                    };
+                    window.addEventListener('scroll', removeHighlight, { once: true });
+                    window.addEventListener('touchmove', removeHighlight, { once: true });
+                }, 300);
             }
         }
 
@@ -1032,9 +1258,7 @@
                 });
 
                 select.value = 'all';
-                select.onchange = function() {
-                    initProfile();
-                };
+                select.onchange = function() { initProfile(); };
                 await initProfile();
 
             } catch (err) {
@@ -1075,19 +1299,16 @@
                 }
                 const data = json.data;
 
-                // 更新核心数据
-                document.getElementById('statKd').textContent = data.KD.toFixed(2);
+                document.getElementById('statKd').textContent = data.KD ? data.KD.toFixed(2) : '0.00';
                 document.getElementById('statGames').textContent = data.总场次 || '0';
                 document.getElementById('statWins').textContent = data.吃鸡数 || '0';
                 document.getElementById('statTop10').textContent = (data.前十率 || 0) + '%';
 
-                // 更多数据
                 document.getElementById('extraKills').textContent = data.总击杀 || '0';
                 document.getElementById('extraDamage').textContent = data.总伤害 || '0';
                 document.getElementById('extraSurvival').textContent = (data.平均生存分钟 || 0) + 'min';
                 document.getElementById('extraMaxKills').textContent = data.最高击杀 || '0';
 
-                // 雷达图
                 if (window.radarChartInstance) {
                     const maxValues = { kills: 100, damage: 50000, survival: 30, wins: 20, top10: 80, kd: 5 };
                     const kills = data.总击杀 || 0;
@@ -1138,7 +1359,6 @@
                 badge.style.color = '#856404';
             }
 
-            // 折叠展开
             const toggleBtn = document.getElementById('toggleMore');
             const collapseBox = document.getElementById('collapseBox');
             const arrowIcon = document.getElementById('arrowIcon');
@@ -1157,7 +1377,6 @@
                 }, 400);
             });
 
-            // 雷达图
             const ctx = document.getElementById('radarChart').getContext('2d');
             const chart = new Chart(ctx, {
                 type: 'radar',
@@ -1235,6 +1454,8 @@
             const activePage = document.querySelector('.page.active');
             if (activePage && activePage.id === 'page-profile') {
                 setTimeout(initProfileUI, 200);
+            } else if (activePage && activePage.id === 'page-rank') {
+                setTimeout(() => loadLeaderboard('kd'), 200);
             }
         });
     </script>
