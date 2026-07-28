@@ -8,7 +8,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0b1426">
-    <!-- Chart.js 依赖 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <style>
@@ -720,11 +719,9 @@
 
                 <!-- 赛季切换 -->
                 <div class="season-bar">
-                    <span class="label">📅 当前赛季</span>
+                    <span class="label">📅 赛季</span>
                     <select class="season-select" id="seasonSelect">
-                        <option value="2026-S1" selected>2026 S1</option>
-                        <option value="2026-S2">2026 S2</option>
-                        <option value="2025-S3">2025 S3</option>
+                        <!-- 由 JS 动态填充 -->
                     </select>
                 </div>
 
@@ -879,20 +876,70 @@
             const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
             if (activeTab) activeTab.classList.add('active');
 
-            // 如果切换到个人中心，初始化图表
+            // 如果切换到个人中心，重新初始化
             if (pageId === 'profile') {
                 setTimeout(() => {
-                    // 如果已有图表先销毁
                     if (window.radarChartInstance) {
                         window.radarChartInstance.destroy();
                         window.radarChartInstance = null;
                     }
-                    initProfile();
+                    initProfileUI();
                 }, 100);
             }
         }
 
-        // ===== 个人中心初始化（真实数据） =====
+        // ===== 加载赛季列表 =====
+        async function loadSeasons() {
+            try {
+                const response = await fetch('/api/seasons');
+                if (!response.ok) throw new Error('获取赛季列表失败');
+                const data = await response.json();
+                if (!data.ok) throw new Error(data.error || '未知错误');
+
+                const select = document.getElementById('seasonSelect');
+                select.innerHTML = '';
+
+                // 添加“全部赛季”选项
+                const allOption = document.createElement('option');
+                allOption.value = 'all';
+                allOption.textContent = '全部赛季';
+                select.appendChild(allOption);
+
+                // 添加各个赛季
+                data.seasons.forEach(season => {
+                    const option = document.createElement('option');
+                    option.value = season;
+                    option.textContent = season;
+                    select.appendChild(option);
+                });
+
+                // 默认选中“全部赛季”
+                select.value = 'all';
+
+                // 绑定 change 事件
+                select.onchange = function() {
+                    initProfile();
+                };
+
+                // 加载数据
+                await initProfile();
+
+            } catch (err) {
+                console.error('加载赛季列表失败:', err);
+                // 降级方案：使用硬编码选项
+                const select = document.getElementById('seasonSelect');
+                select.innerHTML = `
+                    <option value="all">全部赛季</option>
+                    <option value="S1">S1</option>
+                    <option value="S2">S2</option>
+                `;
+                select.value = 'all';
+                select.onchange = function() { initProfile(); };
+                await initProfile();
+            }
+        }
+
+        // ===== 个人中心获取数据 =====
         async function initProfile() {
             const username = localStorage.getItem('dmn_user');
             if (!username) {
@@ -929,7 +976,7 @@
                 document.getElementById('extraSurvival').textContent = (data.平均生存分钟 || 0) + 'min';
                 document.getElementById('extraMaxKills').textContent = data.最高击杀 || '0';
 
-                // 更新雷达图（如果存在）
+                // 更新雷达图
                 if (window.radarChartInstance) {
                     const maxValues = { kills: 100, damage: 50000, survival: 30, wins: 20, top10: 80, kd: 5 };
                     const kills = data.总击杀 || 0;
@@ -960,7 +1007,7 @@
             }
         }
 
-        // ===== 个人中心 DOM 初始化（首次加载） =====
+        // ===== 个人中心 UI 初始化 =====
         function initProfileUI() {
             // 个人信息显示
             const user = localStorage.getItem('dmn_user') || 'DMN丨战神';
@@ -988,7 +1035,6 @@
             const collapseBox = document.getElementById('collapseBox');
             const arrowIcon = document.getElementById('arrowIcon');
             let isOpen = false;
-            // 移除旧监听
             toggleBtn.replaceWith(toggleBtn.cloneNode(true));
             const newToggle = document.getElementById('toggleMore');
             const newArrow = document.getElementById('arrowIcon');
@@ -1068,13 +1114,8 @@
             darkModeMedia.addEventListener('change', updateRadarColors);
             updateRadarColors();
 
-            // 赛季切换事件
-            document.getElementById('seasonSelect').addEventListener('change', function() {
-                initProfile();
-            });
-
-            // 首次加载数据
-            initProfile();
+            // 加载赛季列表（内部会调用 initProfile）
+            loadSeasons();
         }
 
         // ===== 初始化 =====
@@ -1090,35 +1131,6 @@
             const activePage = document.querySelector('.page.active');
             if (activePage && activePage.id === 'page-profile') {
                 setTimeout(initProfileUI, 200);
-            } else {
-                // 如果是其他页面，但后续切换到个人中心时，由 switchPage 触发 initProfileUI
-                // 但由于 switchPage 调用了 initProfile，我们需要在 initProfile 中调用 initProfileUI 吗？
-                // 为了保持清晰，我们修改 switchPage 逻辑：当切换到 profile 时，调用 initProfileUI 并加载数据
-                // 但上面的 switchPage 只调用了 initProfile，我们需要先初始化 UI 再加载数据。
-                // 所以调整 switchPage 中 profile 的处理：
-                const originalSwitch = switchPage;
-                switchPage = function(pageId) {
-                    // 隐藏所有页面
-                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-                    const target = document.getElementById('page-' + pageId);
-                    if (target) target.classList.add('active');
-
-                    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-                    const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
-                    if (activeTab) activeTab.classList.add('active');
-
-                    if (pageId === 'profile') {
-                        setTimeout(() => {
-                            if (window.radarChartInstance) {
-                                window.radarChartInstance.destroy();
-                                window.radarChartInstance = null;
-                            }
-                            initProfileUI();
-                        }, 100);
-                    }
-                };
-                // 重新绑定导航点击（因为 switchPage 已被重新赋值）
-                // 但导航按钮已经通过 onclick 绑定了 switchPage，无需再绑
             }
         });
     </script>
