@@ -12,7 +12,7 @@ export async function onRequest(context) {
     const db = env.DB;
 
     try {
-        // 1. 根据当前名称查询账号ID
+        // 1. 根据当前游戏名称查询账号ID
         const player = await db.prepare(
             'SELECT 账号ID FROM 人员表 WHERE 游戏名称 = ? AND 是否当前 = 1'
         ).bind(username).first();
@@ -23,32 +23,33 @@ export async function onRequest(context) {
 
         const accountId = player.账号ID;
 
-        // 2. 查询该账号ID下的所有名称（包括历史）
+        // 2. 查询该账号下的所有名称（包括历史）
         const nameRows = await db.prepare(
             'SELECT 游戏名称 FROM 人员表 WHERE 账号ID = ?'
         ).bind(accountId).all();
 
         const allNames = nameRows.results.map(row => row.游戏名称);
-        // 如果没有任何名称（理论上不可能），则使用当前名称
         if (allNames.length === 0) allNames = [username];
 
-        // 3. 构建查询，统计该赛季所有名称下的对局
+        // 3. 构建查询参数
         const placeholders = allNames.map(() => '?').join(',');
+
+        // 4. 汇总统计（使用实际字段名）
         const query = `
             SELECT 
                 COUNT(*) AS 总场次,
-                SUM(击杀) AS 总击杀,
-                SUM(伤害) AS 总伤害,
-                SUM(生存时间) AS 总生存时间,
-                SUM(CASE WHEN 是否吃鸡 = 1 THEN 1 ELSE 0 END) AS 吃鸡数,
-                SUM(CASE WHEN 是否前十 = 1 THEN 1 ELSE 0 END) AS 前十数
+                SUM(击杀数) AS 总击杀,
+                SUM(总伤害量) AS 总伤害,
+                SUM(存活时间秒) AS 总生存时间,
+                SUM(CASE WHEN 最终排名 = 1 THEN 1 ELSE 0 END) AS 吃鸡数,
+                SUM(CASE WHEN 最终排名 <= 10 THEN 1 ELSE 0 END) AS 前十数
             FROM 战绩表
             WHERE 玩家名称 IN (${placeholders}) AND 赛季 = ?
         `;
         const params = [...allNames, season];
         const result = await db.prepare(query).bind(...params).first();
 
-        // 4. 计算各项指标
+        // 5. 计算指标
         const totalMatches = result.总场次 || 0;
         const totalKills = result.总击杀 || 0;
         const totalWins = result.吃鸡数 || 0;
@@ -56,19 +57,22 @@ export async function onRequest(context) {
         const totalDamage = result.总伤害 || 0;
         const totalSurvival = result.总生存时间 || 0;
 
+        // KD = 总击杀 / (总场次 - 吃鸡数) ，若分母为0则直接取总击杀
         const kd = (totalMatches - totalWins) > 0 ? (totalKills / (totalMatches - totalWins)) : totalKills;
+
         const top10Rate = totalMatches > 0 ? (totalTop10 / totalMatches) * 100 : 0;
-        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0;
+        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0; // 转分钟
         const avgKills = totalMatches > 0 ? (totalKills / totalMatches) : 0;
         const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
 
         // 最高击杀
         const maxKillRow = await db.prepare(
-            `SELECT MAX(击杀) AS 最高击杀 FROM 战绩表 
+            `SELECT MAX(击杀数) AS 最高击杀 FROM 战绩表 
              WHERE 玩家名称 IN (${placeholders}) AND 赛季 = ?`
         ).bind(...params).first();
         const maxKills = maxKillRow.最高击杀 || 0;
 
+        // 6. 返回数据（字段名与前端对应）
         return new Response(JSON.stringify({
             ok: true,
             data: {
