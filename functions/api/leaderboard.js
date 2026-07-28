@@ -1,95 +1,99 @@
 // functions/api/leaderboard.js
-// 路由: /api/leaderboard?type=kd&season=1&search=xxx
-
 export async function onRequest(context) {
     const { request, env } = context;
     const url = new URL(request.url);
+    const sort = url.searchParams.get('sort') || 'kd'; // kd, damage, survival
 
-    const type = url.searchParams.get('type') || 'kd';
-    const season = url.searchParams.get('season') || '1';
-    const search = url.searchParams.get('search') || '';
+    const db = env.DB;
 
-    const db = env.DB; // 直接使用绑定的D1变量
+    try {
+        // 1. 获取所有当前有效的玩家（是否当前 = 1）
+        const players = await db.prepare(
+            'SELECT 账号ID, 游戏名称 FROM 人员表 WHERE 是否当前 = 1'
+        ).all();
 
-    let query, params = [season];
+        if (!players.results.length) {
+            return new Response(JSON.stringify({ data: [] }), { headers: { 'Content-Type': 'application/json' } });
+        }
 
-    switch(type) {
-        case 'kd':
-            query = `
-                SELECT u.id, u.username, ps.kd, ps.total_kills, ps.total_matches
-                FROM player_stats ps
-                JOIN users u ON ps.player_id = u.id
-                WHERE ps.season_id = ?
-                ORDER BY ps.kd DESC
-                LIMIT 100
+        // 2. 对每个玩家，查询其所有历史名称（包括当前）
+        const allStats = [];
+        for (const player of players.results) {
+            const accountId = player.账号ID;
+            const currentName = player.游戏名称;
+
+            // 查询该账号所有名称
+            const nameRows = await db.prepare(
+                'SELECT 游戏名称 FROM 人员表 WHERE 账号ID = ?'
+            ).bind(accountId).all();
+            const names = nameRows.results.map(row => row.游戏名称);
+            if (names.length === 0) continue;
+
+            const placeholders = names.map(() => '?').join(',');
+
+            // 3. 汇总战绩
+            const query = `
+                SELECT 
+                    COUNT(*) AS 场次,
+                    SUM(击杀数) AS 击杀,
+                    SUM(总伤害量) AS 伤害,
+                    SUM(存活时间秒) AS 总存活时间,
+                    SUM(CASE WHEN 死亡类型 != 'alive' THEN 1 ELSE 0 END) AS 死亡
+                FROM 战绩表
+                WHERE 玩家名称 IN (${placeholders})
             `;
-            break;
-        case 'damage':
-            query = `
-                SELECT u.id, u.username, ps.total_damage, ps.total_matches
-                FROM player_stats ps
-                JOIN users u ON ps.player_id = u.id
-                WHERE ps.season_id = ?
-                ORDER BY ps.total_damage DESC
-                LIMIT 100
-            `;
-            break;
-        case 'survival':
-            query = `
-                SELECT u.id, u.username, ps.avg_survival
-                FROM player_stats ps
-                JOIN users u ON ps.player_id = u.id
-                WHERE ps.season_id = ?
-                ORDER BY ps.avg_survival DESC
-                LIMIT 100
-            `;
-            break;
-        case 'wins':
-            query = `
-                SELECT u.id, u.username, ps.total_wins
-                FROM player_stats ps
-                JOIN users u ON ps.player_id = u.id
-                WHERE ps.season_id = ?
-                ORDER BY ps.total_wins DESC
-                LIMIT 100
-            `;
-            break;
-        case 'teams':
-            query = `
-                SELECT t.id, t.name, COUNT(tm.player_id) as member_count,
-                       SUM(ps.kd) as total_kd, AVG(ps.kd) as avg_kd
-                FROM teams t
-                JOIN team_members tm ON t.id = tm.team_id
-                JOIN player_stats ps ON tm.player_id = ps.player_id
-                WHERE t.season_id = ? AND ps.season_id = ?
-                GROUP BY t.id
-                ORDER BY avg_kd DESC
-                LIMIT 50
-            `;
-            params = [season, season];
-            break;
-        default:
-            return jsonResponse({ error: 'Invalid type' }, 400);
+            const result = await db.prepare(query).bind(...names).first();
+
+            const 场次 = result.场次 || 0;
+            const 击杀 = result.击杀 || 0;
+            const 伤害 = result.伤害 || 0;
+            const 总存活时间 = result.总存活时间 || 0;
+            const 死亡 = result.死亡 || 0;
+
+            // 计算KD
+            const kd = 死亡 > 0 ? (击杀 / 死亡) : 击杀;
+
+            // 平均存活时间（分钟）
+            const avgSurvival = 场次 > 0 ? (总存活时间 / 场次 / 60) : 0;
+
+            allStats.push({
+                账号ID: accountId,
+                当前名称: currentName,
+                场次,
+                击杀,
+                死亡,
+                伤害,
+                平均存活时间: avgSurvival,
+                KD: kd,
+                // 保留原始总存活时间（秒）以备后续
+                总存活时间
+            });
+        }
+
+        // 4. 根据 sort 排序
+        let sorted = [];
+        if (sort === 'kd') {
+            sorted = allStats.sort((a, b) => b.KD - a.KD);
+        } else if (sort === 'damage') {
+            sorted = allStats.sort((a, b) => b.伤害 - a.伤害);
+        } else if (sort === 'survival') {
+            sorted = allStats.sort((a, b) => b.平均存活时间 - a.平均存活时间);
+        } else {
+            sorted = allStats;
+        }
+
+        // 5. 添加排名
+        const ranked = sorted.map((item, index) => ({
+            ...item,
+            排名: index + 1
+        }));
+
+        return new Response(JSON.stringify({ data: ranked }), {
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+    } catch (err) {
+        console.error('Leaderboard API error:', err);
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
-
-    // 搜索过滤
-    if (search && type !== 'teams') {
-        query = query.replace('ORDER BY', ` AND u.username LIKE '%${search}%' ORDER BY`);
-    }
-
-    const results = await db.prepare(query).bind(...params).all();
-
-    return jsonResponse({ 
-        ok: true, 
-        data: results.results,
-        type,
-        season
-    });
-}
-
-function jsonResponse(data, status = 200) {
-    return new Response(JSON.stringify(data), {
-        status,
-        headers: { 'Content-Type': 'application/json' }
-    });
 }
