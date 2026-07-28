@@ -3,7 +3,7 @@ export async function onRequest(context) {
     const { request, env } = context;
     const url = new URL(request.url);
     const username = url.searchParams.get('username');
-    const season = url.searchParams.get('season') || '2026-S1';
+    const season = url.searchParams.get('season') || 'all'; // 默认全部赛季
 
     if (!username) {
         return new Response(JSON.stringify({ error: '缺少用户名' }), { status: 400 });
@@ -12,7 +12,7 @@ export async function onRequest(context) {
     const db = env.DB;
 
     try {
-        // 1. 根据当前游戏名称查询账号ID
+        // 1. 根据当前名称查询账号ID
         const player = await db.prepare(
             'SELECT 账号ID FROM 人员表 WHERE 游戏名称 = ? AND 是否当前 = 1'
         ).bind(username).first();
@@ -23,34 +23,38 @@ export async function onRequest(context) {
 
         const accountId = player.账号ID;
 
-        // 2. 查询该账号下的所有名称（包括历史）
+        // 2. 获取该账号下所有名称（包括历史）
         const nameRows = await db.prepare(
             'SELECT 游戏名称 FROM 人员表 WHERE 账号ID = ?'
         ).bind(accountId).all();
 
-        // ✅ 修复：使用 let 而不是 const
-        let allNames = nameRows.results.map(row => row.游戏名称);
+        const allNames = nameRows.results.map(row => row.游戏名称);
         if (allNames.length === 0) allNames = [username];
 
-        // 3. 构建查询参数
+        // 3. 构建查询
         const placeholders = allNames.map(() => '?').join(',');
+        let seasonCondition = '';
+        const params = [...allNames];
+        if (season !== 'all') {
+            seasonCondition = ' AND 赛季 = ?';
+            params.push(season);
+        }
 
-        // 4. 汇总统计（使用实际字段名）
         const query = `
             SELECT 
                 COUNT(*) AS 总场次,
                 SUM(击杀数) AS 总击杀,
                 SUM(总伤害量) AS 总伤害,
-                SUM(存活时间秒) AS 总生存时间,
+                SUM(存活时间) AS 总生存时间,
                 SUM(CASE WHEN 最终排名 = 1 THEN 1 ELSE 0 END) AS 吃鸡数,
                 SUM(CASE WHEN 最终排名 <= 10 THEN 1 ELSE 0 END) AS 前十数
             FROM 战绩表
-            WHERE 玩家名称 IN (${placeholders}) AND 赛季 = ?
+            WHERE 玩家名称 IN (${placeholders}) ${seasonCondition}
         `;
-        const params = [...allNames, season];
+
         const result = await db.prepare(query).bind(...params).first();
 
-        // 5. 计算指标
+        // 4. 计算指标
         const totalMatches = result.总场次 || 0;
         const totalKills = result.总击杀 || 0;
         const totalWins = result.吃鸡数 || 0;
@@ -60,16 +64,19 @@ export async function onRequest(context) {
 
         const kd = (totalMatches - totalWins) > 0 ? (totalKills / (totalMatches - totalWins)) : totalKills;
         const top10Rate = totalMatches > 0 ? (totalTop10 / totalMatches) * 100 : 0;
-        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0;
+        const avgSurvival = totalMatches > 0 ? (totalSurvival / totalMatches / 60) : 0; // 分钟
         const avgKills = totalMatches > 0 ? (totalKills / totalMatches) : 0;
         const winRate = totalMatches > 0 ? (totalWins / totalMatches) * 100 : 0;
 
         // 最高击杀
-        const maxKillRow = await db.prepare(
-            `SELECT MAX(击杀数) AS 最高击杀 FROM 战绩表 
-             WHERE 玩家名称 IN (${placeholders}) AND 赛季 = ?`
-        ).bind(...params).first();
-        const maxKills = maxKillRow.最高击杀 || 0;
+        const maxQuery = `
+            SELECT MAX(击杀数) AS 最高击杀 FROM 战绩表
+            WHERE 玩家名称 IN (${placeholders}) ${seasonCondition}
+        `;
+        const maxParams = [...allNames];
+        if (season !== 'all') maxParams.push(season);
+        const maxRow = await db.prepare(maxQuery).bind(...maxParams).first();
+        const maxKills = maxRow?.最高击杀 || 0;
 
         return new Response(JSON.stringify({
             ok: true,
