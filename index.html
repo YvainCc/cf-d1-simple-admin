@@ -730,10 +730,10 @@
 
                 <!-- 四项核心数据 -->
                 <div class="grid-4" id="statsGrid">
-                    <div class="stat-card"><div class="value gold" id="statKd">3.6</div><div class="label">KD</div></div>
-                    <div class="stat-card"><div class="value" id="statGames">86</div><div class="label">场次</div></div>
-                    <div class="stat-card"><div class="value" id="statWins">12</div><div class="label">吃鸡</div></div>
-                    <div class="stat-card"><div class="value" id="statTop10">38%</div><div class="label">前十率</div></div>
+                    <div class="stat-card"><div class="value gold" id="statKd">--</div><div class="label">KD</div></div>
+                    <div class="stat-card"><div class="value" id="statGames">--</div><div class="label">场次</div></div>
+                    <div class="stat-card"><div class="value" id="statWins">--</div><div class="label">吃鸡</div></div>
+                    <div class="stat-card"><div class="value" id="statTop10">--</div><div class="label">前十率</div></div>
                 </div>
 
                 <!-- 更多数据折叠 -->
@@ -746,14 +746,14 @@
                         <div class="panel">
                             <div class="radar-wrapper"><canvas id="radarChart"></canvas></div>
                             <div class="extra-stats">
-                                <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">312</span></div>
-                                <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">28,450</span></div>
-                                <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">18.5min</span></div>
-                                <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">12</span></div>
+                                <div class="item"><span class="lbl">总击杀</span><span class="val" id="extraKills">--</span></div>
+                                <div class="item"><span class="lbl">总伤害</span><span class="val" id="extraDamage">--</span></div>
+                                <div class="item"><span class="lbl">场均生存</span><span class="val" id="extraSurvival">--</span></div>
+                                <div class="item"><span class="lbl">最高击杀</span><span class="val" id="extraMaxKills">--</span></div>
                             </div>
                             <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-light, #eef0f4); display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted, #8e98a3);">
                                 <span>📌 数据来源：API 同步</span>
-                                <span id="updateTime">更新于 10分钟前</span>
+                                <span id="updateTime">加载中...</span>
                             </div>
                         </div>
                     </div>
@@ -881,7 +881,6 @@
 
             // 如果切换到个人中心，初始化图表
             if (pageId === 'profile') {
-                // 延迟确保 DOM 渲染
                 setTimeout(() => {
                     // 如果已有图表先销毁
                     if (window.radarChartInstance) {
@@ -893,9 +892,77 @@
             }
         }
 
-        // ===== 个人中心初始化 =====
-        function initProfile() {
-            // 读取用户信息
+        // ===== 个人中心初始化（真实数据） =====
+        async function initProfile() {
+            const username = localStorage.getItem('dmn_user');
+            if (!username) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const seasonSelect = document.getElementById('seasonSelect');
+            const season = seasonSelect.value;
+
+            // 显示加载状态
+            document.querySelectorAll('#statsGrid .value').forEach(el => el.textContent = '...');
+
+            try {
+                const response = await fetch(`/api/profile?username=${encodeURIComponent(username)}&season=${encodeURIComponent(season)}`);
+                if (!response.ok) {
+                    throw new Error('获取数据失败');
+                }
+                const json = await response.json();
+                if (!json.ok) {
+                    throw new Error(json.error || '未知错误');
+                }
+                const data = json.data;
+
+                // 更新四项核心数据
+                document.getElementById('statKd').textContent = data.KD || '0';
+                document.getElementById('statGames').textContent = data.总场次 || '0';
+                document.getElementById('statWins').textContent = data.吃鸡数 || '0';
+                document.getElementById('statTop10').textContent = (data.前十率 || 0) + '%';
+
+                // 更新更多数据
+                document.getElementById('extraKills').textContent = data.总击杀 || '0';
+                document.getElementById('extraDamage').textContent = data.总伤害 || '0';
+                document.getElementById('extraSurvival').textContent = (data.平均生存分钟 || 0) + 'min';
+                document.getElementById('extraMaxKills').textContent = data.最高击杀 || '0';
+
+                // 更新雷达图（如果存在）
+                if (window.radarChartInstance) {
+                    const maxValues = { kills: 100, damage: 50000, survival: 30, wins: 20, top10: 80, kd: 5 };
+                    const kills = data.总击杀 || 0;
+                    const damage = data.总伤害 || 0;
+                    const survival = data.平均生存分钟 || 0;
+                    const wins = data.吃鸡数 || 0;
+                    const top10 = data.前十数 || 0;
+                    const kd = data.KD || 0;
+                    const chartData = [
+                        Math.min((kills / maxValues.kills) * 100, 100),
+                        Math.min((damage / maxValues.damage) * 100, 100),
+                        Math.min((survival / maxValues.survival) * 100, 100),
+                        Math.min((wins / maxValues.wins) * 100, 100),
+                        Math.min((top10 / maxValues.top10) * 100, 100),
+                        Math.min((kd / maxValues.kd) * 100, 100)
+                    ];
+                    window.radarChartInstance.data.datasets[0].data = chartData;
+                    window.radarChartInstance.update();
+                }
+
+                // 更新时间
+                const now = new Date();
+                document.getElementById('updateTime').textContent = '更新于 ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+
+            } catch (err) {
+                console.error('加载个人数据失败:', err);
+                alert('加载数据失败，请稍后再试');
+            }
+        }
+
+        // ===== 个人中心 DOM 初始化（首次加载） =====
+        function initProfileUI() {
+            // 个人信息显示
             const user = localStorage.getItem('dmn_user') || 'DMN丨战神';
             const role = localStorage.getItem('dmn_role') || '队长';
             document.getElementById('profileDisplayName').textContent = user;
@@ -944,7 +1011,7 @@
                     labels: ['击杀', '伤害', '生存', '吃鸡', '前十', 'KD'],
                     datasets: [{
                         label: '当前赛季',
-                        data: [85, 72, 60, 45, 68, 78],
+                        data: [0, 0, 0, 0, 0, 0],
                         backgroundColor: 'rgba(201, 168, 76, 0.15)',
                         borderColor: '#c9a84c',
                         borderWidth: 2.5,
@@ -1001,41 +1068,57 @@
             darkModeMedia.addEventListener('change', updateRadarColors);
             updateRadarColors();
 
-            // 赛季切换模拟数据更新
+            // 赛季切换事件
             document.getElementById('seasonSelect').addEventListener('change', function() {
-                const cards = document.querySelectorAll('#statsGrid .stat-card .value');
-                if (cards.length >= 4) {
-                    cards[0].textContent = (Math.random() * 3 + 1.5).toFixed(1);
-                    cards[1].textContent = Math.floor(Math.random() * 80 + 20);
-                    cards[2].textContent = Math.floor(Math.random() * 15);
-                    cards[3].textContent = Math.floor(Math.random() * 30 + 20) + '%';
-                }
-                if (window.radarChartInstance) {
-                    window.radarChartInstance.data.datasets[0].data = [
-                        60 + Math.random() * 30, 50 + Math.random() * 35, 40 + Math.random() * 30,
-                        30 + Math.random() * 30, 50 + Math.random() * 30, 60 + Math.random() * 25
-                    ];
-                    window.radarChartInstance.update();
-                }
-                const now = new Date();
-                document.getElementById('updateTime').textContent = '更新于 ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+                initProfile();
             });
+
+            // 首次加载数据
+            initProfile();
         }
 
         // ===== 初始化 =====
         document.addEventListener('DOMContentLoaded', function() {
             renderNavbar();
 
-            // 绑定卡片点击（所有页面中的卡片）
+            // 绑定卡片点击
             document.querySelectorAll('.card[data-protected="true"]').forEach(c => {
                 c.addEventListener('click', function() { handleProtectedCardClick(this); });
             });
 
-            // 默认高亮由 HTML 控制
-            // 如果当前页面是 profile，初始化图表
+            // 如果当前页面是个人中心，初始化UI
             const activePage = document.querySelector('.page.active');
             if (activePage && activePage.id === 'page-profile') {
-                setTimeout(initProfile, 200);
+                setTimeout(initProfileUI, 200);
+            } else {
+                // 如果是其他页面，但后续切换到个人中心时，由 switchPage 触发 initProfileUI
+                // 但由于 switchPage 调用了 initProfile，我们需要在 initProfile 中调用 initProfileUI 吗？
+                // 为了保持清晰，我们修改 switchPage 逻辑：当切换到 profile 时，调用 initProfileUI 并加载数据
+                // 但上面的 switchPage 只调用了 initProfile，我们需要先初始化 UI 再加载数据。
+                // 所以调整 switchPage 中 profile 的处理：
+                const originalSwitch = switchPage;
+                switchPage = function(pageId) {
+                    // 隐藏所有页面
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    const target = document.getElementById('page-' + pageId);
+                    if (target) target.classList.add('active');
+
+                    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                    const activeTab = document.querySelector(`.tab-item[data-tab="${pageId}"]`);
+                    if (activeTab) activeTab.classList.add('active');
+
+                    if (pageId === 'profile') {
+                        setTimeout(() => {
+                            if (window.radarChartInstance) {
+                                window.radarChartInstance.destroy();
+                                window.radarChartInstance = null;
+                            }
+                            initProfileUI();
+                        }, 100);
+                    }
+                };
+                // 重新绑定导航点击（因为 switchPage 已被重新赋值）
+                // 但导航按钮已经通过 onclick 绑定了 switchPage，无需再绑
             }
         });
     </script>
